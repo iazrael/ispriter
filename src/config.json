@@ -1,0 +1,9 @@
+{
+    "cssRoot": "",
+    "limit":{
+        "width": 600,
+        "height": 400
+    },
+    "prefix": "sprite_",
+    "format": "png"
+}
