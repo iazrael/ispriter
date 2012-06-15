@@ -1,5 +1,5 @@
 {
-    "cssRoot": "",
+    "cssRoot": "./../test/css/",
     "limit":{
         "width": 600,
         "height": 400
