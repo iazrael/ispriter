@@ -1,4 +1,28 @@
-sprite-merger
-=============
+智能合并CSS精灵图(Sprite)
+=======================
 
-auto merge sprite
+使用nodejs实现, 依赖[CSSOM](https://github.com/NV/CSSOM), [node-canvas](https://github.com/learnboost/node-canvas)
+
+使用 [bin-packing](https://github.com/jakesgordon/bin-packing) 算法排列图片, 后续支持选择其他算法
+
+在此, 感谢这些开源项目的作者
+
+什么是智能?
+=========
+
+编写css 文件时什么都不用管, 该用什么图片用什么图片, 该怎么定位就怎么定位
+
+发布前执行 sprite-merger, 所有合并图片和定位都自动帮你完成
+
+使用方法
+=======
+
+    git clone https://github.com/iazrael/sprite-merger
+
+    copy src to your project
+
+    modify the config.example.json and rename it with any name you want
+
+    node ./src/sprite-merger.js config.json
+
+    that's all

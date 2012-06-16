@@ -246,9 +246,9 @@ var writeFile = function(fileName, styleSheet){
  * as you see, it's the main function
  */
 var main = function(){
-    var configFile = './config.json',
-        config = golbalConfig = readConfig(configFile),
-        cssFileNameList = readFiles(config.cssRoot),
+    var configFile,
+        config,
+        cssFileNameList,
         cssContent,
         styleSheet,
         imageList,
@@ -256,11 +256,17 @@ var main = function(){
         spriteCount = 0,
         spriteName,
         newFileName;
+    if(process.argv.length < 3){
+        console.log('missing the config file');
+        return;
+    }
+    configFile = process.argv[2];
+    config = golbalConfig = readConfig(configFile);
+    cssFileNameList = readFiles(config.cssRoot);
     if(!cssFileNameList.length){
         console.log('there is no file in ' + config.cssRoot);
         return;
     }
-    // console.log(cssFileNameList);
     for(var i = 0, fileName; fileName = cssFileNameList[i]; i++) {
         cssContent = readFile(config.cssRoot + fileName);
         styleSheet = parseCssToStyleSheet(cssContent);
