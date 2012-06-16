@@ -24,7 +24,7 @@
     }
     =>
     div{
-        background: url(../images/sprite_1.png);
+        background: url(../images/sprite_1.png) -48px -48px;
     }
 
 ##background-position写在 background 属性里
