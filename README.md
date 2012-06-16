@@ -37,7 +37,7 @@
         background: url(../images/sprite_1.png) 0 -174px;
     }
 
-##background-image 和 background-position 不实用简写
+##background-image 和 background-position 不使用简写
 
     div{
         background-image: url(../images/tips_icons.png);
