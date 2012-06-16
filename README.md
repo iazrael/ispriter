@@ -57,6 +57,6 @@
 
     modify the config.example.json and rename it with any name you want
 
-    node ./src/sprite-merger.js config.json
+    node ./src/spriter.js config.json
 
     that's all
