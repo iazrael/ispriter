@@ -149,16 +149,16 @@ var objectToArray = function(object){
     //packer 算法需要把最大的一个放在首位...
     //排序算法会对结果造成比较大的影响
     array.sort(function(a, b){
-        if(b.w > a.w){
-            return 1;
-        }
-        if(b.h > a.h){
-            return 1;
-        }
-        return -1;
+        // if(b.w > a.w){
+        //     return 1;
+        // }
+        // if(b.h > a.h){
+        //     return 1;
+        // }
+        // return -1;
         // return b.h - a.h ;
         // return b.w  - a.w ;
-        // return b.w * b.h - a.w * a.h;
+        return b.w * b.h - a.w * a.h;
     });
     if(index > -1){
         obj = array[index];

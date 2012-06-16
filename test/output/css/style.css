@@ -1,26 +1,26 @@
 body {background: #ddd;}
 div {min-height: 10px; border: 1px solid #339; margin: 20px; min-width: 10px;}
-div:nth-of-type(1) {width: 12px; height: 12px; background: url(../images/sprite_1.png) -251px -96px ;}
-div:nth-of-type(2) {width: 48px; height: 48px; background: url(../images/sprite_1.png) -48px -48px ;}
-div:nth-of-type(3) {width: 43px; height: 43px; background: url(../images/sprite_1.png) -20px -96px ;}
-div:nth-of-type(4) {width: 79px; height: 18px; background: url(../images/sprite_1.png) -142px -96px ;}
-div:nth-of-type(5) {width: 15px; height: 15px; background: url(../images/sprite_1.png) -221px -96px ;}
-div:nth-of-type(6) {width: 20px; height: 60px; background: url(../images/sprite_1.png) 0 -96px ;}
-div:nth-of-type(7) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -309px -68px ;}
-div:nth-of-type(8) {width: 20px; height: 20px; background: url(../images/sprite_1.png) -309px -48px ;}
-div:nth-of-type(9) {width: 79px; height: 18px; background: url(../images/sprite_1.png) -63px -96px ;}
-div:nth-of-type(10) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -329px -48px ;}
-div:nth-of-type(11) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -325px -68px ;}
-div:nth-of-type(12) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -357px -68px ;}
-div:nth-of-type(13) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -341px -68px ;}
-div:nth-of-type(14) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -345px -48px ;}
-div:nth-of-type(15) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -361px -48px ;}
-div:nth-of-type(16) {width: 38px; height: 38px; background: url(../images/sprite_1.png) -271px -48px ;}
-div:nth-of-type(17) {width: 13px; height: 11px; background: url(../images/sprite_1.png) -263px -96px ;}
-div:nth-of-type(18) {width: 46px; height: 44px; background: url(../images/sprite_1.png) -144px -48px ;}
-div:nth-of-type(19) {width: 384px; height: 48px; background: url(../images/sprite_1.png) 0 0 ;}
-div:nth-of-type(20) {width: 48px; height: 48px; background: url(../images/sprite_1.png) 0 -48px ;}
-div:nth-of-type(21) {width: 15px; height: 12px; background: url(../images/sprite_1.png) -236px -96px ;}
-div:nth-of-type(22) {width: 81px; height: 38px; background: url(../images/sprite_1.png) -190px -48px ;}
-div:nth-of-type(23) {width: 48px; height: 48px; background: url(../images/sprite_1.png) 0 -48px ;}
-div:nth-of-type(24) {width: 48px; height: 48px; background: url(../images/sprite_1.png) -96px -48px ;}
+div:nth-of-type(1) {width: 40px; height: 38px; background: url(../images/sprite_1.png) -42px -48px;}
+div:nth-of-type(2) {width: 20px; height: 20px; background: url(../images/sprite_1.png) 0 -174px;}
+div:nth-of-type(3) {width: 43px; height: 43px; background: url(../images/sprite_1.png) -142px -86px;}
+div:nth-of-type(4) {width: 79px; height: 18px; background: url(../images/sprite_1.png) -198px -48px;}
+div:nth-of-type(5) {width: 15px; height: 15px; background: url(../images/sprite_1.png) -155px -66px;}
+div:nth-of-type(6) {width: 20px; height: 60px; background: url(../images/sprite_1.png) 0 -134px;}
+div:nth-of-type(7) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -293px -48px;}
+div:nth-of-type(8) {width: 20px; height: 20px; background: url(../images/sprite_1.png) -119px -66px;}
+div:nth-of-type(9) {width: 79px; height: 18px; background: url(../images/sprite_1.png) -119px -48px;}
+div:nth-of-type(10) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -325px -48px;}
+div:nth-of-type(11) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -341px -48px;}
+div:nth-of-type(12) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -357px -48px;}
+div:nth-of-type(13) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -139px -66px;}
+div:nth-of-type(14) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -277px -48px;}
+div:nth-of-type(15) {width: 16px; height: 16px; background: url(../images/sprite_1.png) -309px -48px;}
+div:nth-of-type(16) {width: 38px; height: 38px; background: url(../images/sprite_1.png) -81px -48px;}
+div:nth-of-type(17) {width: 13px; height: 11px; background: url(../images/sprite_1.png) -185px -66px;}
+div:nth-of-type(18) {width: 46px; height: 44px; background: url(../images/sprite_1.png) -96px -86px;}
+div:nth-of-type(19) {width: 384px; height: 48px; background: url(../images/sprite_1.png) 0 0;}
+div:nth-of-type(20) {width: 48px; height: 48px; background: url(../images/sprite_1.png) 0 -86px;}
+div:nth-of-type(21) {width: 15px; height: 12px; background: url(../images/sprite_1.png) -170px -66px;}
+div:nth-of-type(22) {width: 81px; height: 38px; background: url(../images/sprite_1.png) 0 -48px;}
+div:nth-of-type(23) {width: 48px; height: 48px; background: url(../images/sprite_1.png) 0 -86px;}
+div:nth-of-type(24) {width: 48px; height: 48px; background: url(../images/sprite_1.png) -48px -86px;}

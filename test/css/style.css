@@ -8,14 +8,15 @@ div{
     min-width: 10px;
 }
 div:nth-of-type(1){
-    width: 12px;
-    height: 12px;
-    background: url(../images/add.png);
+    width: 40px;
+    height: 38px;
+    background: url(../images/tips_icons.png) -42px 0;
 }
 div:nth-of-type(2){
-    width: 48px;
-    height: 48px;
-    background: url(../images/app_icon.png);
+    width: 20px;
+    height: 20px;
+    background: url(../images/close.png);
+    background-position: 0 -40px;
 }
 div:nth-of-type(3){
     width: 43px;
