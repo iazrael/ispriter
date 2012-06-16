@@ -51,7 +51,7 @@
 使用方法
 =======
 
-    git clone https://github.com/iazrael/sprite-merger
+    git clone https://github.com/iazrael/intelligent-spriter.git
 
     copy src to your project
 
