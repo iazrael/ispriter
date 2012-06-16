@@ -1,9 +1,9 @@
 {
     "cssRoot": "./../test/css/",
-    "limit":{
-        "width": 600,
-        "height": 400
-    },
-    "prefix": "sprite_",
-    "format": "png"
+    "format": "png",
+    "algorithm": "growingpacker",
+    "cssOutput": "./../test/output/css/",
+    "imageOutput": "../images/",
+    "outputPrefix": "sprite_",
+    "outputFormat": "png"
 }
