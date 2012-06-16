@@ -14,6 +14,37 @@
 
 发布前执行 sprite-merger, 所有合并图片和定位都自动帮你完成
 
+支持情况
+=======
+
+没有使用background-position定位的情况下
+    div{
+        background: url(../images/tips_icons.png);
+    }
+    =>
+    div{
+        background: url(../images/sprite_1.png);
+    }
+
+background-position写在background属性里
+    div{
+        background: url(../images/tips_icons.png) -42px 0;
+    }
+    =>
+    div{
+        background: url(../images/sprite_1.png) 0 -174px;
+    }
+
+background-position单独写出来
+    div{
+        background: url(../images/tips_icons.png);
+        background-position: 0 -40px;
+    }
+    =>
+    div{
+        background: url(../images/sprite_1.png) -142px -86px;
+    }
+
 使用方法
 =======
 
