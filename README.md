@@ -17,7 +17,7 @@
 支持情况
 =======
 
-##没有使用background-position定位的情况下
+##没有使用 background-position 定位的情况下
 
     div{
         background: url(../images/tips_icons.png);
@@ -27,7 +27,7 @@
         background: url(../images/sprite_1.png);
     }
 
-##background-position写在background属性里
+##background-position写在 background 属性里
 
     div{
         background: url(../images/tips_icons.png) -42px 0;
@@ -37,10 +37,10 @@
         background: url(../images/sprite_1.png) 0 -174px;
     }
 
-##background-position单独写出来
+##background-image 和 background-position 不实用简写
 
     div{
-        background: url(../images/tips_icons.png);
+        background-image: url(../images/tips_icons.png);
         background-position: 0 -40px;
     }
     =>
