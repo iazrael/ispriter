@@ -1,5 +1,7 @@
-智能合并CSS精灵图(Sprite)
-=======================
+#智能合并CSS精灵图(Intelligent Spriter)
+
+站在巨人的肩膀上
+================
 
 使用nodejs实现, 依赖[CSSOM](https://github.com/NV/CSSOM), [node-canvas](https://github.com/learnboost/node-canvas)
 
