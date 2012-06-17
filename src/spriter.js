@@ -245,8 +245,8 @@ var writeFile = function(fileName, styleSheet){
 /**
  * as you see, it's the main function
  */
-var main = function(){
-    var configFile,
+var main = function(configFile){
+    var //configFile,
         config,
         cssFileNameList,
         cssContent,
@@ -256,11 +256,11 @@ var main = function(){
         spriteCount = 0,
         spriteName,
         newFileName;
-    if(process.argv.length < 3){
-        console.log('missing the config file');
-        return;
-    }
-    configFile = process.argv[2];
+    // if(process.argv.length < 3){
+    //     console.log('missing the config file');
+    //     return;
+    // }
+    // configFile = process.argv[2];
     config = golbalConfig = readConfig(configFile);
     cssFileNameList = readFiles(config.cssRoot);
     if(!cssFileNameList.length){
@@ -290,4 +290,6 @@ var main = function(){
     };
 }
 
-main();
+// main();
+
+exports.merge = main;

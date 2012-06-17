@@ -53,12 +53,14 @@
 使用方法
 =======
 
-    git clone https://github.com/iazrael/intelligent-spriter.git
+    npm install intelligent-spriter
 
-    copy src to your project
+    then write your code, as example, create a file name main.js, add the codes like below:
 
-    modify the config.example.json and rename it with any name you want
+    var spriter=require('intelligent-spriter');
 
-    node ./src/spriter.js config.json
+    spriter.merge(configFileName);
+
+    then execute "node ./main.js" in command line
 
     that's all

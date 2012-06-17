@@ -1,8 +1,8 @@
 {
-    "cssRoot": "./test/css/",
+    "cssRoot": "./css/",
     "format": "png",
     "algorithm": "growingpacker",
-    "cssOutput": "./test/output/css/",
+    "cssOutput": "./output/css/",
     "imageOutput": "../images/",
     "outputPrefix": "sprite_",
     "outputFormat": "png"
