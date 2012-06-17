@@ -1,6 +1,8 @@
 
 .DS_Store
 
-sprite-merger.sublime-project
+config.json
 
-sprite-merger.sublime-workspace
+intelligent-spriter.sublime-project
+
+intelligent-spriter.sublime-workspace
