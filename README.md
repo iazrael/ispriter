@@ -57,9 +57,8 @@
 
     then write your code, as example, create a file name main.js, add the codes like below:
 
-    var spriter=require('intelligent-spriter');
-
-    spriter.merge(configFileName);
+        var spriter=require('intelligent-spriter');
+        spriter.merge(configFileName);
 
     then execute "node ./main.js" in command line
 
