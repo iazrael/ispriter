@@ -1,4 +1,4 @@
-#智能合并CSS精灵图(Intelligent Spriter)
+#智能合并CSS精灵图(iSpriter)
 
 站在巨人的肩膀上
 ================
@@ -53,11 +53,11 @@
 使用方法
 =======
 
-    npm install intelligent-spriter
+    npm install ispriter
 
     then write your code, as example, create a file name main.js, add the codes like below:
 
-        var spriter=require('intelligent-spriter');
+        var spriter=require('ispriter');
         spriter.merge(configFileName);
 
     then execute "node ./main.js" in command line
