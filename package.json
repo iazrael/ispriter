@@ -1,12 +1,12 @@
 {
   "author": "azrael <azrael@imatlas.com> (http://imatlas.com/about)",
-  "name": "intelligent-spriter",
+  "name": "ispriter",
   "description": "an intelligent merge sprite tool",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage": "http://imatlas.com/posts/intelligent-merge-css-sprite/",
   "repository": {
     "type": "git",
-    "url": "git://github.com/iazrael/intelligent-spriter.git"
+    "url": "git://github.com/iazrael/ispriter.git"
   },
   "main": "./src/spriter.js",
   "engines": {
