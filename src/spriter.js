@@ -4,7 +4,8 @@ var fs = require('fs'),
     GrowingPacker = require('./GrowingPacker'),
     bgItpreter = require('./BackgroundInterpreter');
 
-var golbalConfig;
+var golbalConfig,
+    globalImageMap;
 
 var readConfig = function(configFile){
     var content = readFile(configFile);
@@ -92,14 +93,15 @@ var collectCSSRulesAndImages = function(styleSheet, result){
     }
     for(var i = 0, rule, style, imageUrl; rule = styleSheet.cssRules[i]; i++) {
         if(rule.cssRules && rule.cssRules.length){
-            pretreatAndCollectCSSRules(rule, result);
+            //遇到有子样式的，比如@media, @keyframes，递归收集
+            collectCSSRulesAndImages(rule, result);
             continue;
         }
         style = rule.style;
         if(style.background){//有 background 就先拆分
             splitStyleBackground(style);
         }
-        if(style['background-image']){// 有背景图片, 抽取并合并
+        if(style['background-image']){// 有背景图片, 就抽取并合并
             imageUrl = style['background-image'];
             imageUrl = imageUrl.match(imageRegexp);
             if(imageUrl && golbalConfig.format.indexOf(imageUrl[2]) > -1){
@@ -123,28 +125,46 @@ var readImages = function(imageList){
         url,
         content,
         image,
-        imageObj;
+        imageObj,
+        existImgObj;
     delete imageList.length;
     for(var i in imageList){
         imageObj = imageList[i];
         url = imageObj.url;
-        content = fs.readFileSync(golbalConfig.cssRoot + url);
-        image = new Canvas.Image();
-        image.src = content;
+        if (globalImageMap[url]){
+            //在面对多css文件的时候，如果前面已经读取并合并过一个图片，这里就重用了
+            existImgObj = globalImageMap[url];
+            image = existImgObj.image;
+
+            imageObj.hasDrew = true;
+            imageObj.fit = existImgObj.fit;
+            imageObj.spriteName = existImgObj.spriteName;
+            // console.log('has: ' + url + ', ' + existImgObj.spriteName);
+        }else{
+            content = fs.readFileSync(golbalConfig.cssRoot + url);
+            image = new Canvas.Image();
+            image.src = content;
+            //cache to avoid duplicate
+            globalImageMap[url] = imageObj;
+        }
         imageObj.w = image.width;
         imageObj.h = image.height;
         imageObj.image = image;
     }
 }
 
-var objectToArray = function(object){
+var objectToArrays = function(object){
     var array = [],
         obj,
-        index = -1,
-        max = 0;
+        existArr = []
+        ;
     for(var i in object){
         obj = object[i];
-        array.push(obj);
+        if(!obj.fit){
+            array.push(obj);
+        }else{
+            existArr.push(obj);
+        }
     }
     //packer 算法需要把最大的一个放在首位...
     //排序算法会对结果造成比较大的影响
@@ -160,19 +180,17 @@ var objectToArray = function(object){
         // return b.w  - a.w ;
         return b.w * b.h - a.w * a.h;
     });
-    if(index > -1){
-        obj = array[index];
-        array.splice(index, 1);
-        array.unshift(obj);
-    }
-    return array;
+
+    return [array, existArr];
 }   
 
 var positionImages = function(imageList){
     var packer = new GrowingPacker();
     //object to array
-    imageList = objectToArray(imageList);
+    var arr = objectToArrays(imageList);
+    imageList = arr[0];
     packer.fit(imageList);
+    imageList = imageList.concat(arr[1]);//把先前已经合并过的图片信息也存过来
     return {
         imageList: imageList,
         canvasWidth: packer.root.w,
@@ -232,8 +250,13 @@ var drawImageAndPositionBackground = function(dirName, fileName, width, height, 
         ctx = canvas.getContext('2d');
 
     for(var i = 0, item; item = imageList[i]; i++) {
-        replaceAndPositionBackground(fileName, item);
-        ctx.drawImage(item.image, item.fit.x, item.fit.y, item.w, item.h);
+        if(item.hasDrew){//如果之前已经写入过文件， 这里只要用原来的信息定位就好了
+            replaceAndPositionBackground(item.spriteName, item);
+        }else{
+            item.spriteName = fileName;
+            replaceAndPositionBackground(fileName, item);
+            ctx.drawImage(item.image, item.fit.x, item.fit.y, item.w, item.h);
+        }
     };
     fs.writeFileSync(dirName + fileName, canvas.toBuffer());
 }
@@ -261,6 +284,7 @@ var main = function(configFile){
     //     return;
     // }
     // configFile = process.argv[2];
+    globalImageMap = {};
     config = golbalConfig = readConfig(configFile);
     cssFileNameList = readFiles(config.cssRoot);
     if(!cssFileNameList.length){
@@ -281,8 +305,10 @@ var main = function(configFile){
         positionResult = positionImages(imageList);
         imageList = positionResult.imageList;
 
-        spriteName = config.imageOutput + config.outputPrefix + ++spriteCount + '.' + config.outputFormat;
-        drawImageAndPositionBackground(config.cssOutput, spriteName, positionResult.canvasWidth, positionResult.canvasHeight, imageList);
+        spriteName = config.imageOutput + config.outputPrefix + ++spriteCount + '.' + 
+            config.outputFormat;
+        drawImageAndPositionBackground(config.cssOutput, spriteName, positionResult.canvasWidth, 
+                                       positionResult.canvasHeight, imageList);
         
         newFileName = config.cssOutput + fileName;
         //finally at the end...

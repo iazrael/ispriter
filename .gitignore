@@ -7,3 +7,8 @@ intelligent-spriter.sublime-project
 
 intelligent-spriter.sublime-workspace
 node_modules/*
+ispriter.sublime-project
+
+ispriter.sublime-workspace
+
+test/npm-debug.log
