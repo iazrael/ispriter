@@ -16,10 +16,17 @@
 
 发布前执行 spriter, 所有合并图片和定位都自动帮你完成
 
-支持情况
+特性
+====
+
++ 智能提取background的url和position等信息
++ 智能判断使用了background-position（使用px为单位）定位的图片并重新定位
++ 多个css文件合并时，排除并重用已经合并的图片
+
+Example
 =======
 
-##没有使用 background-position 定位的情况下
+### 没有使用 background-position 定位的情况下
 
     div{
         background: url(../images/tips_icons.png);
@@ -29,7 +36,7 @@
         background: url(../images/sprite_1.png) -48px -48px;
     }
 
-##background-position写在 background 属性里
+### background-position写在 background 属性里
 
     div{
         background: url(../images/tips_icons.png) -42px 0;
@@ -39,7 +46,7 @@
         background: url(../images/sprite_1.png) 0 -174px;
     }
 
-##background-image 和 background-position 不使用简写
+### background-image 和 background-position 不使用简写
 
     div{
         background-image: url(../images/tips_icons.png);
@@ -55,11 +62,11 @@
 
     npm install ispriter
 
-    then write your code, as example, create a file name main.js, add the codes like below:
+    then write your code, as example, create a file name test.js(in ./test/), add the codes like below:
 
         var spriter=require('ispriter');
         spriter.merge(configFileName);
 
-    then execute "node ./main.js" in command line
+    then execute "node ./test.js" in command line
 
     that's all
