@@ -98,6 +98,9 @@ var collectCSSRulesAndImages = function(styleSheet, result){
             continue;
         }
         style = rule.style;
+        if(!style) { // 有可能 `@media`  等中没有 样式， 如： `@media xxx {}`
+            continue;
+        };
         if(style.background){//有 background 就先拆分
             splitStyleBackground(style);
         }
