@@ -1,4 +1,5 @@
 var fs = require('fs'),
+    path = require('path'),
     CSSOM = require('cssom'),
     Canvas = require('canvas'),
     GrowingPacker = require('./GrowingPacker'),
@@ -29,6 +30,21 @@ var readFiles = function(dir){
     };
     return result;
 }
+
+// 创建多级目录
+var mkdirsSync = function(dirpath, mode) {
+    if(fs.existsSync(dirpath)){
+        return;
+    }
+    var dirs = dirpath.split('/');
+    var dir = '';
+    for(var i = 0; i < dirs.length; i++) {
+        dir += dirs[i] + '/';
+        if(!fs.existsSync(dir)){
+            fs.mkdirSync(dir, mode);
+        }
+    }
+};
 
 var parseCssToStyleSheet = function(cssContent){
     return CSSOM.parse(cssContent);
@@ -258,10 +274,16 @@ var drawImageAndPositionBackground = function(dirName, fileName, width, height, 
             ctx.drawImage(item.image, item.fit.x, item.fit.y, item.w, item.h);
         }
     };
-    fs.writeFileSync(dirName + fileName, canvas.toBuffer());
+    fileName = path.resolve(dirName + fileName);
+    var dir = path.dirname(fileName);
+    mkdirsSync(dir);
+    fs.writeFileSync(fileName, canvas.toBuffer());
 }
 
 var writeFile = function(fileName, styleSheet){
+    fileName = path.resolve(fileName);
+    var dir = path.dirname(fileName);
+    mkdirsSync(dir);
     fs.writeFileSync(fileName, styleSheet.toString());
 }
 
