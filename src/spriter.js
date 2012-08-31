@@ -98,6 +98,9 @@ var splitStyleBackground = function(style){
 }
 
 var imageRegexp = /\(['"]?(.+\.(png|jpg|jpeg))(\?.*?)?['"]?\)/i;
+var ignorePositionRegexp = /right|center|bottom/i;
+var ignoreRepeatRegexp = /^(repeat|repreat-x|repeat-y)$/i;
+
 var collectCSSRulesAndImages = function(styleSheet, result){
     if(!styleSheet.cssRules.length){
         return;
@@ -120,6 +123,18 @@ var collectCSSRulesAndImages = function(styleSheet, result){
         if(style.background){//有 background 就先拆分
             splitStyleBackground(style);
         }
+        // background 定位是 right center bottom 的图片不合并
+        // 因为这三个的定位方式比较特殊， 浏览器有个自动适应的特性
+        if(ignorePositionRegexp.test(style['background-position-x']) || 
+            ignorePositionRegexp.test(style['background-position-y'])){
+            continue;
+        }
+        // 显示的使用了平铺的， 也不合并
+        if(ignoreRepeatRegexp.test(style['background-repeat']) || 
+            ignoreRepeatRegexp.test(style['background-repeat-x']) || 
+            ignoreRepeatRegexp.test(style['background-repeat-y'])){
+            continue;
+        }
         if(style['background-image']){// 有背景图片, 就抽取并合并
             imageUrl = style['background-image'];
             imageUrl = imageUrl.match(imageRegexp);
@@ -137,6 +152,22 @@ var collectCSSRulesAndImages = function(styleSheet, result){
         }
     }
     return result;
+}
+
+var setImageWidthHeight = function(imageObj, image){
+    var w = 0, h = 0, mw = image.width, mh = image.height;
+    for(var i = 0, rule; rule = imageObj.cssRules[i]; i++) {
+        w = rule.width && rule.width.indexOf('px') !== -1 ?  parseFloat(rule.width) : 0;
+        h = rule.height && rule.height.indexOf('px') !== -1 ?  parseFloat(rule.height) : 0;
+        if(w > mw){
+            mw = w;
+        }
+        if(h > mh){
+            mh = h;
+        }
+    }
+    imageObj.w = mw;
+    imageObj.h = mh;
 }
 
 var readImages = function(imageList){
@@ -166,8 +197,10 @@ var readImages = function(imageList){
             //cache to avoid duplicate
             globalImageMap[url] = imageObj;
         }
-        imageObj.w = image.width;
-        imageObj.h = image.height;
+        // imageObj.w = image.width;
+        // imageObj.h = image.height;
+        // 从所有style里面，选取图片宽高最大的作为图片高度
+        setImageWidthHeight(imageObj, image);
         imageObj.image = image;
     }
 }
@@ -274,7 +307,7 @@ var drawImageAndPositionBackground = function(dirName, fileName, width, height, 
         }else{
             item.spriteName = fileName;
             replaceAndPositionBackground(fileName, item);
-            ctx.drawImage(item.image, item.fit.x, item.fit.y, item.w, item.h);
+            ctx.drawImage(item.image, item.fit.x, item.fit.y);
         }
     };
     fileName = path.resolve(dirName + fileName);

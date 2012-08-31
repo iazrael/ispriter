@@ -56,16 +56,16 @@
         }
     },{
         //background-position
-        //w3c 中 position 的两个值必须写在一次(如果有两个的话)
-        regexp: /(-?\d+(%|in|cm|mm|em|ex|pt|pc|px)?)\b/i,
+        //w3c 中 position 的两个值必须写在一起(如果有两个的话)
+        regexp: /(-?\d+(%|in|cm|mm|em|ex|pt|pc|px)?)|(center|top|right|bottom|left)\b/i,
         exec: function(style, match){
-            style['background-position-x'] = style['background-position-y'] = match[1];
+            style['background-position-x'] = style['background-position-y'] = match[1] || match[3];
         }
     },{
         //background-position-y
-        regexp: /(-?\d+(%|in|cm|mm|em|ex|pt|pc|px)?)\b/i,
+        regexp: /(-?\d+(%|in|cm|mm|em|ex|pt|pc|px)?)|(center|top|right|bottom|left)\b/i,
         exec: function(style, match){
-            style['background-position-y'] = match[1];
+            style['background-position-y'] = match[1] || match[3];
         }
     },{
         //background-color: #fff

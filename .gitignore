@@ -12,3 +12,7 @@ ispriter.sublime-project
 ispriter.sublime-workspace
 
 test/npm-debug.log
+
+test/sprite.js
+
+test/sprite-config.json
