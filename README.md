@@ -22,6 +22,9 @@
 + 智能提取background的url和position等信息
 + 智能判断使用了background-position（使用px为单位）定位的图片并重新定位
 + 多个css文件合并时，排除并重用已经合并的图片
++ 不合并background-position是right/center/bottom的图片
++ 不合并显示的设置平铺方式为repreat的图片
++ 从所有样式里面，选取图片宽高最大的作为图片高度
 
 Example
 =======
