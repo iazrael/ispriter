@@ -97,6 +97,7 @@ var splitStyleBackground = function(style){
     }
 }
 
+var networkRegexp = /^(https?|ftp):\/\//i;
 var imageRegexp = /\(['"]?(.+\.(png|jpg|jpeg))(\?.*?)?['"]?\)/i;
 var ignorePositionRegexp = /right|center|bottom/i;
 var ignoreRepeatRegexp = /^(repeat|repreat-x|repeat-y)$/i;
@@ -138,8 +139,13 @@ var collectCSSRulesAndImages = function(styleSheet, result){
         if(style['background-image']){// 有背景图片, 就抽取并合并
             imageUrl = style['background-image'];
             imageUrl = imageUrl.match(imageRegexp);
+
             if(imageUrl && golbalConfig.format.indexOf(imageUrl[2]) > -1){
                 imageUrl = imageUrl[1];
+                //遇到写绝对路径的图片就跳过
+                if(networkRegexp.test(imageUrl)){
+                    return result;
+                }
                 if(!result[imageUrl]){
                     result[imageUrl] = {
                         url: imageUrl,
@@ -299,21 +305,25 @@ var replaceAndPositionBackground = function(spriteName, imageObj){
 
 var drawImageAndPositionBackground = function(dirName, fileName, width, height, imageList){
     var canvas = new Canvas(width, height),
-        ctx = canvas.getContext('2d');
+        ctx = canvas.getContext('2d'),
+        hasDrew = false;
 
     for(var i = 0, item; item = imageList[i]; i++) {
         if(item.hasDrew){//如果之前已经写入过文件， 这里只要用原来的信息定位就好了
             replaceAndPositionBackground(item.spriteName, item);
         }else{
+            hasDrew = true;
             item.spriteName = fileName;
             replaceAndPositionBackground(fileName, item);
             ctx.drawImage(item.image, item.fit.x, item.fit.y);
         }
     };
-    fileName = path.resolve(dirName + fileName);
-    var dir = path.dirname(fileName);
-    mkdirsSync(dir);
-    fs.writeFileSync(fileName, canvas.toBuffer());
+    if(hasDrew){//如果 canvas 里面没图片， 调用 toBuffer 会出错
+        fileName = path.resolve(dirName + fileName);
+        var dir = path.dirname(fileName);
+        mkdirsSync(dir);
+        fs.writeFileSync(fileName, canvas.toBuffer());
+    }
 }
 
 var writeFile = function(fileName, styleSheet){
