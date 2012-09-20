@@ -10,7 +10,7 @@
     var MATCH_ACTION = [
     {
         //background-image
-        regexp: /(url\([^\)]+\))/i,
+        regexp: /\b(url\([^\)]+\))/i,
         exec: function(style, match){
             style['background-image'] = match[1];
         }
@@ -31,64 +31,64 @@
         }
     },*/{
         //background-repeat
-        regexp: /((repeat)|(no-repeat)|(repreat-x)|(repeat-y))/i,
+        regexp: /((no-repeat)|(repeat-x)|(repeat-y)|(repeat))/i,
         exec: function(style, match){
             style['background-repeat'] = match[1];
         }
     },{
         //background-attachment
-        regexp: /(fixed|scroll)/i,
+        regexp: /\b(fixed|scroll)\b/i,
         exec: function(style, match){
             style['background-attachment'] = match[1];
         }
     },{
         //background-origin, background-clip
         //使用简写的时候 origin 是比 clip 优先的
-        regexp: /((border|padding|content)-box)/i,
+        regexp: /(\b(border|padding|content)-box)/i,
         exec: function(style, match){
             style['background-origin'] = match[1];
         }
     },{
         //background-clip
-        regexp: /((border|padding|content)-box)/i,
+        regexp: /(\b(border|padding|content)-box)/i,
         exec: function(style, match){
             style['background-clip'] = match[1];
         }
     },{
         //background-position
         //w3c 中 position 的两个值必须写在一起(如果有两个的话)
-        regexp: /(-?\d+(%|in|cm|mm|em|ex|pt|pc|px)?)|(center|top|right|bottom|left)\b/i,
+        regexp: /(^-?\d+(%|in|cm|mm|em|ex|pt|pc|px)?)|\b(center|top|right|bottom|left)\b/i,
         exec: function(style, match){
             style['background-position-x'] = style['background-position-y'] = match[1] || match[3];
         }
     },{
         //background-position-y
-        regexp: /(-?\d+(%|in|cm|mm|em|ex|pt|pc|px)?)|(center|top|right|bottom|left)\b/i,
+        regexp: /(^-?\d+(%|in|cm|mm|em|ex|pt|pc|px)?)|\b(center|top|right|bottom|left)\b/i,
         exec: function(style, match){
             style['background-position-y'] = match[1] || match[3];
         }
     },{
         //background-color: #fff
-        regexp: /(#([0-9a-f]{3}|[0-9a-f]{6})\b)/i,
+        regexp: /(^#([0-9a-f]{3}|[0-9a-f]{6})\b)/i,
         exec: function(style, match){
             style['background-color'] = match[1];
         }
     },{
         //background-color: rgb()
-        regexp: /(rgb\(\s*(1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\s*(,\s*(1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\s*){2}\))/i,
+        regexp: /(\brgb\(\s*(1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\s*(,\s*(1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\s*){2}\))/i,
         exec: function(style, match){
             style['background-color'] = match[1];
         }
     },{
         //background-color: rgba()
-        regexp: /(rgba\((\s*(1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\s*,){3}\s*(0?\.[0-9]+|[01])\s*\))/i,
+        regexp: /(\brgba\((\s*(1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\s*,){3}\s*(0?\.[0-9]+|[01])\s*\))/i,
         exec: function(style, match){
             style['background-color'] = match[1];
         }
     },{
         //background-color: color-name
         //W3C 的 HTML 4.0 标准仅支持 16 种颜色名, 加上 orange + transparent 一共 18 种 
-        regexp: /(aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow|orange|transparent)/i,
+        regexp: /\b(aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow|orange|transparent)\b/i,
         exec: function(style, match){
             style['background-color'] = match[1];
         }

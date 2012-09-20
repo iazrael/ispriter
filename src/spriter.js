@@ -100,7 +100,7 @@ var splitStyleBackground = function(style){
 var networkRegexp = /^(https?|ftp):\/\//i;
 var imageRegexp = /\(['"]?(.+\.(png|jpg|jpeg))(\?.*?)?['"]?\)/i;
 var ignorePositionRegexp = /right|center|bottom/i;
-var ignoreRepeatRegexp = /^(repeat|repreat-x|repeat-y)$/i;
+var ignoreRepeatRegexp = /^(repeat-x|repeat-y|repeat)$/i;
 
 var collectCSSRulesAndImages = function(styleSheet, result){
     if(!styleSheet.cssRules.length){
@@ -128,12 +128,14 @@ var collectCSSRulesAndImages = function(styleSheet, result){
         // 因为这三个的定位方式比较特殊， 浏览器有个自动适应的特性
         if(ignorePositionRegexp.test(style['background-position-x']) || 
             ignorePositionRegexp.test(style['background-position-y'])){
+            mergeBackgound(style);
             continue;
         }
         // 显示的使用了平铺的， 也不合并
         if(ignoreRepeatRegexp.test(style['background-repeat']) || 
             ignoreRepeatRegexp.test(style['background-repeat-x']) || 
             ignoreRepeatRegexp.test(style['background-repeat-y'])){
+            mergeBackgound(style);
             continue;
         }
         if(style['background-image']){// 有背景图片, 就抽取并合并
@@ -272,7 +274,8 @@ var setBackgroundPosition = function(rule, attr, newValue){
 var mergeBackgound = function(rule){
     var background = '';
 
-    rule['background-position'] = rule['background-position-x'] + ' ' + rule['background-position-y'];
+    rule['background-position'] = (rule['background-position-x'] || 0) + ' ' + (rule['background-position-y'] || 0);
+
     removeStyleAttr(rule, 'background-position-x');
     removeStyleAttr(rule, 'background-position-y');
     var attrList = [
