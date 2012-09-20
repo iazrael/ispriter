@@ -274,8 +274,10 @@ var setBackgroundPosition = function(rule, attr, newValue){
 var mergeBackgound = function(rule){
     var background = '';
 
-    rule['background-position'] = (rule['background-position-x'] || 0) + ' ' + (rule['background-position-y'] || 0);
-
+    rule['background-position'] = (('background-position-x' in rule) ? rule['background-position-x'] : '') + ' ' +
+         (('background-position-y' in rule) ? rule['background-position-y'] : '');
+    rule['background-position'] = rule['background-position'].trim();
+    
     removeStyleAttr(rule, 'background-position-x');
     removeStyleAttr(rule, 'background-position-y');
     var attrList = [
