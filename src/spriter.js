@@ -277,7 +277,7 @@ var mergeBackgound = function(rule){
     rule['background-position'] = (('background-position-x' in rule) ? rule['background-position-x'] : '') + ' ' +
          (('background-position-y' in rule) ? rule['background-position-y'] : '');
     rule['background-position'] = rule['background-position'].trim();
-    
+
     removeStyleAttr(rule, 'background-position-x');
     removeStyleAttr(rule, 'background-position-y');
     var attrList = [
@@ -378,7 +378,7 @@ var main = function(configFile){
         positionResult = positionImages(imageList);
         imageList = positionResult.imageList;
 
-        spriteName = config.imageOutput + config.outputPrefix + ++spriteCount + '.' + 
+        spriteName = config.imageOutput + config.outputPrefix + fileName.split('.')[0] + '.' + 
             config.outputFormat;
         drawImageAndPositionBackground(config.cssOutput, spriteName, positionResult.canvasWidth, 
                                        positionResult.canvasHeight, imageList);
