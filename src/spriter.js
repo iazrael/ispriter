@@ -121,6 +121,11 @@ var collectCSSRulesAndImages = function(styleSheet, result){
         if(!style) { // 有可能 `@media`  等中没有 样式， 如： `@media xxx {}`
             continue;
         };
+        if(style['background-size']){//跳过有background-size的样式
+            //因为backgrond-size不能简写在background里面，而且拆分background之后再组装的话
+            //background就变成再background-size后面了，会导致background-size被background覆盖
+            continue;
+        }
         if(style.background){//有 background 就先拆分
             splitStyleBackground(style);
         }
