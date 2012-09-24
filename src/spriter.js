@@ -3,7 +3,8 @@ var fs = require('fs'),
     CSSOM = require('cssom'),
     Canvas = require('canvas'),
     GrowingPacker = require('./GrowingPacker'),
-    bgItpreter = require('./BackgroundInterpreter');
+    bgItpreter = require('./BackgroundInterpreter'),
+    ztool = require('./ztool');
 
 var golbalConfig,
     globalImageMap;
@@ -153,6 +154,7 @@ var collectCSSRulesAndImages = function(styleSheet, result){
                 if(networkRegexp.test(imageUrl)){
                     return result;
                 }
+                // 把用了同一个文件的样式汇集在一起
                 if(!result[imageUrl]){
                     result[imageUrl] = {
                         url: imageUrl,
@@ -205,6 +207,8 @@ var readImages = function(imageList){
             // console.log('has: ' + url + ', ' + existImgObj.spriteName);
         }else{
             content = fs.readFileSync(golbalConfig.cssRoot + url);
+            // console.log(golbalConfig.cssRoot + url);
+            imageObj.length = content.length;
             image = new Canvas.Image();
             image.src = content;
             //cache to avoid duplicate
@@ -212,7 +216,7 @@ var readImages = function(imageList){
         }
         // imageObj.w = image.width;
         // imageObj.h = image.height;
-        // 从所有style里面，选取图片宽高最大的作为图片高度
+        // 从所有style里面，选取图片宽高最大的作为图片宽高
         setImageWidthHeight(imageObj, image);
         imageObj.image = image;
     }
@@ -332,7 +336,10 @@ var drawImageAndPositionBackground = function(dirName, fileName, width, height, 
         fileName = path.resolve(dirName + fileName);
         var dir = path.dirname(fileName);
         mkdirsSync(dir);
-        fs.writeFileSync(fileName, canvas.toBuffer());
+        var buffer = canvas.toBuffer();
+        // buffer.length 得到的是图片的size， 单位字节（B）
+        // console.log(fileName, buffer.length);
+        fs.writeFileSync(fileName, buffer);
     }
 }
 
@@ -371,23 +378,24 @@ var main = function(configFile){
     }
     for(var i = 0, fileName; fileName = cssFileNameList[i]; i++) {
         cssContent = readFile(config.cssRoot + fileName);
+        //解析样式表
         styleSheet = parseCssToStyleSheet(cssContent);
-
+        //收集需要合并的图片信息
         imageList = collectCSSRulesAndImages(styleSheet);
         if(!imageList.length){
-            //TODO 是否将没有修改的文件也写到 output 里?
             continue;
         }
+        //读取图片内容，以及大小
         readImages(imageList);
-
+        //对图片进行定位
         positionResult = positionImages(imageList);
         imageList = positionResult.imageList;
-
-        spriteName = config.imageOutput + config.outputPrefix + fileName.split('.')[0] + '.' + 
-            config.outputFormat;
+        //把合并后的图片输出并修改样式表里面的background
+        spriteName = config.imageOutput + config.outputPrefix + fileName.split('.')[0] 
+            + '.' + config.outputFormat;
         drawImageAndPositionBackground(config.cssOutput, spriteName, positionResult.canvasWidth, 
                                        positionResult.canvasHeight, imageList);
-        
+        //输出修改后的文件
         newFileName = config.cssOutput + fileName;
         //finally at the end...
         writeFile(newFileName, styleSheet);

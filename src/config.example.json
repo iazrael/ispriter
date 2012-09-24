@@ -2,6 +2,7 @@
     "cssRoot": "./../test/css/",
     "format": "png",
     "algorithm": "growingpacker",
+    "maxSize": "60",
     "cssOutput": "./../test/output/css/",
     "imageOutput": "../images/",
     "outputPrefix": "sprite_",
