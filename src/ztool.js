@@ -2,7 +2,11 @@ var fs = require('fs'),
     path = require('path');
 
 
-// 创建多级目录
+/**
+ * 创建多级目录
+ * @param  {String} dirpath 路径
+ * @param  {String} mode    文件模式
+ */
 exports.mkdirsSync = function(dirpath, mode) {
     if(fs.existsSync(dirpath)){
         return;
@@ -17,7 +21,12 @@ exports.mkdirsSync = function(dirpath, mode) {
     }
 };
 
-// 批量读取文件
+/**
+ * 批量读取文件
+ * @param  {String} dir      路径
+ * @param  {String} fileType 需要读取的文件的格式
+ * @return {Array}  返回文件的内容数组 [{fileName: '', content: buffer}]
+ */
 exports.readFilesSync = function(dir, fileType){
     var list,
         result = [],

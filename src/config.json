@@ -1,0 +1,13 @@
+{
+	"algorithm": "growingpacker",
+	"input": {
+		"cssRoot": "./../test/css/",
+		"format": "png"
+	},
+	"output": {
+		"cssRoot": "./../test/sprite_output/css/",
+		"maxSize": 60,
+		"prefix": "sprite_",
+		"format": "png"
+	}
+}
