@@ -6,5 +6,6 @@
     "cssOutput": "./../test/output/css/",
     "imageOutput": "../images/",
     "outputPrefix": "sprite_",
+    "imagePadding": 5,
     "outputFormat": "png"
 }

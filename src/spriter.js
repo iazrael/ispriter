@@ -181,8 +181,9 @@ var setImageWidthHeight = function(imageObj, image){
             mh = h;
         }
     }
-    imageObj.w = mw;
-    imageObj.h = mh;
+    var padding = golbalConfig.imagePadding || 0;
+    imageObj.w = mw + padding;
+    imageObj.h = mh + padding;
 }
 
 var readImages = function(imageList){
