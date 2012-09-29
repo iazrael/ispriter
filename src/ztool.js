@@ -59,19 +59,6 @@ exports.readFilesSync = function(dir, fileType){
 }
 
 /**
- * 把一个对象转换的数组
- * @param  {Object} obj 
- * @return {Array}     
- */
-exports.toArray = function(obj){
-    var arr = [];
-    for(var i in obj){
-        arr.push(obj[i]);
-    }
-    return arr;
-}
-
-/**
  * 写文件, 自动创建不存在的目录
  * @param  {[type]} fileName [description]
  * @param  {[type]} data     [description]

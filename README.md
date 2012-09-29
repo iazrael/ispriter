@@ -14,62 +14,65 @@
 
 编写css 文件时什么都不用管, 该用什么图片用什么图片, 该怎么定位就怎么定位
 
-发布前执行 spriter, 所有合并图片和定位都自动帮你完成
+发布前执行 ispriter, 所有合并图片和定位都自动帮你完成
 
 特性
 ====
 
 + 智能提取background的url和position等信息
 + 智能判断使用了background-position（使用px为单位）定位的图片并重新定位
++ 兼容已经合并了的图片, 并重新定位
 + 多个css文件合并时，排除并重用已经合并的图片
-+ 不合并background-position是right/center/bottom的图片
-+ 不合并显示的设置平铺方式为repreat的图片
-+ 从所有样式里面，选取图片宽高最大的作为图片高度
++ 智能设置被合并图片的宽高
++ 支持设定合并后图片的最大大小
++ 支持设置合并后的图片间距
 
-Example
-=======
-
-### 没有使用 background-position 定位的情况下
-
-    div{
-        background: url(../images/tips_icons.png);
-    }
-    =>
-    div{
-        background: url(../images/sprite_1.png) -48px -48px;
-    }
-
-### background-position写在 background 属性里
-
-    div{
-        background: url(../images/tips_icons.png) -42px 0;
-    }
-    =>
-    div{
-        background: url(../images/sprite_1.png) 0 -174px;
-    }
-
-### background-image 和 background-position 不使用简写
-
-    div{
-        background-image: url(../images/tips_icons.png);
-        background-position: 0 -40px;
-    }
-    =>
-    div{
-        background: url(../images/sprite_1.png) -142px -86px;
-    }
++ 跳过background-position是right/center/bottom的图片
++ 跳过显式的设置平铺方式为repreat的图片
++ 跳过设置了background-size的图片
 
 使用方法
 =======
 
-    npm install ispriter
+### config 文件的配置参数
 
-    then write your code, as example, create a file name test.js(in ./test/), add the codes like below:
+    {
+        "algorithm": "growingpacker",//optional 目前只有 growingpacker
+        "input": {
+            "cssRoot": "./../test/css/", //required
+            "imageRoot": "",//optional 默认 cssRoot
+            "format": "png"//optional
+        },
+        "output": {
+            "cssRoot": "./../test/sprite_output/css/",//required
+            "imageRoot": "../images/",//optional 相对于 cssRoot 的路径, 默认 "./image/", 最终会变成合并后的的图片路径写在css文件中
+            "maxSize": 60,//optional 图片容量的最大大小, 单位 KB, 默认 0
+            "margin": 5,//optional 合成之后, 图片间的空隙, 默认 0
+            "prefix": "sprite_",//optional 
+            "format": "png"//optional 输出的图片格式
+        }
+    }
 
-        var spriter=require('ispriter');
-        spriter.merge(configFileName);
+### config 的最简配置
 
-    then execute "node ./test.js" in command line
+    {
+        "input": {
+            "cssRoot": "./../test/css/"
+        },
+        "output": {
+            "cssRoot": "./../test/sprite_output/css/"
+        }
+    }
 
-    that's all
+### 从代码中调用
+
+    var spriter = require('ispriter');
+
+    var configFile = '../src/config.example.json';
+
+    spriter.merge(configFile);
+
+### 从命令行调用
+
+    node -e "require('ispriter').merge('../src/config.example.json')"
+
