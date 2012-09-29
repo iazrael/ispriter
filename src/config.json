@@ -1,13 +1,15 @@
 {
-	"algorithm": "growingpacker",
+	"algorithm": "growingpacker",//optional
 	"input": {
-		"cssRoot": "./../test/css/",
-		"format": "png"
+		"cssRoot": "./../test/css/", //required
+		"imageRoot": "",//optional 默认 cssRoot
+		"format": "png"//optional
 	},
 	"output": {
-		"cssRoot": "./../test/sprite_output/css/",
-		"maxSize": 60,
-		"prefix": "sprite_",
-		"format": "png"
+		"cssRoot": "./../test/sprite_output/css/",//required
+		"imageRoot": "../images/",//optional 相对于 cssRoot 的路径, 默认 "./image/", 最终会变成合并后的的图片路径写在css文件中
+		"maxSize": 60,//optional 图片容量的最大大小, 单位 KB, 默认 0
+		"prefix": "sprite_",//optional 
+		"format": "png"//optional 输出的图片格式
 	}
 }

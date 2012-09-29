@@ -6,8 +6,33 @@ var fs = require('fs'),
     bgItpreter = require('./BackgroundInterpreter'),
     ztool = require('./ztool');
 
-var spriteConfig, spriteCache;
+var spriteConfig, spriteCache, imageInfoCache;
 
+//****************************************************************
+// 数据结构定义
+//****************************************************************
+/**
+ * StyleObj 的属性定义, 只是为了备忘而已
+ * @type {Object}
+ */
+var StyleObj = {
+    url: '',//样式中包含的背景图片的路径
+    cssRules: [],//用到了该图片的样式的集合
+    imageInfo: null//图片的信息, 参看 ImageInfo
+    
+}
+
+var ImageInfo = {
+    url: '',//图片路径
+    image: null,//图片内容
+    size: 0,//图片的大小
+    width: 0,//宽
+    height: 0//高
+}
+
+//****************************************************************
+// 读取配置
+//****************************************************************
 /**
  * 读取配置
  * @param  {[type]} configFile [description]
@@ -15,7 +40,34 @@ var spriteConfig, spriteCache;
  */
 var readConfig = function(configFile){
     var content = fs.readFileSync(configFile).toString();
-    var config = JSON.parse(content);
+    content = content.replace(/\/\*[\s\S]*?\*\/|\/\/.+/g, '')
+    var config = JSON.parse(content), dir;
+    config.algorithm = config.algorithm || 'growingpacker';
+
+    config.input.cssRoot = path.resolve(config.input.cssRoot) + '/';
+    if(!config.input.imageRoot){
+        config.input.imageRoot = config.input.cssRoot;
+    }
+    config.input.format = config.input.format || 'png';
+
+    config.output.cssRoot = path.resolve(config.output.cssRoot) + '/';
+    if(!config.output.imageRoot){
+        config.output.imageRoot = './image/';
+    }else{
+        dir = config.output.imageRoot;
+        if(dir.lastIndexOf('/') !== dir.length - 1){
+            dir += '/';
+        }
+        config.output.imageRoot = dir;
+    }
+    if(!config.output.maxSize){
+        config.output.maxSize = 0;
+    }else{
+        config.output.maxSize = config.output.maxSize * 1024;
+    }
+    
+    config.output.prefix = config.output.prefix || 'sprite_';
+    config.output.format = config.output.format || 'png';
 
     return config;
 }
@@ -30,9 +82,9 @@ var ignoreRepeatRegexp = /^(repeat-x|repeat-y|repeat)$/i;
 
 /**
  * 收集需要合并的样式和图片
- * @param  {[type]} styleSheet [description]
- * @param  {[type]} result     [description]
- * @return {[type]}            [description]
+ * @param  {StyleSheet} styleSheet 
+ * @param  {StyleObjList} result     
+ * @return {StyleObjList}            
  */
 var collectStyleRules = function(styleSheet, result){
     if(!styleSheet.cssRules.length){
@@ -75,29 +127,40 @@ var collectStyleRules = function(styleSheet, result){
             mergeBackgound(style);
             continue;
         }
-        if(style['background-image']){// 有背景图片, 就抽取并合并
-            imageUrl = style['background-image'];
-            imageUrl = imageUrl.match(imageRegexp);
-
-            if(imageUrl && spriteConfig.input.format.indexOf(imageUrl[2]) > -1){
-                imageUrl = imageUrl[1];
-                //遇到写绝对路径的图片就跳过
-                if(ignoreNetworkRegexp.test(imageUrl)){
-                    return result;//这里直接返回了, 因为一个style里面是不会同时存在两个background-image的
-                }
-                // 把用了同一个文件的样式汇集在一起
-                if(!result[imageUrl]){
-                    result[imageUrl] = {
-                        url: imageUrl,
-                        cssRules: []
-                    };
-                    result.length++;
-                }
-                result[imageUrl].cssRules.push(style);
+        // 有背景图片, 就抽取并合并
+        if(style['background-image'] && 
+            (imageUrl = getImageUrl(style['background-image']))){
+            //遇到写绝对路径的图片就跳过
+            if(ignoreNetworkRegexp.test(imageUrl)){
+                //这里直接返回了, 因为一个style里面是不会同时存在两个background-image的
+                return result;
             }
+            // 把用了同一个文件的样式汇集在一起
+            if(!result[imageUrl]){
+                result[imageUrl] = {// an StyleObj
+                    url: imageUrl,
+                    cssRules: []
+                };
+                result.length++;
+            }
+            result[imageUrl].cssRules.push(style);
         }
     }
     return result;
+}
+
+/**
+ * 从background-image 的值中提取图片的路径
+ * @param  {[type]} backgroundImage [description]
+ * @return {[type]}                 [description]
+ */
+var getImageUrl = function(backgroundImage){
+    var format = spriteConfig.input.format;
+    var m = backgroundImage.match(imageRegexp);
+    if(m && format.indexOf(m[2]) > -1){
+        return m[1];
+    }
+    return null;
 }
 
 /**
@@ -192,6 +255,196 @@ var mergeBackgound = function(style){
     style[style.length++] = 'background';
     
 }
+
+//****************************************************************
+// 读取图片信息
+//****************************************************************
+
+var readImageInfo = function(styleObjList){
+    var styleObj, imageInfo, content, image;
+
+    for(var url in styleObjList){
+        styleObj = styleObjList[url];
+
+        if(imageInfo = imageInfoCache[url]){
+
+        }else{
+            content = fs.readFileSync(spriteConfig.input.imageRoot + url);
+            imageInfo = {};
+            imageInfo.size = content.length;
+            image = new Canvas.Image();
+            image.src = content;
+            imageInfo.image = image;
+            imageInfo.width = image.width;
+            imageInfo.height = image.height;
+
+            imageInfoCache[url] = imageInfo;
+        }
+        // 从所有style里面，选取图片宽高最大的作为图片宽高
+        setImageWidthHeight(styleObj, imageInfo);
+
+        styleObj.imageInfo = imageInfo;
+    }
+}
+
+var setImageWidthHeight = function(styleObj, imageInfo){
+    var w = 0, h = 0, mw = imageInfo.width, mh = imageInfo.height;
+    for(var i = 0, rule; rule = styleObj.cssRules[i]; i++) {
+        w = getPxValue(rule.width),
+        h = getPxValue(rule.height);
+        if(w > mw){
+            mw = w;
+        }
+        if(h > mh){
+            mh = h;
+        }
+    }
+    styleObj.w = mw;
+    styleObj.h = mh;
+}
+
+var getPxValue = function(cssValue){
+    if(cssValue && cssValue.indexOf('px') > -1){
+        return parseInt(cssValue);
+    }
+    return 0;
+}
+
+//****************************************************************
+// 对图片进行坐标定位
+//****************************************************************
+
+var positionImages = function(styleObjList){
+    var styleObjArr = [], arr = [], styleObj,
+        maxSize = spriteConfig.output.maxSize,
+        packer = new GrowingPacker();
+    //把已经合并了并已输出的图片先排除掉
+    for(var i in styleObjList){
+        styleObj = styleObjList[i];
+        if(!styleObj.imageInfo.hasDrew){
+            arr.push(styleObjList[i]);
+        }
+    }
+    // console.log(arr);
+    //如果限制了输出图片的大小, 则进行分组
+    if(maxSize){
+        //限制图片大小的算法是:
+        //1. 先把图片按从大到小排序
+        //2. 顺序叠加图片 size , 超过maxSize 时, 另起一个数组
+        //3. 最终把一个数组, 拆成 N 个 总 szie 小于 maxSize 的数组
+        arr.sort(function(a, b){
+            return b.imageInfo.size - a.imageInfo.size;
+        });
+        // console.log(arr.length);
+        var total = 0, ret = [];
+        for(var i = 0; styleObj = arr[i]; i++) {
+            total += styleObj.imageInfo.size;
+            if(total > maxSize){
+                styleObjArr.push(ret);
+                ret = [];
+                total = styleObj.imageInfo.size;
+            }
+            ret.push(styleObj);
+        }
+        if(ret.length){
+            styleObjArr.push(ret);
+        }
+        // console.log(styleObjArr);
+    }else{
+        styleObjArr.push(arr);
+    }
+    //packer 算法需要把最大的一个放在首位...
+    //排序算法会对结果造成比较大的影响
+    for(var j = 0; arr = styleObjArr[j]; j++) {
+        arr.sort(function(a, b){
+            return b.w * b.h - a.w * a.h;
+        });
+        //packer 定位
+        packer.fit(arr);
+        arr.root = packer.root;
+    }
+    // console.log(styleObjArr);
+    return styleObjArr;
+}
+
+//****************************************************************
+// 输出合并的图片 并修改样式表里面的background
+//****************************************************************
+
+var drawImageAndPositionBackground = function(styleObjArr, cssFileName){
+    var canvas = new Canvas(), hasDrew, imageName;
+    for(var i = 0, arr; arr = styleObjArr[i]; i++) {
+        canvas.width = arr.root.w;
+        canvas.height = arr.root.h;
+        ctx = canvas.getContext('2d');
+        hasDrew = false;
+        imageName = getImageName(cssFileName, i);
+        console.log(imageName);
+        for(var j = 0, styleObj; styleObj = arr[j]; j++) {
+            hasDrew = true;
+            // console.log(styleObj);
+            replaceAndPositionBackground(imageName, styleObj);
+            styleObj.imageInfo.x = styleObj.fit.x;
+            styleObj.imageInfo.y = styleObj.fit.y;
+
+            ctx.drawImage(styleObj.imageInfo.image, styleObj.fit.x, styleObj.fit.y);
+        }
+        //如果 canvas 里面没图片， 调用 toBuffer 会出错
+        //而且没必要输出一张空白图片
+        if(hasDrew){
+            imageName = spriteConfig.output.cssRoot + imageName;
+            var buffer = canvas.toBuffer();
+            // buffer.length 得到的是图片的size， 单位字节（B）
+            // console.log(fileName, buffer.length);
+            ztool.writeFileSync(imageName, buffer);
+        }
+
+    }
+
+}
+
+var getImageName = function(cssFileName, index){
+    var basename = path.basename(cssFileName);
+    var extname = path.extname(basename);
+    var name = basename.replace(extname, '');
+    if(spriteConfig.output.maxSize){
+        name += '_' + index;
+    }
+    return spriteConfig.output.imageRoot + spriteConfig.output.prefix +
+        name + '.' + spriteConfig.output.format;
+}
+
+var replaceAndPositionBackground = function(imageUrl, styleObj){
+    for(var i = 0, rule; rule = styleObj.cssRules[i]; i++) {
+        rule['background-image'] = 'url(' + imageUrl + ')';
+        //set background-position-x
+        setPxValue(rule, 'background-position-x', styleObj.fit.x);
+
+        //set background-position-y
+        setPxValue(rule, 'background-position-y', styleObj.fit.y);
+
+        //mergeBackgound, 合并 background 属性, 用于减少代码量
+        mergeBackgound(rule);
+        // console.log(rule);
+    };
+}
+
+/**
+ * 调整 样式规则的像素值, 如果原来就有值, 则在原来的基础上变更
+ */
+var setPxValue = function(rule, attr, newValue){
+    var value;
+    if(rule[attr]){
+        value = parseInt(rule[attr]);
+    }else{
+        value = 0;
+        rule[rule.length++] = attr;
+    }
+    value = value - newValue;
+    value = value ? value + 'px' : '0';
+    rule[attr] = value;
+}
+
 //****************************************************************
 // 主逻辑
 //****************************************************************
@@ -203,46 +456,43 @@ var mergeBackgound = function(style){
  */
 exports.merge = function(configFile){
     spriteCache = {};
-    var config = spriteConfig = readConfig(configFile);
-
-    var fileList = ztool.readFileSync(config.input.cssRoot, 'css');
+    imageInfoCache = {};
+    spriteConfig = readConfig(configFile);
+    // console.log(spriteConfig);
+    var fileList = ztool.readFilesSync(spriteConfig.input.cssRoot, 'css');
     if(!fileList.length){
-        console.log('there is no file in ' + config.input.cssRoot);
+        console.log('there is no file in ' + spriteConfig.input.cssRoot);
         return;
     }
     for(var i = 0, fileObj; fileObj = fileList[i]; i++){
         var spriteObj = {};
         spriteObj.fileName = fileObj.fileName;
+        // console.log(fileObj);
         //解析样式表
-        spriteObj.styleSheet = CSSOM.parse(fileObj.content);
+        spriteObj.styleSheet = CSSOM.parse(fileObj.content.toString());
         //收集需要合并的图片信息
         var styleObjList = collectStyleRules(spriteObj.styleSheet);
+        if(!styleObjList.length){
+            //这个 css 没有需要合并的图片
+            continue;
+        }
+        delete styleObjList.length;
+        // console.log(styleObjList);
+        
+        //读取图片信息(内容, 宽高, 大小)
+        readImageInfo(styleObjList);
+        // console.log(styleObjList);
+        
+        //对图片进行坐标定位
+        var styleObjArr = positionImages(styleObjList);
+
+        //输出合并的图片 并修改样式表里面的background
+        drawImageAndPositionBackground(styleObjArr, fileObj.fileName);
+
+        //输出修改后的样式表
 
     }
 
-    for(var i = 0, fileName; fileName = cssFileNameList[i]; i++) {
-        // cssContent = readFile(config.cssRoot + fileName);
-        //解析样式表
-        // styleSheet = parseCssToStyleSheet(cssContent);
-        //收集需要合并的图片信息
-        imageList = collectStyleRules(styleSheet);
-        if(!imageList.length){
-            continue;
-        }
-        //读取图片内容，以及大小
-        readImages(imageList);
-        //对图片进行定位
-        positionResult = positionImages(imageList);
-        imageList = positionResult.imageList;
-        //把合并后的图片输出并修改样式表里面的background
-        spriteName = config.imageOutput + config.outputPrefix + fileName.split('.')[0] 
-            + '.' + config.outputFormat;
-        drawImageAndPositionBackground(config.cssOutput, spriteName, positionResult.canvasWidth, 
-                                       positionResult.canvasHeight, imageList);
-        //输出修改后的文件
-        newFileName = config.cssOutput + fileName;
-        //finally at the end...
-        writeFile(newFileName, styleSheet);
-    };
+
 }
 

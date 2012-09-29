@@ -7,7 +7,7 @@ var fs = require('fs'),
  * @param  {String} dirpath 路径
  * @param  {String} mode    文件模式
  */
-exports.mkdirsSync = function(dirpath, mode) {
+var mkdirsSync = exports.mkdirsSync = function(dirpath, mode) {
     if(fs.existsSync(dirpath)){
         return;
     }
@@ -58,5 +58,29 @@ exports.readFilesSync = function(dir, fileType){
     return result;
 }
 
+/**
+ * 把一个对象转换的数组
+ * @param  {Object} obj 
+ * @return {Array}     
+ */
+exports.toArray = function(obj){
+    var arr = [];
+    for(var i in obj){
+        arr.push(obj[i]);
+    }
+    return arr;
+}
+
+/**
+ * 写文件, 自动创建不存在的目录
+ * @param  {[type]} fileName [description]
+ * @param  {[type]} data     [description]
+ * @return {[type]}          [description]
+ */
+exports.writeFileSync = function(fileName, data){
+    var dir = path.dirname(fileName);
+    mkdirsSync(dir);
+    fs.writeFileSync(fileName, data);
+}
 
 

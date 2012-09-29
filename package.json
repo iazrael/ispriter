@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git://github.com/iazrael/ispriter.git"
   },
-  "main": "./src/spriter.js",
+  "main": "./src/ispriter.js",
   "engines": {
     "node": "*"
   },
