@@ -1,6 +1,6 @@
 // var spriter = require('ispriter');
 var spriter = require('../');
 
-var configFile = './config.json';
+var configFile = '../src/config.json';
 
 spriter.merge(configFile);
