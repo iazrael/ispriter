@@ -1,15 +1,4 @@
 {
-<<<<<<< HEAD
-    "cssRoot": "./../test/css/",
-    "format": "png",
-    "algorithm": "growingpacker",
-    "maxSize": "60",
-    "cssOutput": "./../test/output/css/",
-    "imageOutput": "../images/",
-    "outputPrefix": "sprite_",
-    "imagePadding": 5,
-    "outputFormat": "png"
-=======
 	"algorithm": "growingpacker",//optional 目前只有 growingpacker
 	"input": {
 		"cssRoot": "./../test/css/", //required
@@ -24,5 +13,4 @@
 		"prefix": "sprite_",//optional 
 		"format": "png"//optional 输出的图片格式
 	}
->>>>>>> rebuild part-final; 增加图片maxSize限制
 }
