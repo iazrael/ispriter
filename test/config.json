@@ -1,9 +1,0 @@
-{
-    "cssRoot": "./css/",
-    "format": "png",
-    "algorithm": "growingpacker",
-    "cssOutput": "./output/css/",
-    "imageOutput": "../images/",
-    "outputPrefix": "sprite_",
-    "outputFormat": "png"
-}
