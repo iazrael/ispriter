@@ -6,7 +6,7 @@ var fs = require('fs'),
     bgItpreter = require('./BackgroundInterpreter'),
     ztool = require('./ztool');
 
-var spriteConfig, spriteCache, imageInfoCache;
+var spriteConfig, imageInfoCache;
 
 //****************************************************************
 // 数据结构定义
@@ -65,6 +65,7 @@ var readConfig = function(configFile){
     }else{
         config.output.maxSize = config.output.maxSize * 1024;
     }
+    config.output.margin = parseInt(config.output.margin || 0);
     
     config.output.prefix = config.output.prefix || 'sprite_';
     config.output.format = config.output.format || 'png';
@@ -299,8 +300,8 @@ var setImageWidthHeight = function(styleObj, imageInfo){
             mh = h;
         }
     }
-    styleObj.w = mw;
-    styleObj.h = mh;
+    styleObj.w = mw + spriteConfig.output.margin;
+    styleObj.h = mh + spriteConfig.output.margin;
 }
 
 var getPxValue = function(cssValue){
@@ -379,7 +380,7 @@ var drawImageAndPositionBackground = function(styleObjArr, cssFileName){
         ctx = canvas.getContext('2d');
         hasDrew = false;
         imageName = getImageName(cssFileName, i);
-        console.log(imageName);
+        // console.log(imageName);
         for(var j = 0, styleObj; styleObj = arr[j]; j++) {
             hasDrew = true;
             // console.log(styleObj);
@@ -392,10 +393,11 @@ var drawImageAndPositionBackground = function(styleObjArr, cssFileName){
         //如果 canvas 里面没图片， 调用 toBuffer 会出错
         //而且没必要输出一张空白图片
         if(hasDrew){
-            imageName = spriteConfig.output.cssRoot + imageName;
+            imageName = path.resolve(spriteConfig.output.cssRoot + imageName);
             var buffer = canvas.toBuffer();
             // buffer.length 得到的是图片的size， 单位字节（B）
             // console.log(fileName, buffer.length);
+            // console.log('draw: ', imageName);
             ztool.writeFileSync(imageName, buffer);
         }
 
@@ -455,7 +457,6 @@ var setPxValue = function(rule, attr, newValue){
  * @return {[type]}            [description]
  */
 exports.merge = function(configFile){
-    spriteCache = {};
     imageInfoCache = {};
     spriteConfig = readConfig(configFile);
     // console.log(spriteConfig);
