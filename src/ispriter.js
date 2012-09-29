@@ -42,12 +42,23 @@ var readConfig = function(configFile){
     var config = JSON.parse(content), dir;
     config.algorithm = config.algorithm || 'growingpacker';
 
+    if(typeof config.input === 'string'){
+        config.input = {
+            cssRoot: config.input
+        };
+    }
+
     config.input.cssRoot = path.resolve(config.input.cssRoot) + '/';
     if(!config.input.imageRoot){
         config.input.imageRoot = config.input.cssRoot;
     }
     config.input.format = config.input.format || 'png';
 
+    if(typeof config.output === 'string'){
+        config.output = {
+            cssRoot: config.output
+        }
+    }
     config.output.cssRoot = path.resolve(config.output.cssRoot) + '/';
     if(!config.output.imageRoot){
         config.output.imageRoot = './image/';
@@ -424,7 +435,7 @@ var drawImageAndPositionBackground = function(styleObjArr, cssFileName){
             var buffer = canvas.toBuffer();
             // buffer.length 得到的是图片的size， 单位字节（B）
             // console.log(fileName, buffer.length);
-            // console.log('draw: ', imageName);
+            console.log('>>output image:', imageName);
             ztool.writeFileSync(imageName, buffer);
         }
 
@@ -529,7 +540,7 @@ exports.merge = function(configFile){
         //输出修改后的样式表
         writeCssFile(spriteObj);
     }
-    console.log('done. time use:', +new Date - start, 'ms');
+    console.log('>>all done. time use:', +new Date - start, 'ms');
 
 }
 

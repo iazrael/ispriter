@@ -1,3 +1,1 @@
-1. background-position: top,left,bottom,right,center 的处理
-
-2. background-position 为非px单位的处理
+1. background-position 为非px单位的处理
