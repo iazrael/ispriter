@@ -448,6 +448,16 @@ var setPxValue = function(rule, attr, newValue){
 }
 
 //****************************************************************
+// 输出修改后的样式表    
+//****************************************************************
+
+var writeCssFile = function(spriteObj){
+    var fileName = spriteConfig.output.cssRoot + spriteObj.fileName;
+    fileName = path.resolve(fileName);
+    ztool.writeFileSync(fileName, spriteObj.styleSheet.toString());
+}
+
+//****************************************************************
 // 主逻辑
 //****************************************************************
 
@@ -491,7 +501,7 @@ exports.merge = function(configFile){
         drawImageAndPositionBackground(styleObjArr, fileObj.fileName);
 
         //输出修改后的样式表
-
+        writeCssFile(spriteObj);
     }
 
 
