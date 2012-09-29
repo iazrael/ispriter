@@ -56,12 +56,8 @@
 ### config 的最简配置
 
     {
-        "input": {
-            "cssRoot": "./../test/css/"
-        },
-        "output": {
-            "cssRoot": "./../test/sprite_output/css/"
-        }
+        "input":  "./../test/css/", // input cssRoot
+        "output": "./../test/sprite_output/css/" // output cssRoot
     }
 
 ### 从代码中调用
@@ -76,3 +72,7 @@
 
     node -e "require('ispriter').merge('../src/config.example.json')"
 
+Example
+=======
+
+具体实例请到项目根目录下的 test 目录, 执行 node dosprite.js 体验实际效果
