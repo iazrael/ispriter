@@ -26,7 +26,6 @@
 + 智能设置被合并图片的宽高
 + 支持设定合并后图片的最大大小
 + 支持设置合并后的图片间距
-
 + 跳过background-position是right/center/bottom的图片
 + 跳过显式的设置平铺方式为repreat的图片
 + 跳过设置了background-size的图片
