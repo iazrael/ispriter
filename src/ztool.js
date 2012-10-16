@@ -37,6 +37,8 @@ exports.readFilesSync = function(dir, fileType){
         dir += '/';
     }
     list = fs.readdirSync(dir);
+    //把文件按文件名排序
+    list.sort();
     if(fileType && fileType.indexOf('.') === -1){
         fileType = '.' + fileType.toLowerCase();
     }

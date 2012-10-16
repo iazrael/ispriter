@@ -96,17 +96,30 @@
     ];
 
     var analyse = function(value){
-        var style = {},
-            match,
-            origin = value = value.trim();
-        for(var i = 0, action; (action = MATCH_ACTION[i]) && value; i++) {
-            match = value.match(action.regexp);
-            if(match){
-                action.exec(style, match);
-                value = value.replace(match[0], '').trim();
+        //处理多 background 简写的情况
+        var values = value.split(',');
+        var list = [],
+            style,
+            has,
+            match;
+        for (var i = 0; i < values.length; i++) {
+            value = values[i].trim();
+            style = {};
+            has = false;
+            for(var j = 0, action; (action = MATCH_ACTION[j]) && value; j++) {
+                match = value.match(action.regexp);
+                if(match){
+                    action.exec(style, match);
+                    value = value.replace(match[0], '').trim();
+                    has = true;
+                }
+            };
+            if(has){
+                list.push(style);
             }
         };
-        return style;
+        
+        return list;
     }
 
     exports.analyse = analyse;

@@ -22,6 +22,10 @@ var StyleObj = {
     
 }
 
+/**
+ * ImageInfo 图片信息的属性定义
+ * @type {Object}
+ */
 var ImageInfo = {
     url: '',//图片路径
     image: null,//图片内容
@@ -139,6 +143,7 @@ var collectStyleRules = function(styleSheet, result){
         }
         // 有背景图片, 就抽取并合并
         if(style['background-image'] && 
+            style['background-image'].indexOf(',') == -1 &&//TODO 忽略掉多背景的属性
             (imageUrl = getImageUrl(style['background-image']))){
             //遇到写绝对路径的图片就跳过
             if(ignoreNetworkRegexp.test(imageUrl)){
@@ -189,6 +194,11 @@ var splitStyleBackground = function(style){
         style['background-position-y'] = value[1];
     }
     background = bgItpreter.analyse(style.background);
+    if(background.length != 1){
+        //TODO 暂时跳过多背景的属性
+        return;
+    }
+    background = background[0];
     if(background['background-image']){
         removeStyleAttr(style, 'background');
         mergeStyleAttr(style, background);
