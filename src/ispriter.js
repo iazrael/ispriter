@@ -4,7 +4,8 @@ var fs = require('fs'),
     Canvas = require('canvas'),
     GrowingPacker = require('./GrowingPacker'),
     bgItpreter = require('./BackgroundInterpreter'),
-    ztool = require('./ztool');
+    ztool = require('./ztool'),
+    nf = require('node-file');
 
 var spriteConfig, imageInfoCache;
 
@@ -40,10 +41,13 @@ var ImageInfo = {
 /**
  * 读取配置
  */
-var readConfig = function(configFile){
-    var content = fs.readFileSync(configFile).toString();
-    content = content.replace(/\/\*[\s\S]*?\*\/|\/\/.+/g, '')
-    var config = JSON.parse(content), dir;
+var readConfig = function(config){
+    if(ztool.isString(config)){
+        var content = fs.readFileSync(config).toString();
+        content = content.replace(/\/\*[\s\S]*?\*\/|\/\/.+/g, '');
+        config = JSON.parse(content);
+    }
+    var dir;
     config.algorithm = config.algorithm || 'growingpacker';
 
     if(typeof config.input === 'string'){
@@ -52,7 +56,7 @@ var readConfig = function(configFile){
         };
     }
 
-    config.input.cssRoot = path.resolve(config.input.cssRoot) + '/';
+    config.input.cssRoot = path.resolve(config.input.cssRoot) + path.sep;
     if(!config.input.imageRoot){
         config.input.imageRoot = config.input.cssRoot;
     }
@@ -63,13 +67,13 @@ var readConfig = function(configFile){
             cssRoot: config.output
         }
     }
-    config.output.cssRoot = path.resolve(config.output.cssRoot) + '/';
+    config.output.cssRoot = path.resolve(config.output.cssRoot) + path.sep;
     if(!config.output.imageRoot){
         config.output.imageRoot = './image/';
     }else{
         dir = config.output.imageRoot;
-        if(dir.lastIndexOf('/') !== dir.length - 1){
-            dir += '/';
+        if(dir.lastIndexOf(path.sep) !== dir.length - 1){
+            dir += path.sep;
         }
         config.output.imageRoot = dir;
     }
@@ -446,7 +450,7 @@ var drawImageAndPositionBackground = function(styleObjArr, cssFileName){
             // buffer.length 得到的是图片的size， 单位字节（B）
             // console.log(fileName, buffer.length);
             console.log('>>output image:', imageName);
-            ztool.writeFileSync(imageName, buffer);
+            nf.writeFileSync(imageName, buffer);
         }
 
     }
@@ -502,7 +506,7 @@ var setPxValue = function(rule, attr, newValue){
 var writeCssFile = function(spriteObj){
     var fileName = spriteConfig.output.cssRoot + spriteObj.fileName;
     fileName = path.resolve(fileName);
-    ztool.writeFileSync(fileName, spriteObj.styleSheet.toString());
+    nf.writeFileSync(fileName, spriteObj.styleSheet.toString());
 }
 
 //****************************************************************
@@ -517,17 +521,19 @@ exports.merge = function(configFile){
     spriteConfig = readConfig(configFile);
     var start = +new Date;
     // console.log(spriteConfig);
-    var fileList = ztool.readFilesSync(spriteConfig.input.cssRoot, 'css');
+    var inputCssRoot = spriteConfig.input.cssRoot;
+    var fileList = nf.listFilesSync(inputCssRoot, 'css');
     if(!fileList.length){
         console.log('there is no file in ' + spriteConfig.input.cssRoot);
         return;
     }
-    for(var i = 0, fileObj; fileObj = fileList[i]; i++){
+    // console.log(fileList);
+    for(var i = 0, fileName, content; fileName = fileList[i]; i++){
         var spriteObj = {};
-        spriteObj.fileName = fileObj.fileName;
-        // console.log(fileObj);
+        spriteObj.fileName = fileName;
         //解析样式表
-        spriteObj.styleSheet = CSSOM.parse(fileObj.content.toString());
+        content = fs.readFileSync(path.join(inputCssRoot,fileName));
+        spriteObj.styleSheet = CSSOM.parse(content.toString());
         //收集需要合并的图片信息
         var styleObjList = collectStyleRules(spriteObj.styleSheet);
         if(!styleObjList.length){
@@ -545,7 +551,7 @@ exports.merge = function(configFile){
         var styleObjArr = positionImages(styleObjList);
 
         //输出合并的图片 并修改样式表里面的background
-        drawImageAndPositionBackground(styleObjArr, fileObj.fileName);
+        drawImageAndPositionBackground(styleObjArr, fileName);
 
         //输出修改后的样式表
         writeCssFile(spriteObj);
