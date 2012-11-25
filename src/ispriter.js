@@ -44,8 +44,7 @@ var ImageInfo = {
 var readConfig = function(config){
     if(ztool.isString(config)){
         var content = fs.readFileSync(config).toString();
-        content = content.replace(/\/\*[\s\S]*?\*\/|\/\/.+/g, '');
-        config = JSON.parse(content);
+        config = ztool.jsonParse(content);
     }
     var dir;
     config.algorithm = config.algorithm || 'growingpacker';

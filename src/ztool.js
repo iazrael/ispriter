@@ -37,6 +37,6 @@ exports.endsWith = function(str, end){
     return index + end.length == str.length;
 }
 
-exports.friendlyJsonParse = function(jsonStr){
+exports.jsonParse = function(jsonStr){
     return Function('return ' + jsonStr)();
 }
