@@ -11,27 +11,31 @@ var GrowingPacker = require('./GrowingPacker');
 var bgItpreter = require('./BackgroundInterpreter');
 var ztool = require('./ztool');
 var nf = require('node-file');
+var attConfig = require('./../../../att.json');
 
 var spriteConfig, imageInfoCache;
+
+var INPUT_ERROR = 'Input is not available';
+var workspacePath = path.resolve(attConfig['plugins']['cdn']['workspaces']['workspace']);
 
 //****************************************************************
 // 数据结构定义
 //****************************************************************
 /**
- * StyleObj 的属性定义, 只是为了备忘而已
+ * styleObj 的属性定义, 只是为了备忘而已
  * @type {Object}
  */
-var StyleObj = {
+var styleObj = {
     url:'', //样式中包含的背景图片的路径
     cssRules:[], //用到了该图片的样式的集合
-    imageInfo:null//图片的信息, 参看 ImageInfo
+    imageInfo:null//图片的信息, 参看 imageInfo
 };
 
 /**
- * ImageInfo 图片信息的属性定义
+ * imageInfo 图片信息的属性定义
  * @type {Object}
  */
-var ImageInfo = {
+var imageInfo = {
     url:'', //图片路径
     image:null, //图片内容
     size:0, //图片的大小
@@ -46,7 +50,16 @@ var ImageInfo = {
  * 读取配置
  */
 var readConfig = function (config) {
-    if (ztool.isString(config)) {
+
+    //传入参数是一个文件夹或者文件地址，和传入配置文件的处理是不一样的
+    if (ztool.isObject(config)) {
+        if (config.input) {
+            spriteConfig = config;
+        } else {
+            console.log(INPUT_ERROR);
+            return false;
+        }
+    } else if (ztool.isString(config)) {
         var content = fs.readFileSync(config).toString();
         config = ztool.jsonParse(content);
     }
@@ -56,23 +69,34 @@ var readConfig = function (config) {
     /**
      * 处理简化配置的情况
      * {
-         "input":  "./../test/css/", // input cssRoot
-         "output": "./../test/sprite_output/css/" // output cssRoot
-       }
+     "input":  "./../test/css/", // input cssRoot
+     "output": "./../test/sprite_output/css/" // output cssRoot
+     }
      */
-    if (typeof config.input === 'string') {
+    if (ztool.isString(config.input)) {
         config.input = {
             cssRoot:config.input
         };
     }
 
-    if (typeof config.output === 'string') {
+    if (ztool.isString(config.output)) {
         config.output = {
             cssRoot:config.output
         }
     }
 
-    config.input.cssRoot = path.resolve(config.input.cssRoot) + path.sep;
+    var fileStat = fs.statSync(config.input.cssRoot);
+
+    //处理输入为目录和文件的两种情况
+    if (fileStat.isDirectory()) {
+        config.input.cssRoot = path.resolve(config.input.cssRoot) + path.sep;
+        config.input.baseDir = config.input.cssRoot;
+        config.input.type = 'directory';
+    } else {
+        config.input.cssRoot = path.resolve(config.input.cssRoot);
+        config.input.baseDir = path.dirname(config.input.cssRoot) + path.sep;
+        config.input.type = 'file';
+    }
 
     if (!config.input.imageRoot) {
         config.input.imageRoot = config.input.cssRoot;
@@ -81,8 +105,15 @@ var readConfig = function (config) {
     config.input.format = config.input.format || 'png';
 
     if (!config.output) {
-        config.output = {
-            cssRoot:config.input.cssRoot
+        //输出目录取决于输入的input是目录还是文件,统一和原来css的目录一致
+        if (config.input.type === 'directory') {
+            config.output = {
+                cssRoot:config.input.cssRoot
+            }
+        } else {
+            config.output = {
+                cssRoot:config.input.baseDir
+            }
         }
     } else {
         config.output.cssRoot = path.resolve(config.output.cssRoot) + path.sep;
@@ -122,8 +153,8 @@ var ignoreRepeatRegexp = /^(repeat-x|repeat-y|repeat)$/i;
 /**
  * 收集需要合并的样式和图片
  * @param  {StyleSheet} styleSheet
- * @param  {StyleObjList} result
- * @return {StyleObjList}
+ * @param  {styleObjList} result
+ * @return {styleObjList}
  */
 var collectStyleRules = function (styleSheet, result) {
     if (!styleSheet.cssRules.length) {
@@ -177,7 +208,7 @@ var collectStyleRules = function (styleSheet, result) {
             }
             // 把用了同一个文件的样式汇集在一起
             if (!result[imageUrl]) {
-                result[imageUrl] = {// an StyleObj
+                result[imageUrl] = {// an styleObj
                     url:imageUrl,
                     cssRules:[]
                 };
@@ -255,13 +286,14 @@ var removeStyleAttr = function (style, attr) {
  */
 var mergeStyleAttr = function (style, exStyle) {
     for (var i in exStyle) {
-        if (style[i]) {
-            continue;
+        if (exStyle.hasOwnProperty(i)) {
+            if (style[i]) {
+                continue;
+            }
+            style[i] = exStyle[i];
+            style[style.length++] = i;
         }
-        style[i] = exStyle[i];
-        style[style.length++] = i;
     }
-
 };
 
 /**
@@ -295,34 +327,42 @@ var mergeBackgound = function (style) {
 // 读取图片信息
 //****************************************************************
 
-var readImageInfo = function (styleObjList) {
+var readimageInfo = function (styleObjList) {
     var styleObj, imageInfo, content, image;
 
-    for (var url in styleObjList) {
-        styleObj = styleObjList[url];
+    for (var key in styleObjList) {
+        if (styleObjList.hasOwnProperty(key)) {
+            var url = key;
+            styleObj = styleObjList[key];
+            if (imageInfo = imageInfoCache[key]) {
 
-        if (imageInfo = imageInfoCache[url]) {
+            } else {
+                //如果引用的是相对workspace下的资源
+                if (url.indexOf('/') === 0) {
+                    url = workspacePath + url;
+                } else {
+                    url = path.resolve(url);
+                }
+                //console.log('background image >>> ' + url)
+                content = fs.readFileSync(url);
+                imageInfo = {};
+                image = new Canvas.Image();
+                image.src = content;
+                imageInfo.image = image;
+                // console.log(image.size);
+                imageInfo.width = image.width;
+                imageInfo.height = image.height;
+                //图片本身可能是没压缩的, 有很多冗余信息, 这里要取压缩后的 size 才行
+                // imageInfo.size = content.length;
+                imageInfo.size = getImageSize(image);
 
-        } else {
-            content = fs.readFileSync(spriteConfig.input.imageRoot + url);
-            imageInfo = {};
+                imageInfoCache[url] = imageInfo;
+            }
+            // 从所有style里面，选取图片宽高最大的作为图片宽高
+            setImageWidthHeight(styleObj, imageInfo);
 
-            image = new Canvas.Image();
-            image.src = content;
-            imageInfo.image = image;
-            // console.log(image.size);
-            imageInfo.width = image.width;
-            imageInfo.height = image.height;
-            //图片本身可能是没压缩的, 有很多冗余信息, 这里要取压缩后的 size 才行
-            // imageInfo.size = content.length;
-            imageInfo.size = getImageSize(image);
-
-            imageInfoCache[url] = imageInfo;
+            styleObj.imageInfo = imageInfo;
         }
-        // 从所有style里面，选取图片宽高最大的作为图片宽高
-        setImageWidthHeight(styleObj, imageInfo);
-
-        styleObj.imageInfo = imageInfo;
     }
 };
 
@@ -339,8 +379,8 @@ var getImageSize = function (image) {
 var setImageWidthHeight = function (styleObj, imageInfo) {
     var w = 0, h = 0, mw = imageInfo.width, mh = imageInfo.height;
     for (var i = 0, rule; rule = styleObj.cssRules[i]; i++) {
-        w = getPxValue(rule.width),
-            h = getPxValue(rule.height);
+        w = getPxValue(rule.width);
+        h = getPxValue(rule.height);
         if (w > mw) {
             mw = w;
         }
@@ -368,12 +408,14 @@ var positionImages = function (styleObjList) {
         maxSize = spriteConfig.output.maxSize,
         packer = new GrowingPacker();
     //把已经合并了并已输出的图片先排除掉
-    for (var i in styleObjList) {
-        styleObj = styleObjList[i];
-        if (styleObj.imageInfo.hasDrew) {
-            existArr.push(styleObj);
-        } else {
-            arr.push(styleObj);
+    for (var key in styleObjList) {
+        if (styleObjList.hasOwnProperty(key)) {
+            styleObj = styleObjList[key];
+            if (styleObj.imageInfo.hasDrew) {
+                existArr.push(styleObj);
+            } else {
+                arr.push(styleObj);
+            }
         }
     }
     // console.log(arr);
@@ -438,11 +480,11 @@ var drawImageAndPositionBackground = function (styleObjArr, cssFileName) {
         //若最后一个元素, 没有root 属性, 表示它的样式都是复用已合并的图片的, 直接替换样式即可
         arr = styleObjArr.pop();
         length = styleObjArr.length;
-        for (var j = 0, styleObj; styleObj = arr[j]; j++) {
-            imageInfo = styleObj.imageInfo;
-            styleObj.fit = imageInfo.fit;
+        arr.forEach(function (item, index) {
+            imageInfo = item.imageInfo;
+            item.fit = imageInfo.fit;
             replaceAndPositionBackground(imageInfo.imageName, styleObj);
-        }
+        });
     }
     for (var i = 0; arr = styleObjArr[i]; i++) {
         canvas.width = arr.root.w;
@@ -525,6 +567,7 @@ var setPxValue = function (rule, attr, newValue) {
 //****************************************************************
 
 var writeCssFile = function (spriteObj) {
+    console.log(spriteConfig.output.cssRoot, spriteConfig.output.prefix, spriteObj.fileName);
     var fileName = spriteConfig.output.cssRoot + spriteConfig.output.prefix + spriteObj.fileName;
     fileName = path.resolve(fileName);
     nf.writeFileSync(fileName, spriteObj.styleSheet.toString());
@@ -534,41 +577,22 @@ var writeCssFile = function (spriteObj) {
 // 主逻辑
 //****************************************************************
 
-/**
- * 主逻辑
- */
-exports.merge = function (configFile) {
-    //TODO:传入参数是一个文件夹
-    //TODO:传入的参数是一个css文件
-    imageInfoCache = {};
-    spriteConfig = readConfig(configFile);
-    var start = +new Date;
-    // console.log(spriteConfig);
-    var inputCssRoot = spriteConfig.input.cssRoot;
-    var fileList = nf.listFilesSync(inputCssRoot, 'css');
-    if (!fileList.length) {
-        console.log('there is no file in ' + spriteConfig.input.cssRoot);
-        return;
-    }
-    // console.log(fileList);
-    for (var i = 0, fileName, content; fileName = fileList[i]; i++) {
-        if(fileName.indexOf(spriteConfig.output.prefix) === -1){
-            var spriteObj = {};
-            spriteObj.fileName = fileName;
-            //解析样式表
-            content = fs.readFileSync(path.join(inputCssRoot, fileName));
-            spriteObj.styleSheet = CSSOM.parse(content.toString());
-            //收集需要合并的图片信息
-            var styleObjList = collectStyleRules(spriteObj.styleSheet);
-            if (!styleObjList.length) {
-                //这个 css 没有需要合并的图片
-                continue;
-            }
+function handlerFile(fileName) {
+    if (fileName.indexOf(spriteConfig.output.prefix) === -1) {
+        var spriteObj = {};
+        var content;
+        spriteObj.fileName = path.basename(fileName);
+        //解析样式表
+        content = fs.readFileSync(path.resolve(fileName));
+        spriteObj.styleSheet = CSSOM.parse(content.toString());
+        //收集需要合并的图片信息
+        var styleObjList = collectStyleRules(spriteObj.styleSheet);
+        if (styleObjList.length) {
             delete styleObjList.length;
             // console.log(styleObjList);
 
             //读取图片信息(内容, 宽高, 大小)
-            readImageInfo(styleObjList);
+            readimageInfo(styleObjList);
             // console.log(styleObjList);
 
             //对图片进行坐标定位
@@ -576,10 +600,43 @@ exports.merge = function (configFile) {
 
             //输出合并的图片 并修改样式表里面的background
             drawImageAndPositionBackground(styleObjArr, fileName);
-
             //输出修改后的样式表
             writeCssFile(spriteObj);
+        } else{
+            console.log('>>check result : file ' + fileName + ' has no background images to merge');
         }
+    }
+}
+
+/**
+ * 主逻辑
+ */
+exports.merge = function (configFile) {
+    imageInfoCache = {};
+    spriteConfig = readConfig(configFile);
+
+    if (!spriteConfig) {
+        console.log(INPUT_ERROR);
+    }
+
+    var start = +new Date;
+    var inputCssRoot;
+
+    if (spriteConfig.input.type === 'directory') {
+        inputCssRoot = spriteConfig.input.cssRoot;
+        var fileList = nf.listFilesSync(inputCssRoot, 'css');
+        console.log(fileList);
+        if (!fileList.length) {
+            console.log('there is no file in ' + spriteConfig.input.cssRoot);
+            return;
+        }
+        console.log(fileList.length);
+        fileList.forEach(function (item, index) {
+            handlerFile(item, inputCssRoot);
+        });
+    } else {
+        inputCssRoot = spriteConfig.input.baseDir;
+        handlerFile(spriteConfig.input.cssRoot, inputCssRoot);
     }
     console.log('>>all done. time use:', +new Date - start, 'ms');
 };
