@@ -1,5 +1,5 @@
 /**
- * @author:azrael
+ * @author:azrael butian.wth
  * @description : 解析 css background 属性
  */
 

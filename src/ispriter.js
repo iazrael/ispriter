@@ -1,6 +1,5 @@
 /**
- * 主文件
- * @type {*}
+ * @author:azrael butian.wth
  */
 
 var fs = require('fs');
@@ -99,7 +98,7 @@ var readConfig = function (config) {
     }
 
     if (!config.input.imageRoot) {
-        config.input.imageRoot = config.input.cssRoot;
+        config.input.imageRoot = config.input.baseDir;
     }
 
     config.input.format = config.input.format || 'png';
@@ -341,7 +340,7 @@ var readimageInfo = function (styleObjList) {
                 if (url.indexOf('/') === 0) {
                     url = workspacePath + url;
                 } else {
-                    url = path.resolve(url);
+                    url = path.join(spriteConfig.input.imageRoot,url);
                 }
                 //console.log('background image >>> ' + url)
                 content = fs.readFileSync(url);
@@ -577,13 +576,13 @@ var writeCssFile = function (spriteObj) {
 // 主逻辑
 //****************************************************************
 
-function handlerFile(fileName) {
+function handlerFile(fileName, inputCssRoot) {
     if (fileName.indexOf(spriteConfig.output.prefix) === -1) {
         var spriteObj = {};
         var content;
-        spriteObj.fileName = path.basename(fileName);
+        spriteObj.fileName = fileName;
         //解析样式表
-        content = fs.readFileSync(path.resolve(fileName));
+        content = fs.readFileSync(path.join(inputCssRoot, fileName));
         spriteObj.styleSheet = CSSOM.parse(content.toString());
         //收集需要合并的图片信息
         var styleObjList = collectStyleRules(spriteObj.styleSheet);
@@ -614,7 +613,7 @@ function handlerFile(fileName) {
 exports.merge = function (configFile) {
     imageInfoCache = {};
     spriteConfig = readConfig(configFile);
-
+    console.log(spriteConfig);
     if (!spriteConfig) {
         console.log(INPUT_ERROR);
     }
@@ -625,18 +624,16 @@ exports.merge = function (configFile) {
     if (spriteConfig.input.type === 'directory') {
         inputCssRoot = spriteConfig.input.cssRoot;
         var fileList = nf.listFilesSync(inputCssRoot, 'css');
-        console.log(fileList);
         if (!fileList.length) {
             console.log('there is no file in ' + spriteConfig.input.cssRoot);
             return;
         }
-        console.log(fileList.length);
-        fileList.forEach(function (item, index) {
+        fileList.forEach(function (item) {
             handlerFile(item, inputCssRoot);
         });
     } else {
         inputCssRoot = spriteConfig.input.baseDir;
-        handlerFile(spriteConfig.input.cssRoot, inputCssRoot);
+        handlerFile(path.basename(spriteConfig.input.cssRoot), inputCssRoot);
     }
     console.log('>>all done. time use:', +new Date - start, 'ms');
 };
