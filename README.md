@@ -71,6 +71,12 @@
 
     node -e "require('ispriter').merge('../src/config.example.json')"
 
+### 支持直接对文件和目录进行sprite操作
+    
+    var spriter = require('ispriter');
+    spriter.merge('D:/desktop/dev/workspace/product/appcenter/appBrwoser/css/app.css');
+    spriter.merge('D:/desktop/dev/workspace/product/appcenter/appBrwoser/css/');
+
 Example
 =======
 
