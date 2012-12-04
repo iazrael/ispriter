@@ -44,7 +44,7 @@
         },
         "output": {
             "cssRoot": "./../test/sprite_output/css/", //optional 默认和input cssRoot一致
-            "imageRoot": "../images/",//optional 相对于 cssRoot 的路径, 默认 "./image/", 最终会变成合并后的的图片路径写在css文件中
+            "imageRoot": "../images/",//optional 相对于 cssRoot 的路径, 默认 "./images/", 最终会变成合并后的的图片路径写在css文件中
             "maxSize": 60,//optional 图片容量的最大大小, 单位 KB, 默认 0
             "margin": 5,//optional 合成之后, 图片间的空隙, 默认 0
             "prefix": "sprite_",//optional 
