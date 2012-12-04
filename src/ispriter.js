@@ -14,7 +14,6 @@ var nf = require('node-file');
 var spriteConfig, imageInfoCache;
 
 var INPUT_ERROR = 'Input is not available';
-var workspacePath = path.resolve(attConfig['plugins']['cdn']['workspaces']['workspace']);
 
 //****************************************************************
 // 数据结构定义
@@ -48,7 +47,7 @@ var imageInfo = {
  * 读取配置
  */
 var readConfig = function (config) {
-
+    console.log(config);
     //传入参数是一个文件夹或者文件地址，和传入配置文件的处理是不一样的
     if (ztool.isObject(config)) {
         if (config.input) {
@@ -58,8 +57,18 @@ var readConfig = function (config) {
             return false;
         }
     } else if (ztool.isString(config)) {
-        var content = fs.readFileSync(config).toString();
-        config = ztool.jsonParse(content);
+        //如果直接输入的是一个目录或者css文件，则简化处理
+        var configStat = fs.statSync(config);
+        if (configStat.isDirectory() || path.extname(config) == '.css') {
+          config = {
+              "input": {
+                  "cssRoot": config
+              }
+          };
+        } else {
+            var content = fs.readFileSync(config).toString();
+            config = ztool.jsonParse(content);
+        }               
     }
 
     var dir;
@@ -563,7 +572,6 @@ var setPxValue = function (rule, attr, newValue) {
 //****************************************************************
 
 var writeCssFile = function (spriteObj) {
-    console.log(spriteConfig.output.cssRoot, spriteConfig.output.prefix, spriteObj.fileName);
     var fileName = spriteConfig.output.cssRoot + spriteConfig.output.prefix + spriteObj.fileName;
     fileName = path.resolve(fileName);
     nf.writeFileSync(fileName, spriteObj.styleSheet.toString());
@@ -610,7 +618,6 @@ function handlerFile(fileName, inputCssRoot) {
 exports.merge = function (configFile) {
     imageInfoCache = {};
     spriteConfig = readConfig(configFile);
-    console.log(spriteConfig);
     if (!spriteConfig) {
         console.log(INPUT_ERROR);
     }
