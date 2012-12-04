@@ -1,7 +1,3 @@
-/**
- * @author:azrael butian.wth
- */
-
 var fs = require('fs');
 var path = require('path');
 var CSSOM = require('cssom');
