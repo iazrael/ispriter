@@ -10,7 +10,6 @@ var GrowingPacker = require('./GrowingPacker');
 var bgItpreter = require('./BackgroundInterpreter');
 var ztool = require('./ztool');
 var nf = require('node-file');
-var attConfig = require('./../../../att.json');
 
 var spriteConfig, imageInfoCache;
 
@@ -322,9 +321,10 @@ var mergeBackgound = function (style) {
 
 };
 
-//****************************************************************
-// 读取图片信息
-//****************************************************************
+/**
+ * 读取图片信息
+ * @param styleObjList
+ */
 
 var readimageInfo = function (styleObjList) {
     var styleObj, imageInfo, content, image;
@@ -336,12 +336,7 @@ var readimageInfo = function (styleObjList) {
             if (imageInfo = imageInfoCache[key]) {
 
             } else {
-                //如果引用的是相对workspace下的资源
-                if (url.indexOf('/') === 0) {
-                    url = workspacePath + url;
-                } else {
-                    url = path.join(spriteConfig.input.imageRoot,url);
-                }
+                url = path.join(spriteConfig.input.imageRoot,url);
                 //console.log('background image >>> ' + url)
                 content = fs.readFileSync(url);
                 imageInfo = {};
@@ -398,9 +393,11 @@ var getPxValue = function (cssValue) {
     return 0;
 };
 
-//****************************************************************
-// 对图片进行坐标定位
-//****************************************************************
+/**
+ * 对图片进行坐标定位
+ * @param styleObjList
+ * @return {Array}
+ */
 
 var positionImages = function (styleObjList) {
     var styleObjArr = [], arr = [], existArr = [], styleObj,
