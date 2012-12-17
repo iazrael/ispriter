@@ -584,6 +584,18 @@ function handlerFile(fileName, inputCssRoot) {
         spriteObj.fileName = fileName;
         //解析样式表
         content = fs.readFileSync(path.join(inputCssRoot, fileName));
+        content = content.toString();
+
+        /**
+         * 取出版本号等信息
+         * @type {*}
+         */
+
+        var topInfo = /\/[\*]*[\s\S]*\//.exec(content);
+        if(topInfo[0]){
+            spriteObj.fileInfo = topInfo[0];
+        }
+
         spriteObj.styleSheet = CSSOM.parse(content.toString());
         //收集需要合并的图片信息
         var styleObjList = collectStyleRules(spriteObj.styleSheet);
