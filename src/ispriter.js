@@ -591,7 +591,7 @@ function handlerFile(fileName, inputCssRoot) {
          * @type {*}
          */
 
-        var topInfo = /\/[\*]*[\s\S]*\//.exec(content);
+        var topInfo = /\/[\*]*[\s\S]*?\//.exec(content);
         if(topInfo[0]){
             spriteObj.fileInfo = topInfo[0];
         }
