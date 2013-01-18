@@ -43,8 +43,8 @@
             "format": "png"//optional
         },
         "output": {
-            "cssRoot": "./../test/sprite_output/css/",//required
-            "imageRoot": "../images/",//optional 相对于 cssRoot 的路径, 默认 "./image/", 最终会变成合并后的的图片路径写在css文件中
+            "cssRoot": "./../test/sprite_output/css/", //optional 默认和input cssRoot一致
+            "imageRoot": "../images/",//optional 相对于 cssRoot 的路径, 默认 "./images/", 最终会变成合并后的的图片路径写在css文件中
             "maxSize": 60,//optional 图片容量的最大大小, 单位 KB, 默认 0
             "margin": 5,//optional 合成之后, 图片间的空隙, 默认 0
             "prefix": "sprite_",//optional 
@@ -56,7 +56,6 @@
 
     {
         "input":  "./../test/css/", // input cssRoot
-        "output": "./../test/sprite_output/css/" // output cssRoot
     }
 
 ### 从代码中调用
@@ -70,6 +69,12 @@
 ### 从命令行调用
 
     node -e "require('ispriter').merge('../src/config.example.json')"
+
+### 支持直接对文件和目录进行sprite操作
+    
+    var spriter = require('ispriter');
+    spriter.merge('D:/desktop/dev/workspace/product/appcenter/appBrwoser/css/app.css');
+    spriter.merge('D:/desktop/dev/workspace/product/appcenter/appBrwoser/css/');
 
 Example
 =======
