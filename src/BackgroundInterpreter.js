@@ -1,3 +1,8 @@
+/**
+ * @author:azrael butian.wth
+ * @description : 解析 css background 属性
+ */
+
 //url(../images/app_icon.png) white no-repeat 10px 50% border-box content-box fixed
 (function () {
 

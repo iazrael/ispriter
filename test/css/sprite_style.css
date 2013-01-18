@@ -1,4 +1,4 @@
-body {background: #ddd;}
+/images/body {background: #ddd;}
 div {min-height: 10px; border: 1px solid #339; margin: 20px; min-width: 10px;}
 div:nth-of-type(8) {width: 20px; height: 20px; background: url(../images/sprite_style.png) -81px -48px;}
 div:nth-of-type(9) {width: 79px; height: 18px; background: url(../images/sprite_style.png) 0 -86px;}
