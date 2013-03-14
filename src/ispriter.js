@@ -71,8 +71,9 @@ var readConfig = function(config){
         config.output.imageRoot = './image/';
     }else{
         dir = config.output.imageRoot;
-        if(dir.lastIndexOf(path.sep) !== dir.length - 1){
-            dir += path.sep;
+        //css 里面的斜杠不能用成 windows 的
+        if(dir.lastIndexOf('/') !== dir.length - 1){
+            dir += '/';
         }
         config.output.imageRoot = dir;
     }
