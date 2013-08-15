@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "cssom": "*",
-    "canvas": "*",
+    "pngjs": "*",
     "node-file": "*"
   },
   "devDependencies": {},

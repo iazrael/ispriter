@@ -3,7 +3,7 @@
 	"input": {
 		"cssRoot": "./../test/css/", //required
 		"imageRoot": "",//optional 默认 cssRoot
-		"format": "png"//optional
+		"format": "png"//optional, 只支持输出PNG格式, 如果是其他格式, 也是以PNG格式输出, 仅仅把后缀改为其他后缀
 	},
 	"output": {
 		"cssRoot": "./../test/sprite_output/css/",//required

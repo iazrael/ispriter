@@ -105,3 +105,33 @@ div:nth-of-type(24){
     background: url(../images/txweibo_logo.png);
 }
 
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_video.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_word.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/folder.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/folder_o.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/game.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/game_o.png);
+}

@@ -91,3 +91,205 @@ div:nth-of-type(24){
     background: url(../images/txweibo_logo.png);
 }
 
+div:nth-of-type(1){
+    width: 12px;
+    height: 12px;
+    background: url(../images/add.png);
+}
+div:nth-of-type(2){
+    width: 48px;
+    height: 48px;
+    background: url(../images/app_icon.png);
+}
+div:nth-of-type(3){
+    width: 43px;
+    height: 43px;
+    background: url(../images/badge.png);
+}
+div:nth-of-type(4){
+    width: 79px;
+    height: 18px;
+    background: url(../images/bright-star.png);
+}
+div:nth-of-type(5){
+    width: 15px;
+    height: 15px;
+    background: url(../images/close2.png);
+}
+
+div:nth-of-type(11){
+    width: 16px;
+    height: 16px;
+    background: url(../images/level_1.png);
+}
+div:nth-of-type(12){
+    width: 16px;
+    height: 16px;
+    background: url(../images/level_2.png);
+}
+div:nth-of-type(13){
+    width: 16px;
+    height: 16px;
+    background: url(../images/level_3.png);
+}
+div:nth-of-type(14){
+    width: 16px;
+    height: 16px;
+    background: url(../images/level_4.png);
+}
+div:nth-of-type(15){
+    width: 16px;
+    height: 16px;
+    background: url(../images/level_5.png);
+}
+
+div:nth-of-type(16){
+    width: 38px;
+    height: 38px;
+    background: url(../images/info.png);
+}
+div:nth-of-type(17){
+    width: 13px;
+    height: 11px;
+    background: url(../images/open.png);
+}
+/*div:nth-of-type(18){
+    width: 46px;
+    height: 44px;
+    background: url(../images/in.png);
+}
+div:nth-of-type(19){
+    width: 384px;
+    height: 48px;
+    background: url(../images/in2.png);
+}*/
+div:nth-of-type(20){
+    width: 48px;
+    height: 48px;
+    background: url(../images/sina_logo.png);
+}
+div:nth-of-type(21){
+    width: 15px;
+    height: 12px;
+    background: url(../images/speaker.png);
+}
+div:nth-of-type(22){
+    width: 81px;
+    height: 38px;
+    background: url(../images/tips_icons.png);
+}
+div:nth-of-type(23){
+    width: 48px;
+    height: 48px;
+    background: url(../images/sina_logo.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/txweibo_logo.png);
+}
+
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/appmarket.png);
+}
+
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/back_click.png);
+}
+
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/back_hover.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/diskexplorer.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/doc.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/doc_o.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_default.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_excel.png);
+}
+
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_image.png);
+}
+
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_music.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_pdf.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_ppt.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_rar.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_txt.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_video.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_word.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/folder.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/folder_o.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/game.png);
+}
+div:nth-of-type(24){
+    width: 48px;
+    height: 48px;
+    background: url(../images/game_o.png);
+}

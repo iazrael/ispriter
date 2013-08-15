@@ -1,7 +1,7 @@
 var fs = require('fs'),
     path = require('path'),
     CSSOM = require('cssom'),
-    Canvas = require('canvas'),
+    PNG = require('pngjs').PNG,
     GrowingPacker = require('./GrowingPacker'),
     bgItpreter = require('./BackgroundInterpreter'),
     ztool = require('./ztool'),
@@ -274,45 +274,57 @@ var mergeBackgound = function(style){
 // 读取图片信息
 //****************************************************************
 
-var readImageInfo = function(styleObjList){
-    var styleObj, imageInfo, content, image;
+var readImageInfo = function(styleObjList, callback){
 
-    for(var url in styleObjList){
-        styleObj = styleObjList[url];
-
+    ztool.forEach(styleObjList, function(url, styleObj, next){
+        // console.log(url);
+        var imageInfo, content, image, imageFileName;
         if(imageInfo = imageInfoCache[url]){
+            // 从所有style里面，选取图片宽高最大的作为图片宽高
+            setImageWidthHeight(styleObj, imageInfo);
 
+            styleObj.imageInfo = imageInfo;
+            next();
         }else{
-            content = fs.readFileSync(spriteConfig.input.imageRoot + url);
+            // content = fs.readFileSync(spriteConfig.input.imageRoot + url);
+            imageFileName = spriteConfig.input.imageRoot + url;
             imageInfo = {};
             
-            image = new Canvas.Image();
-            image.src = content;
-            imageInfo.image = image;
-            // console.log(image.size);
-            imageInfo.width = image.width;
-            imageInfo.height = image.height;
-            //图片本身可能是没压缩的, 有很多冗余信息, 这里要取压缩后的 size 才行
-            // imageInfo.size = content.length;
-            imageInfo.size = getImageSize(image);
+            fs.createReadStream(imageFileName)
+            .pipe(new PNG())
+            .on('parsed', function() {
 
-            imageInfoCache[url] = imageInfo;
+                imageInfo.image = this;
+                imageInfo.width = this.width;
+                imageInfo.height = this.height;
+                getImageSize(this, function(size){
+                    // console.log(size);
+                    imageInfo.size = size;
+                    imageInfoCache[url] = imageInfo;
+
+                    // 从所有style里面，选取图片宽高最大的作为图片宽高
+                    setImageWidthHeight(styleObj, imageInfo);
+
+                    styleObj.imageInfo = imageInfo;
+                    next();
+                });
+            });
         }
-        // 从所有style里面，选取图片宽高最大的作为图片宽高
-        setImageWidthHeight(styleObj, imageInfo);
+        
+    }, callback);
 
-        styleObj.imageInfo = imageInfo;
-    }
+    
 }
 
-var tmpCanvas = new Canvas();
-
-var getImageSize = function(image){
-    tmpCanvas.width = image.width;
-    tmpCanvas.height = image.height;
-    var ctx = tmpCanvas.getContext('2d');
-    ctx.drawImage(image, 0, 0);
-    return tmpCanvas.toBuffer().length;
+var getImageSize = function(image, callback){
+    var size = 0;
+    image.pack()
+        .on('data', function(chunk){
+            size += chunk.length;
+        })
+        .on('end', function(){
+            callback(size);
+        });
 }
 
 var setImageWidthHeight = function(styleObj, imageInfo){
@@ -373,16 +385,19 @@ var positionImages = function(styleObjList){
             // console.log(styleObj.url, total);
             if(total > maxSize){
                 // console.log('--------------');
-                styleObjArr.push(ret);
-                ret = [];
-                total = styleObj.imageInfo.size;
+                if(ret.length){
+                    styleObjArr.push(ret);
+                    ret = [];
+                    total = styleObj.imageInfo.size;
+                }
             }
             ret.push(styleObj);
         }
         if(ret.length){
             styleObjArr.push(ret);
         }
-        // console.log(styleObjArr);
+        // console.log(styleObjArr.length, styleObjArr);
+        // console.log('-------------------------------');
     }else{
         styleObjArr.push(arr);
     }
@@ -399,7 +414,8 @@ var positionImages = function(styleObjList){
     if(existArr.length){
         styleObjArr.push(existArr);
     }
-    // console.log(styleObjArr);
+    // console.log(styleObjArr.length, styleObjArr);
+    // console.log('-------------------------------');
     return styleObjArr;
 }
 
@@ -408,14 +424,13 @@ var positionImages = function(styleObjList){
 //****************************************************************
 
 var drawImageAndPositionBackground = function(styleObjArr, cssFileName){
-    // console.log(styleObjArr.length);
-    var canvas = new Canvas(), hasDrew, 
-        imageInfo, imageName, 
-        length = styleObjArr.length,
-        arr;
+    // console.log(styleObjArr.length, cssFileName);
+    var imageInfo,  
+        length = styleObjArr.length
+        ;
     if(!styleObjArr[length - 1].root){
         //若最后一个元素, 没有root 属性, 表示它的样式都是复用已合并的图片的, 直接替换样式即可
-        arr = styleObjArr.pop();
+        var arr = styleObjArr.pop();
         length = styleObjArr.length;
         for(var j = 0, styleObj; styleObj = arr[j]; j++) {
             imageInfo = styleObj.imageInfo;
@@ -423,41 +438,68 @@ var drawImageAndPositionBackground = function(styleObjArr, cssFileName){
             replaceAndPositionBackground(imageInfo.imageName, styleObj);
         }
     }
-    for(var i = 0; arr = styleObjArr[i]; i++) {
-        canvas.width = arr.root.w;
-        canvas.height = arr.root.h;
-        ctx = canvas.getContext('2d');
-        hasDrew = false;
-        imageName = getImageName(cssFileName, i, length);
+    // console.log(styleObjArr.length, cssFileName);
+    ztool.forEach(styleObjArr, function(i, arr, next){
+        // for(var i = 0; arr = styleObjArr[i]; i++) {
+        // console.log(i);
+        // console.log('-------------------------------');
+        var imageResult = createPng(arr.root.w, arr.root.h);
+
+        var imageName = getImageName(cssFileName, i, length);
         // console.log(imageName);
-        // console.log('--------');
-        for(var j = 0, styleObj; styleObj = arr[j]; j++) {
-            imageInfo = styleObj.imageInfo;
-            hasDrew = true;
+        ztool.forEach(arr, function(j, styleObj, goon){
+            // console.log(j);
+            var imageInfo = styleObj.imageInfo;
             // console.log(styleObj.url);
             replaceAndPositionBackground(imageName, styleObj);
             imageInfo.fit = styleObj.fit;
             imageInfo.hasDrew = true;
             imageInfo.imageName = imageName;
-
-            ctx.drawImage(imageInfo.image, imageInfo.fit.x, imageInfo.fit.y);
-        }
-        //如果 canvas 里面没图片， 调用 toBuffer 会出错
-        //而且没必要输出一张空白图片
-        if(hasDrew){
-            imageName = path.resolve(spriteConfig.output.cssRoot + imageName);
-            var buffer = canvas.toBuffer();
-            // buffer.length 得到的是图片的size， 单位字节（B）
-            // console.log(fileName, buffer.length);
-            console.log('>>output image:', imageName);
-            nf.writeFileSync(imageName, buffer);
-        }
-
-    }
+            
+            var image = imageInfo.image;
+            image.bitblt(imageResult, 0, 0, image.width, image.height, 
+                imageInfo.fit.x, imageInfo.fit.y);
+            goon();
+        },function(count){
+            //没必要输出一张空白图片
+            if(count > 0){
+                imageName = path.resolve(spriteConfig.output.cssRoot + imageName);
+                nf.mkdirsSync(path.dirname(imageName));
+                // console.log(imageName);
+                imageResult.pack().pipe(fs.createWriteStream(imageName));
+                console.log('>>output image:', imageName);
+            }
+            next();
+        });
+        // }
+    });
 
 }
 
+var createPng = function(width, height) {
+    var png = new PNG({
+        width: width,
+        height: height/*,
+        deflateLevel: 0,
+        deflateStrategy: 4*/
+    });
+    //先把所有元素至空, 防止污染
+    for (var y = 0; y < png.height; y++) {
+        for (var x = 0; x < png.width; x++) {
+            var idx = (png.width * y + x) << 2;
+
+            png.data[idx] = 0;
+            png.data[idx+1] = 0;
+            png.data[idx+2] = 0;
+
+            png.data[idx+3] = 0;
+        }
+    }
+    return png;
+}
+
 var getImageName = function(cssFileName, index, total){
+    // console.log(cssFileName, index, total);
     var basename = path.basename(cssFileName);
     var extname = path.extname(basename);
     var name = basename.replace(extname, '');
@@ -528,35 +570,35 @@ exports.merge = function(configFile){
         return;
     }
     // console.log(fileList);
-    for(var i = 0, fileName, content; fileName = fileList[i]; i++){
-        var spriteObj = {};
-        spriteObj.fileName = fileName;
+    ztool.forEach(fileList, function(i, fileName, next){
+        var spriteObj = { fileName: fileName }
         //解析样式表
-        content = fs.readFileSync(path.join(inputCssRoot,fileName));
+        var content = fs.readFileSync(path.join(inputCssRoot,fileName));
         spriteObj.styleSheet = CSSOM.parse(content.toString());
         //收集需要合并的图片信息
         var styleObjList = collectStyleRules(spriteObj.styleSheet);
         if(!styleObjList.length){
             //这个 css 没有需要合并的图片
-            continue;
+            return next();
         }
         delete styleObjList.length;
-        // console.log(styleObjList);
         
         //读取图片信息(内容, 宽高, 大小)
-        readImageInfo(styleObjList);
-        // console.log(styleObjList);
-        
-        //对图片进行坐标定位
-        var styleObjArr = positionImages(styleObjList);
+        readImageInfo(styleObjList, function(){
+            //对图片进行坐标定位
+            var styleObjArr = positionImages(styleObjList);
 
-        //输出合并的图片 并修改样式表里面的background
-        drawImageAndPositionBackground(styleObjArr, fileName);
+            //输出合并的图片 并修改样式表里面的background
+            drawImageAndPositionBackground(styleObjArr, fileName);
 
-        //输出修改后的样式表
-        writeCssFile(spriteObj);
-    }
-    console.log('>>all done. time use:', +new Date - start, 'ms');
+            //输出修改后的样式表
+            writeCssFile(spriteObj);
+            next();
+        });
+    },
+    function(){
+        console.log('>>all done. time use:', +new Date - start, 'ms');
+    });
 
 }
 
