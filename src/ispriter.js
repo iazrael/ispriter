@@ -86,7 +86,7 @@ var readConfig = function(config){
     
     config.output.prefix = config.output.prefix || 'sprite_';
     config.output.format = config.output.format || 'png';
-
+    // console.log(config);
     return config;
 }
 //****************************************************************
@@ -457,6 +457,7 @@ var drawImageAndPositionBackground = function(styleObjArr, cssFileName){
             imageInfo.imageName = imageName;
             
             var image = imageInfo.image;
+            //对图片进行定位和填充
             image.bitblt(imageResult, 0, 0, image.width, image.height, 
                 imageInfo.fit.x, imageInfo.fit.y);
             goon();
@@ -500,11 +501,16 @@ var createPng = function(width, height) {
 
 var getImageName = function(cssFileName, index, total){
     // console.log(cssFileName, index, total);
-    var basename = path.basename(cssFileName);
-    var extname = path.extname(basename);
-    var name = basename.replace(extname, '');
+    var name = '';
+    if(cssFileName){
+        var basename = path.basename(cssFileName);
+        var extname = path.extname(basename);
+        name = basename.replace(extname, '');
+    }
     if(spriteConfig.output.maxSize && total > 1){
-        name += '_' + index;
+        name += (spriteConfig.output.combine ? '' : '_') + index;
+    }else if(spriteConfig.output.combine){
+        name = 'all';
     }
     return spriteConfig.output.imageRoot + spriteConfig.output.prefix +
         name + '.' + spriteConfig.output.format;
@@ -545,23 +551,47 @@ var setPxValue = function(rule, attr, newValue){
 // 输出修改后的样式表    
 //****************************************************************
 
-var writeCssFile = function(spriteObj){
-    var fileName = spriteConfig.output.cssRoot + spriteObj.fileName;
-    fileName = path.resolve(fileName);
-    nf.writeFileSync(fileName, spriteObj.styleSheet.toString());
+var writeCssFile = function(spriteObjList){
+    if(!ztool.isArray(spriteObjList)){
+        spriteObjList = [spriteObjList];
+    }
+    var fileName, spriteObj, cssContentList = [];
+    for(var i in spriteObjList){
+        spriteObj = spriteObjList[i];
+        fileName = spriteConfig.output.cssRoot + spriteObj.fileName;
+        fileName = path.resolve(fileName);
+        if(spriteConfig.output.combine){
+            cssContentList.push(spriteObj.styleSheet.toString());
+        }else{
+            nf.writeFileSync(fileName, spriteObj.styleSheet.toString());
+        }
+    }
+    if(spriteConfig.output.combine && cssContentList.length){
+        fileName = spriteConfig.output.cssRoot + spriteConfig.output.prefix + 'all.css';
+        fileName = path.resolve(fileName);
+        nf.writeFileSync(fileName, cssContentList.join(''));
+    }
 }
 
 //****************************************************************
 // 主逻辑
 //****************************************************************
 
+var onMergeStart = function(){
+    this.start = +new Date;
+}
+
+var onMergeFinish = function(){
+    console.log('>>all done. time use:', +new Date - this.start, 'ms');
+}
+
 /**
  * 主逻辑
  */
 exports.merge = function(configFile){
+    onMergeStart();
     imageInfoCache = {};
     spriteConfig = readConfig(configFile);
-    var start = +new Date;
     // console.log(spriteConfig);
     var inputCssRoot = spriteConfig.input.cssRoot;
     var fileList = nf.listFilesSync(inputCssRoot, 'css');
@@ -570,6 +600,7 @@ exports.merge = function(configFile){
         return;
     }
     // console.log(fileList);
+    var combineStyleObjList = {length: 0 }, combineStyleSheetList = [];
     ztool.forEach(fileList, function(i, fileName, next){
         var spriteObj = { fileName: fileName }
         //解析样式表
@@ -581,8 +612,25 @@ exports.merge = function(configFile){
             //这个 css 没有需要合并的图片
             return next();
         }
+        // console.log(styleObjList);
+
         delete styleObjList.length;
-        
+        if(spriteConfig.output.combine){
+            // console.log(styleObjList);
+            combineStyleSheetList.push(spriteObj);
+            //如果是要合并成一张图片的, 就先把所有图片信息收集起来
+            var styleObj, existSObj;
+            for(var url in styleObjList){
+                styleObj = styleObjList[url];
+                if(existSObj = combineStyleObjList[url]){
+                    existSObj.cssRules = existSObj.cssRules.concat(styleObj.cssRules);
+                }else{
+                    combineStyleObjList[url] = styleObj;
+                }
+                combineStyleObjList.length++;
+            }
+            return next();
+        }
         //读取图片信息(内容, 宽高, 大小)
         readImageInfo(styleObjList, function(){
             //对图片进行坐标定位
@@ -597,7 +645,24 @@ exports.merge = function(configFile){
         });
     },
     function(){
-        console.log('>>all done. time use:', +new Date - start, 'ms');
+        if(spriteConfig.output.combine && combineStyleObjList.length){
+            //在这里将所有图片合并
+            delete combineStyleObjList.length;
+            //读取图片信息(内容, 宽高, 大小)
+            readImageInfo(combineStyleObjList, function(){
+                //对图片进行坐标定位
+                var styleObjArr = positionImages(combineStyleObjList);
+
+                //输出合并的图片 并修改样式表里面的background
+                drawImageAndPositionBackground(styleObjArr, '');
+
+                //输出合并后的样式表
+                writeCssFile(combineStyleSheetList);
+                onMergeFinish();
+            });
+        }else{
+            onMergeFinish();
+        }
     });
 
 }
