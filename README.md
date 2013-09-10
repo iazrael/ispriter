@@ -29,6 +29,7 @@
 + 跳过background-position是right/center/bottom的图片
 + 跳过显式的设置平铺方式为repreat的图片
 + 跳过设置了background-size的图片
++ 支持将所有图片合并为一张， 同时所有css文件合并为一个文件 [新]
 
 使用方法
 =======
@@ -48,7 +49,8 @@
             "maxSize": 60,//optional 图片容量的最大大小, 单位 KB, 默认 0
             "margin": 5,//optional 合成之后, 图片间的空隙, 默认 0
             "prefix": "sprite_",//optional 
-            "format": "png"//optional 输出的图片格式
+            "format": "png",//optional 输出的图片格式
+            "combine": false//optional 为true时将所有图片合并为一张, 同时所有css文件合并为一个文件
         }
     }
 
