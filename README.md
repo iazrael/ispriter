@@ -70,8 +70,12 @@
     spriter.merge(configFile);
 
 ### 从命令行调用
+    
+    npm install ispriter -g
 
-    node -e "require('ispriter').merge('../src/config.example.json')"
+    cd ./test
+
+    ispriter -c config.example.json
 
 Example
 =======

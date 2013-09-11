@@ -2,7 +2,7 @@
   "author": "azrael <azrael@imatlas.com> (http://imatlas.com/about)",
   "name": "ispriter",
   "description": "an intelligent merge sprite tool",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "homepage": "http://imatlas.com/posts/intelligent-merge-css-sprite/",
   "repository": {
     "type": "git",
@@ -12,10 +12,13 @@
   "engines": {
     "node": "*"
   },
+  "bin":{
+    "ispriter": "./bin/ispriter"
+  },
   "dependencies": {
     "cssom": "*",
     "pngjs": "*",
-    "node-file": "*"
+    "commander": "*"
   },
   "devDependencies": {},
   "optionalDependencies": {}

@@ -1,3 +1,5 @@
+
+
 var fs = require('fs'),
     path = require('path'),
     CSSOM = require('cssom'),
@@ -5,7 +7,7 @@ var fs = require('fs'),
     GrowingPacker = require('./GrowingPacker'),
     bgItpreter = require('./BackgroundInterpreter'),
     ztool = require('./ztool'),
-    nf = require('node-file');
+    nf = require('./node-file');
 
 var spriteConfig, imageInfoCache;
 
@@ -664,6 +666,4 @@ exports.merge = function(configFile){
             onMergeFinish();
         }
     });
-
 }
-

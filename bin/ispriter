@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+//****************************************************************
+// 对命令行调用做支持
+//****************************************************************
+
+var fs = require('fs'),
+    path = require('path'),
+    program = require('commander'),
+    ispriter = require('../src/ispriter.js');
+
+
+program
+  .version('0.2.2')
+  .usage('[options] [file]')
+  .option('-c, --config [file]', 'assign the config file')
+  .parse(process.argv);
+
+var configFile = program.config;
+
+if(!configFile || typeof configFile !== 'string' || !configFile.trim()){
+    console.log("you haven't specify the config file");
+    return;
+}
+configFile = path.resolve(configFile);
+if(!fs.existsSync(configFile)){
+    console.log("the config file is not exists: " + configFile);
+}else{
+    ispriter.merge(configFile);
+}
