@@ -15,11 +15,9 @@
   "bin":{
     "ispriter": "./bin/ispriter"
   },
-  "dependencies": {
-    "cssom": "*",
-    "pngjs": "*",
-    "commander": "*"
-  },
-  "devDependencies": {},
-  "optionalDependencies": {}
+  "bundledDependencies": [
+    "cssom",
+    "pngjs",
+    "commander"
+  ]
 }
