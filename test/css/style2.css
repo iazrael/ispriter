@@ -36,12 +36,12 @@ div:nth-of-type(5){
 div:nth-of-type(11){
     width: 16px;
     height: 16px;
-    background: url(../images/level_1.png);
+    background: url(../images/level_1_not_exists.png);
 }
 div:nth-of-type(12){
     width: 16px;
     height: 16px;
-    background: url(../images/level_2.png);
+    background: url(http://www.qq.com/images/level_2.png);
 }
 div:nth-of-type(13){
     width: 16px;

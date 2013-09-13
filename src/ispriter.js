@@ -115,7 +115,7 @@ var collectStyleRules = function(styleSheet, result){
             length: 0
         }
     }
-    for(var i = 0, rule, style, imageUrl; rule = styleSheet.cssRules[i]; i++) {
+    for(var i = 0, rule, style, imageUrl, imagePath; rule = styleSheet.cssRules[i]; i++) {
         if(rule.cssRules && rule.cssRules.length){
             //遇到有子样式的，比如@media, @keyframes，递归收集
             collectStyleRules(rule, result);
@@ -154,7 +154,12 @@ var collectStyleRules = function(styleSheet, result){
             //遇到写绝对路径的图片就跳过
             if(ignoreNetworkRegexp.test(imageUrl)){
                 //这里直接返回了, 因为一个style里面是不会同时存在两个background-image的
-                return result;
+                continue;
+            }
+            imagePath = path.join(spriteConfig.input.imageRoot, imageUrl);
+            if(!fs.existsSync(imagePath)){
+                //如果这个图片是不存在的, 就直接返回了, 进行容错
+                continue;
             }
             // 把用了同一个文件的样式汇集在一起
             if(!result[imageUrl]){

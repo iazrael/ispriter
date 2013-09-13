@@ -5,8 +5,8 @@ div:nth-of-type(2) {width: 48px; height: 48px; background: url(../images/sprite_
 div:nth-of-type(3) {width: 43px; height: 43px; background: url(../images/sprite_style_0.png) -51px -202px;}
 div:nth-of-type(4) {width: 79px; height: 18px; background: url(../images/sprite_style_1.png) 0 -159px;}
 div:nth-of-type(5) {width: 15px; height: 15px; background: url(../images/sprite_style_1.png) -190px -42px;}
-div:nth-of-type(11) {width: 16px; height: 16px; background: url(../images/sprite_style_1.png) -190px 0;}
-div:nth-of-type(12) {width: 16px; height: 16px; background: url(../images/sprite_style_1.png) -168px -159px;}
+div:nth-of-type(11) {width: 16px; height: 16px; background-image: url(../images/level_1_not_exists.png);}
+div:nth-of-type(12) {width: 16px; height: 16px; background-image: url(http://www.qq.com/images/level_2.png);}
 div:nth-of-type(13) {width: 16px; height: 16px; background: url(../images/sprite_style_1.png) -159px -127px;}
 div:nth-of-type(14) {width: 16px; height: 16px; background: url(../images/sprite_style_1.png) -159px -106px;}
 div:nth-of-type(15) {width: 16px; height: 16px; background: url(../images/sprite_style_1.png) -159px -78px;}
