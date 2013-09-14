@@ -91,6 +91,18 @@ var readConfig = function(config){
     // console.log(config);
     return config;
 }
+
+//****************************************************************
+// 读取并解析样式表文件
+//****************************************************************
+
+var readStyleSheet = function(fileName){
+    var content = fs.readFileSync(path.join(spriteConfig.input.cssRoot,fileName));
+    var styleSheet = CSSOM.parse(content.toString());
+    return styleSheet;
+}
+
+
 //****************************************************************
 // 收集需要合并的样式和图片
 //****************************************************************
@@ -116,7 +128,12 @@ var collectStyleRules = function(styleSheet, result){
         }
     }
     for(var i = 0, rule, style, imageUrl, imagePath; rule = styleSheet.cssRules[i]; i++) {
-        if(rule.cssRules && rule.cssRules.length){
+        if(rule.href && rule.styleSheet){
+            //@import 引入的样式表, 读取进来继续处理
+            rule.styleSheet = readStyleSheet(rule.href);
+            collectStyleRules(rule.styleSheet, result);
+            continue;
+        }else if(rule.cssRules && rule.cssRules.length){
             //遇到有子样式的，比如@media, @keyframes，递归收集
             collectStyleRules(rule, result);
             continue;
@@ -558,6 +575,21 @@ var setPxValue = function(rule, attr, newValue){
 // 输出修改后的样式表    
 //****************************************************************
 
+var styleSheetToString = function(styleSheet) {
+    var result = "";
+    var rules = styleSheet.cssRules, rule;
+    for (var i=0; i<rules.length; i++) {
+        rule = rules[i];
+        if(rule instanceof CSSOM.CSSImportRule){
+            result += styleSheetToString(rule.styleSheet) + '\n';
+        }else{
+            result += rule.cssText + '\n';
+        }
+    }
+    return result;
+};
+
+
 var writeCssFile = function(spriteObjList){
     if(!ztool.isArray(spriteObjList)){
         spriteObjList = [spriteObjList];
@@ -568,15 +600,15 @@ var writeCssFile = function(spriteObjList){
         fileName = spriteConfig.output.cssRoot + spriteObj.fileName;
         fileName = path.resolve(fileName);
         if(spriteConfig.output.combine){
-            cssContentList.push(spriteObj.styleSheet.toString());
+            cssContentList.push(styleSheetToString(spriteObj.styleSheet));
         }else{
-            nf.writeFileSync(fileName, spriteObj.styleSheet.toString());
+            nf.writeFileSync(fileName, styleSheetToString(spriteObj.styleSheet), true);
         }
     }
     if(spriteConfig.output.combine && cssContentList.length){
         fileName = spriteConfig.output.cssRoot + spriteConfig.output.prefix + 'all.css';
         fileName = path.resolve(fileName);
-        nf.writeFileSync(fileName, cssContentList.join(''));
+        nf.writeFileSync(fileName, cssContentList.join(''), true);
     }
 }
 
@@ -611,8 +643,7 @@ exports.merge = function(configFile){
     ztool.forEach(fileList, function(i, fileName, next){
         var spriteObj = { fileName: fileName }
         //解析样式表
-        var content = fs.readFileSync(path.join(inputCssRoot,fileName));
-        spriteObj.styleSheet = CSSOM.parse(content.toString());
+        spriteObj.styleSheet = readStyleSheet(fileName);
         //收集需要合并的图片信息
         var styleObjList = collectStyleRules(spriteObj.styleSheet);
         if(!styleObjList.length){
