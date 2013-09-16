@@ -1,11 +1,13 @@
 body{
     background: #ddd;
 }
-div{
-    min-height: 10px;
-    border: 1px solid #339;
-    margin: 20px;
-    min-width: 10px;
+@media screen{
+    div{
+        min-height: 10px;
+        border: 1px solid #339;
+        margin: 20px;
+        min-width: 10px;
+    }
 }
 div:nth-of-type(1){
     width: 12px;
