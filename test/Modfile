@@ -5,19 +5,19 @@ module.exports = {
     tasks: {
         sprite: {
             options: {
-                "algorithm": "growingpacker",//optional Ä¿Ç°Ö»ÓĞ growingpacker
+                "algorithm": "growingpacker",//optional ç›®å‰åªæœ‰ growingpacker
                 "input": {
                     "cssRoot": "./css/", //required
-                    "format": "png"//optional, Ö»Ö§³ÖÊä³öPNG¸ñÊ½, Èç¹ûÊÇÆäËû¸ñÊ½, Ò²ÊÇÒÔPNG¸ñÊ½Êä³ö, ½ö½ö°Ñºó×º¸ÄÎªÆäËûºó×º
+                    "format": "png"//optional, åªæ”¯æŒè¾“å‡ºPNGæ ¼å¼, å¦‚æœæ˜¯å…¶ä»–æ ¼å¼, ä¹Ÿæ˜¯ä»¥PNGæ ¼å¼è¾“å‡º, ä»…ä»…æŠŠåç¼€æ”¹ä¸ºå…¶ä»–åç¼€
                 },
                 "output": {
                     "cssRoot": "./sprite_output/css/",//required
-                    "imageRoot": "../images/",//optional Ïà¶ÔÓÚ cssRoot µÄÂ·¾¶, Ä¬ÈÏ "./image/", ×îÖÕ»á±ä³ÉºÏ²¢ºóµÄµÄÍ¼Æ¬Â·¾¶Ğ´ÔÚcssÎÄ¼şÖĞ
-                    "maxSize": 60,//optional Í¼Æ¬ÈİÁ¿µÄ×î´ó´óĞ¡, µ¥Î» KB, Ä¬ÈÏ 0
-                    "margin": 5,//optional ºÏ³ÉÖ®ºó, Í¼Æ¬¼äµÄ¿ÕÏ¶, Ä¬ÈÏ 0
+                    "imageRoot": "../images/",//optional ç›¸å¯¹äº cssRoot çš„è·¯å¾„, é»˜è®¤ "./image/", æœ€ç»ˆä¼šå˜æˆåˆå¹¶åçš„çš„å›¾ç‰‡è·¯å¾„å†™åœ¨cssæ–‡ä»¶ä¸­
+                    "maxSize": 60,//optional å›¾ç‰‡å®¹é‡çš„æœ€å¤§å¤§å°, å•ä½ KB, é»˜è®¤ 0
+                    "margin": 5,//optional åˆæˆä¹‹å, å›¾ç‰‡é—´çš„ç©ºéš™, é»˜è®¤ 0
                     "prefix": "sprite_",//optional 
-                    "format": "png",//optional Êä³öµÄÍ¼Æ¬¸ñÊ½
-                    "combine": false//optional ÎªtrueÊ±½«ËùÓĞÍ¼Æ¬ºÏ²¢ÎªÒ»ÕÅ, Í¬Ê±ËùÓĞcssÎÄ¼şºÏ²¢ÎªÒ»¸öÎÄ¼ş
+                    "format": "png",//optional è¾“å‡ºçš„å›¾ç‰‡æ ¼å¼
+                    "combine": false//optional ä¸ºtrueæ—¶å°†æ‰€æœ‰å›¾ç‰‡åˆå¹¶ä¸ºä¸€å¼ , åŒæ—¶æ‰€æœ‰cssæ–‡ä»¶åˆå¹¶ä¸ºä¸€ä¸ªæ–‡ä»¶
                 }
             }
         }
