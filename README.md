@@ -27,10 +27,8 @@
 + 智能设置被合并图片的宽高
 + 支持设定合并后图片的最大大小
 + 支持设置合并后的图片间距
-
 + 支持将所有图片合并为一张, 同时所有css文件合并为一个文件 【新】
 + 支持读取 @import 的样式表进行处理 【新】
-
 + 跳过background-position是right/center/bottom的图片
 + 跳过显式的设置平铺方式为repreat的图片
 + 跳过设置了background-size的图片
@@ -120,4 +118,7 @@
 Example
 =======
 
-具体实例请到项目根目录下的 test 目录, 执行 node dosprite.js 体验实际效果
+具体实例请到项目根目录下的 test 目录, 执行
+
+    ispriter -c config.example.json 
+体验实际效果
