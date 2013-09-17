@@ -80,6 +80,42 @@
 
     ispriter -c config.example.json
 
+### 从 [Mod](https://github.com/modulejs/modjs) 中调用
+
+    // Modfile
+    module.exports = {
+        plugins: {
+            sprite: "ispriter"
+        },
+        tasks: {
+            sprite: {
+                page1: {
+                    "input":  "./../test/css/", // input cssRoot
+                    "output": "./../test/sprite_output/css/" // output cssRoot
+                },
+                page2: {
+                    // 涉及对象类型参数需配置在options中
+                    options: {
+                        "algorithm": "growingpacker",//optional 目前只有 growingpacker
+                        "input": {
+                            "cssRoot": "./css/", //required
+                            "format": "png"//optional, 只支持输出PNG格式, 如果是其他格式, 也是以PNG格式输出, 仅仅把后缀改为其他后缀
+                        },
+                        "output": {
+                            "cssRoot": "./sprite_output/css/",//required
+                            "imageRoot": "../images/",//optional 相对于 cssRoot 的路径, 默认 "./image/", 最终会变成合并后的的图片路径写在css文件中
+                            "maxSize": 60,//optional 图片容量的最大大小, 单位 KB, 默认 0
+                            "margin": 5,//optional 合成之后, 图片间的空隙, 默认 0
+                            "prefix": "sprite_",//optional 
+                            "format": "png",//optional 输出的图片格式
+                            "combine": false//optional 为true时将所有图片合并为一张, 同时所有css文件合并为一个文件
+                        }
+                    }   
+                }
+            }
+        }
+    }
+    
 Example
 =======
 

@@ -620,8 +620,9 @@ var onMergeStart = function(){
     this.start = +new Date;
 }
 
-var onMergeFinish = function(){
+var onMergeFinish = function(done){
     console.log('>>all done. time use:', +new Date - this.start, 'ms');
+    done && done();
 }
 
 /**
@@ -702,4 +703,10 @@ exports.merge = function(configFile){
             onMergeFinish();
         }
     });
+}
+
+// Task.JS Specification API https://github.com/taskjs/spec
+exports.run = function(options, done){
+    exports.merge(options);
+    onMergeFinish = onMergeFinish.bind(this, done);
 }
