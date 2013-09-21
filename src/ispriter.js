@@ -707,6 +707,6 @@ exports.merge = function(configFile){
 
 // Task.JS Specification API https://github.com/taskjs/spec
 exports.run = function(options, done){
-    exports.merge(options);
     onMergeFinish = onMergeFinish.bind(this, done);
+    exports.merge(options);
 }
