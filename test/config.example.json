@@ -1,7 +1,7 @@
 {
 	"algorithm": "growingpacker",//optional 目前只有 growingpacker
 	"input": {
-		"cssRoot": "./css/", //required
+		"cssRoot": ["./css/", "./css/main.css"], //required
 		"format": "png"//optional, 只支持输出PNG格式, 如果是其他格式, 也是以PNG格式输出, 仅仅把后缀改为其他后缀
 	},
 	"output": {
