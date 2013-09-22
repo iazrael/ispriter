@@ -83,8 +83,8 @@ var DEFAULT_CONFIG = {
          * @optional
          * @default "./img/"
          * @example
-         * 如果指定 imageDist 为 "./img/sprite/", 则在输出的 css 中会显示为
-         * background: url("./img/sprite/sprite_1.png");
+         * 如果指定 imageDist 为 "./images/sprite/", 则在输出的 css 中会显示为
+         * background: url("./images/sprite/sprite_1.png");
          * 
          */
         "imageDist": "./img/",
@@ -153,6 +153,9 @@ var DEFAULT_CONFIG = {
  */
 var readConfig = function(config){
     if(us.isString(config)){
+        if(!fs.existsSync(config)){
+            throw 'place give in a sprite config or config file!';
+        }
         var content = fs.readFileSync(config).toString();
         config = ztool.jsonParse(content);
     }
@@ -174,8 +177,8 @@ var readConfig = function(config){
     config = adjustOldProperty(config);
 
     // 
-    config = us.extend({}, DEFAULT_CONFIG, config);
-    console.log(config);
+    config = ztool.merge({}, DEFAULT_CONFIG, config);
+
     var cssSource = config.input.cssSource;
     if(!cssSource){
         throw 'there is no cssSource specific!';
@@ -242,6 +245,292 @@ var adjustOldProperty = function(config){
         delete config.output.maxSize;
     }
     return config;
+}
+
+//****************************************************************
+// 2. 合并任务
+//****************************************************************
+
+function SpriteTask(fileName){
+    this.workspace = mergeTask.config.input.workspace;
+    this.fileName = fileName;
+
+}
+
+//****************************************************************
+// 2. CSS 样式处理
+//****************************************************************
+
+/**
+ * 读取并解析样式表文件   
+ * @return {CSSStyleSheet} 
+ * @example
+ * CSSStyleSheet: {
+ *  cssRules: [
+ *      {
+ *          selectorText: "img",
+ *         style: {
+ *             0: "border",
+ *             length: 1,
+ *              border: "none"
+ *          }
+ *      }
+ *   ]
+ *  } 
+ */
+var readStyleSheet = function(fileName) {
+    fileName = path.join(mergeTask.config.input.workspace, fileName);
+    var content = fs.readFileSync(fileName);
+    var styleSheet = CSSOM.parse(content.toString());
+    this.styleSheet = styleSheet;
+    return styleSheet;
+};
+
+/**
+ * 所用到的一些正则
+ */
+var regexp = {
+    ignoreNetwork: /^(https?|ftp):\/\//i,
+    ignorePosition: /right|center|bottom/i,
+    ignoreRepeat: /^(repeat-x|repeat-y|repeat)$/i,
+    image: /\(['"]?(.+\.(png|jpg|jpeg))(\?.*?)?['"]?\)/i
+
+}
+
+/**
+ * 收集需要合并的样式和图片
+ * @param  {CSSStyleSheet} styleSheet 
+ * @param  {Object} result     
+ * @return {Object}     
+ * @example
+ * result: {
+ *     length: 1,
+ *     "./img/icon1.png": {
+ *         url: "./img/icon1.png",
+ *         cssRules: []
+ *     }
+ * }       
+ */
+var collectStyleRules = function(styleSheet, result){
+    if(!styleSheet.cssRules.length){
+        return;
+    }
+    if(!result){
+        result = {
+            length: 0
+        }
+    }
+    styleSheet.cssRules.forEach(function(cssRule, i){
+
+    });
+    for(var i = 0, rule, style, imageUrl, imagePath; rule = styleSheet.cssRules[i]; i++) {
+        if(rule.href && rule.styleSheet){
+            //@import 引入的样式表, 读取进来继续处理
+            rule.styleSheet = readStyleSheet(rule.href);
+            collectStyleRules(rule.styleSheet, result);
+            continue;
+        }else if(rule.cssRules && rule.cssRules.length){
+            //遇到有子样式的，比如@media, @keyframes，递归收集
+            collectStyleRules(rule, result);
+            continue;
+        }
+        style = rule.style;
+        if(!style) { // 有可能 `@media`  等中没有 样式， 如： `@media xxx {}`
+            continue;
+        };
+        if(style['background-size']){//跳过有background-size的样式
+            //因为backgrond-size不能简写在background里面，而且拆分background之后再组装的话
+            //background就变成再background-size后面了，会导致background-size被background覆盖
+            continue;
+        }
+        if(style.background){//有 background 就先拆分
+            splitStyleBackground(style);
+        }
+        // background 定位是 right center bottom 的图片不合并
+        // 因为这三个的定位方式比较特殊， 浏览器有个自动适应的特性
+        if(ignorePositionRegexp.test(style['background-position-x']) || 
+            ignorePositionRegexp.test(style['background-position-y'])){
+            mergeBackgound(style);
+            continue;
+        }
+        // 显式的使用了平铺的， 也不合并
+        if(ignoreRepeatRegexp.test(style['background-repeat']) || 
+            ignoreRepeatRegexp.test(style['background-repeat-x']) || 
+            ignoreRepeatRegexp.test(style['background-repeat-y'])){
+            mergeBackgound(style);
+            continue;
+        }
+        // 有背景图片, 就抽取并合并
+        if(style['background-image'] && 
+            style['background-image'].indexOf(',') == -1 &&//TODO 忽略掉多背景的属性
+            (imageUrl = getImageUrl(style['background-image']))){
+            //遇到写绝对路径的图片就跳过
+            if(ignoreNetworkRegexp.test(imageUrl)){
+                //这里直接返回了, 因为一个style里面是不会同时存在两个background-image的
+                continue;
+            }
+            imagePath = path.join(spriteConfig.input.imageRoot, imageUrl);
+            if(!fs.existsSync(imagePath)){
+                //如果这个图片是不存在的, 就直接返回了, 进行容错
+                continue;
+            }
+            // 把用了同一个文件的样式汇集在一起
+            if(!result[imageUrl]){
+                result[imageUrl] = {// an StyleObj
+                    url: imageUrl,
+                    cssRules: []
+                };
+                result.length++;
+            }
+            result[imageUrl].cssRules.push(style);
+        }
+    }
+    return result;
+}
+
+/**
+ * 从background-image 的值中提取图片的路径
+ * @return {String}       url
+ */
+var getImageUrl = function(backgroundImage){
+    var format = spriteConfig.input.format;
+    var m = backgroundImage.match(imageRegexp);
+    if(m && format.indexOf(m[2]) > -1){
+        return m[1];
+    }
+    return null;
+}
+
+/**
+ * 把background 属性拆分
+ * e.g. background: #fff url('...') repeat-x 0px top;
+ */
+var splitStyleBackground = function(style){
+    var background, 
+        value;
+    // 撕裂 background-position
+    if(value = style['background-position']){
+        value = value.trim().replace(/\s{2}/g,'').split(' ');
+        if(!value[1]){
+            value[1] = value[0];
+        }
+        style['background-position-x'] = value[0];
+        style['background-position-y'] = value[1];
+    }
+    background = bgItpreter.analyse(style.background);
+    if(background.length != 1){
+        //TODO 暂时跳过多背景的属性
+        return;
+    }
+    background = background[0];
+    if(background['background-image']){
+        removeStyleAttr(style, 'background');
+        mergeStyleAttr(style, background);
+    }
+}
+
+/**
+ * 从 style 中删除属性
+ */
+var removeStyleAttr = function(style, attr){
+    if(!style[attr]){
+        return;
+    }
+    delete style[attr];
+    for(var i = 0, item; item = style[i]; i++) {
+        if(item === attr){
+            for(var j = i; j < style.length - 1; j++){
+                style[j] = style[j + 1];
+            }
+            delete style[style.length--];
+            break;
+        }
+    };
+}
+
+/**
+ * 合并两个style, 并调整下标
+ * 如果 style 里面有的属性, 就不用 exStyle 的覆盖
+ */
+var mergeStyleAttr = function(style, exStyle){
+    for(var i in exStyle){
+        if(style[i]){
+            continue;
+        }
+        style[i] = exStyle[i];
+        style[style.length++] = i;
+    }
+
+}
+
+/**
+ * 把 style 里面的background属性转换成简写形式
+ * 用于减少代码
+ */
+var mergeBackgound = function(style){
+    var background = '';
+
+    style['background-position'] = (('background-position-x' in style) ? style['background-position-x'] : '') + ' ' +
+         (('background-position-y' in style) ? style['background-position-y'] : '');
+    style['background-position'] = style['background-position'].trim();
+
+    removeStyleAttr(style, 'background-position-x');
+    removeStyleAttr(style, 'background-position-y');
+    var attrList = [
+        'background-color', 'background-image', 'background-position', 'background-repeat',
+        'background-attachment', 'background-origin', 'background-clip'];
+    for(var i = 0, item; item = attrList[i]; i++) {
+        if(style[item]){
+            background += style[item] + ' ';
+            removeStyleAttr(style, item);
+        }
+    }
+    style['background'] = background.trim();
+    style[style.length++] = 'background';
+    
+}
+
+//****************************************************************
+// 主逻辑
+//****************************************************************
+
+var mergeTask = {
+    config: null,
+    cache: null,
+    onDone: null,
+
+    start: function(config, done){
+        this.start = +new Date;
+        this.cache = {};
+        this.onDone = done;
+
+        // 1. 读取和处理合图配置
+        this.config = readConfig(config);
+
+
+    },
+    finish: function(){
+        var timeUse = +new Date - this.start;
+        console.log('>>all done. time use:', timeUse, 'ms');
+        this.onDone && this.onDone(timeUse);
+    }
+}
+
+/**
+ * ispriter 的主要入口函数
+ * @param  {Object|String} config ispriter 的配置对象或者是配置文件, 
+ * 如不清楚请参照 README.md
+ * @param {Function} done 当精灵图合并完成后触发
+ */
+exports.merge = function(config, done){
+
+    mergeTask.start(config, done);
+
+}
+
+// Task.JS Specification API https://github.com/taskjs/spec
+exports.run = function(options, done){
+    exports.merge(options, done);
 }
 
 //****************************************************************
