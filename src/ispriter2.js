@@ -280,6 +280,9 @@ function SpriteTask(fileName){
  */
 var readStyleSheet = function(fileName) {
     fileName = path.join(mergeTask.config.input.workspace, fileName);
+    if(!fs.existsSync(fileName)){
+        return null;
+    }
     var content = fs.readFileSync(fileName);
     var styleSheet = CSSOM.parse(content.toString());
     this.styleSheet = styleSheet;
@@ -293,7 +296,8 @@ var regexp = {
     ignoreNetwork: /^(https?|ftp):\/\//i,
     ignorePosition: /right|center|bottom/i,
     ignoreRepeat: /^(repeat-x|repeat-y|repeat)$/i,
-    image: /\(['"]?(.+\.(png|jpg|jpeg))(\?.*?)?['"]?\)/i
+    image: /\(['"]?(.+\.(png|jpg|jpeg))(\?.*?)?['"]?\)/i,
+    css: /(.+\.css).*/i
 
 }
 
@@ -315,51 +319,105 @@ var collectStyleRules = function(styleSheet, result){
     if(!styleSheet.cssRules.length){
         return;
     }
+
     if(!result){
         result = {
             length: 0
         }
     }
-    styleSheet.cssRules.forEach(function(cssRule, i){
 
-    });
-    for(var i = 0, rule, style, imageUrl, imagePath; rule = styleSheet.cssRules[i]; i++) {
+    // 遍历所有 css 规则收集进行图片合并的样式规则
+    styleSheet.cssRules.forEach(function(rule, i){
+
+        // typeof rule === 'CSSStyleRule'
         if(rule.href && rule.styleSheet){
-            //@import 引入的样式表, 读取进来继续处理
-            rule.styleSheet = readStyleSheet(rule.href);
-            collectStyleRules(rule.styleSheet, result);
-            continue;
-        }else if(rule.cssRules && rule.cssRules.length){
-            //遇到有子样式的，比如@media, @keyframes，递归收集
+
+            // @import 引入的样式表, 把 css 文件读取进来继续处理
+            var fileName = rule.href;
+            
+            // 忽略掉链接到网络上的文件
+            if(!fileName || !regexp.ignoreNetwork.test(fileName)){
+                return;
+            }
+            var match = fileName.match(regexp.css);
+            if(!match){
+                return;
+            }
+            fileName = match[1];
+
+            var styleSheet = readStyleSheet(fileName);
+            if(!styleSheet){
+                return;
+            }
+            rule.styleSheet = styleSheet;
+
+            // 继续收集 import 的样式
+            collectStyleRules(styleSheet, result);
+            return;
+        }
+
+        if(rule.cssRules && rule.cssRules.length){
+
+            // 遇到有子样式的，比如 @media, @keyframes，递归收集
             collectStyleRules(rule, result);
-            continue;
+            return;
         }
-        style = rule.style;
-        if(!style) { // 有可能 `@media`  等中没有 样式， 如： `@media xxx {}`
-            continue;
-        };
-        if(style['background-size']){//跳过有background-size的样式
-            //因为backgrond-size不能简写在background里面，而且拆分background之后再组装的话
-            //background就变成再background-size后面了，会导致background-size被background覆盖
-            continue;
+
+        if(!rule.style){
+
+            // 有可能 @media 等中没有任何样式, 如: @media xxx {}
+            return;
         }
-        if(style.background){//有 background 就先拆分
-            splitStyleBackground(style);
+
+        // typeof style === 'CSSStyleDeclaration'
+        var style = rule.style;
+        if(style['background-size']){
+
+            /* 
+             * 跳过有 background-size 的样式, 因为:
+             * 1. backgrond-size 不能简写在 background 里面, 而拆分 background 之后再组装, 
+             *    background 就变成在 background-size 后面了, 会导致 background-size 被 background 覆盖;
+             * 2. 拥有 backgrond-size 的背景图片一般都涉及到拉伸, 这类图片是不能合并的
+             */
+            return;
         }
-        // background 定位是 right center bottom 的图片不合并
-        // 因为这三个的定位方式比较特殊， 浏览器有个自动适应的特性
-        if(ignorePositionRegexp.test(style['background-position-x']) || 
-            ignorePositionRegexp.test(style['background-position-y'])){
-            mergeBackgound(style);
-            continue;
+        if(style['background']){
+            
+            // 有 background 属性的 style 就先把 background 简写拆分出来
+            splitBackgroundStyle(style);
         }
-        // 显式的使用了平铺的， 也不合并
-        if(ignoreRepeatRegexp.test(style['background-repeat']) || 
-            ignoreRepeatRegexp.test(style['background-repeat-x']) || 
-            ignoreRepeatRegexp.test(style['background-repeat-y'])){
-            mergeBackgound(style);
-            continue;
+        
+        if(regexp.ignorePosition.test(style['background-position-x']) || 
+            regexp.ignorePosition.test(style['background-position-y'])){
+
+            /*
+             * background 定位是 right center bottom 的图片不合并
+             * 因为这三个的定位方式比较特殊, 浏览器有个自动适应的特性
+             * 把刚刚拆分的 background 属性合并并返回
+             */
+            mergeBackgoundStyle(style);
+            return;
         }
+
+        if(regexp.ignoreRepeat.test(style['background-repeat']) || 
+            regexp.ignoreRepeat.test(style['background-repeat-x']) || 
+            regexp.ignoreRepeat.test(style['background-repeat-y'])){
+
+            // 显式的使用了平铺的图片, 也不进行合并
+            mergeBackgoundStyle(style);
+            return;
+        }
+
+        if(style['background-image'] && 
+            style['background-image'].indexOf(',') == -1 &&//TODO 忽略掉多背景的属性
+            (imageUrl = getImageUrl(style['background-image']))){
+            
+        }
+    });
+
+    for(var i = 0, rule, style, imageUrl, imagePath; rule = styleSheet.cssRules[i]; i++) {
+                style = rule.style;
+        
         // 有背景图片, 就抽取并合并
         if(style['background-image'] && 
             style['background-image'].indexOf(',') == -1 &&//TODO 忽略掉多背景的属性
