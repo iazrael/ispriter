@@ -285,9 +285,137 @@ var readStyleSheet = function(fileName) {
     }
     var content = fs.readFileSync(fileName);
     var styleSheet = CSSOM.parse(content.toString());
-    this.styleSheet = styleSheet;
     return styleSheet;
 };
+
+/**
+ * CSS Style Declaration 的通用方法定义
+ * @type {Object}
+ * @example
+ * CSSStyleDeclaration: {
+ *     0: "border",
+ *     1: "color",
+ *     length: 2,
+ *     border: "none",
+ *     color: "#333"
+ * }
+ */
+var BaseCSSStyleDeclaration = {
+
+    /**
+     * 把background 属性拆分
+     * e.g. background: #fff url('...') repeat-x 0px top;
+     */
+    splitBackground: function(){
+        var background, 
+            value;
+
+        if(!this['background']){
+
+            // 有 background 属性的 style 才能拆分 background 
+            return;
+        }
+
+        // 撕裂 background-position
+        if(value = this['background-position']){
+            value = value.trim().replace(/\s{2}/g,'').split(' ');
+            if(!value[1]){
+                value[1] = value[0];
+            }
+            this['background-position-x'] = value[0];
+            this['background-position-y'] = value[1];
+        }
+        background = bgItpreter.analyse(this['background']);
+        if(background.length != 1){
+
+            // TODO 暂时跳过多背景的属性
+            return;
+        }
+        background = background[0];
+        if(background['background-image']){
+
+            // 把原来缩写的 background 属性删掉
+            this.removeAttr('background');
+
+            this.extend(background);
+        }
+    },
+
+    /**
+     * 把 style 里面的 background 属性转换成简写形式, 用于减少代码
+     */
+    mergeBackgound: function(){
+        var background = '', style = this;
+
+        style['background-position'] = (('background-position-x' in style) ? style['background-position-x'] : '') + ' ' +
+             (('background-position-y' in style) ? style['background-position-y'] : '');
+        style['background-position'] = style['background-position'].trim();
+
+        this.removeAttr('background-position-x');
+        this.removeAttr('background-position-y');
+
+        var toMergeAttrs = [
+            'background-color', 'background-image', 'background-position', 'background-repeat',
+            'background-attachment', 'background-origin', 'background-clip'];
+        for(var i = 0, item; item = toMergeAttrs[i]; i++) {
+            if(style[item]){
+                background += this.removeAttr(item) + ' ';
+            }
+        }
+        style['background'] = background.trim();
+        style[style.length++] = 'background';
+        
+    },
+
+    /**
+     * 移除一个属性
+     * @param  {String} attr 
+     * @return {String} 返回被移除的属性值
+     */
+    removeAttr: function(attr){
+        var value;
+        if(!this[attr]){
+            return null;
+        }
+        value = this[attr];
+        delete this[attr];
+
+        // 同时移除用数字下标索引的属性名称
+        for(var i = 0, item; item = this[i]; i++) {
+            if(item === attr){
+
+                // 把后面的索引往前推进
+                for(var j = i; j < this.length - 1; j++){
+                    this[j] = this[j + 1];
+                }
+
+                // 删除最后一个索引
+                delete this[this.length--];
+                break;
+            }
+        }
+        return value;
+    },
+
+    /**
+     * 把 obj 的属性和属性值扩展合并过来, 并调整下标, 方法将被忽略
+     * @param  {Object} obj 
+     * @param  {Boolean} override 是否覆盖也有属性
+     */
+    extend: function(obj, override){
+        for(var i in obj){
+            if(us.isFunction(obj[i])){
+                continue;
+            }else if(this[i] && !override){
+                continue;
+            }
+            this[i] = obj[i];
+            this[this.length++] = i;
+        }
+
+    }
+
+}
 
 /**
  * 所用到的一些正则
@@ -369,8 +497,12 @@ var collectStyleRules = function(styleSheet, result){
             return;
         }
 
-        // typeof style === 'CSSStyleDeclaration'
-        var style = rule.style;
+        /* 
+         * typeof style === 'CSSStyleDeclaration'
+         * 给 style 对象扩展基本的方法
+         */
+        var style = us.extend(rule.style, BaseCSSStyleDeclaration);
+
         if(style['background-size']){
 
             /* 
@@ -384,7 +516,7 @@ var collectStyleRules = function(styleSheet, result){
         if(style['background']){
             
             // 有 background 属性的 style 就先把 background 简写拆分出来
-            splitBackgroundStyle(style);
+            style.splitBackground();
         }
         
         if(regexp.ignorePosition.test(style['background-position-x']) || 
@@ -395,7 +527,7 @@ var collectStyleRules = function(styleSheet, result){
              * 因为这三个的定位方式比较特殊, 浏览器有个自动适应的特性
              * 把刚刚拆分的 background 属性合并并返回
              */
-            mergeBackgoundStyle(style);
+             style.mergeBackgound();
             return;
         }
 
@@ -404,14 +536,20 @@ var collectStyleRules = function(styleSheet, result){
             regexp.ignoreRepeat.test(style['background-repeat-y'])){
 
             // 显式的使用了平铺的图片, 也不进行合并
-            mergeBackgoundStyle(style);
+            style.mergeBackgound();
             return;
         }
 
         if(style['background-image'] && 
-            style['background-image'].indexOf(',') == -1 &&//TODO 忽略掉多背景的属性
+            style['background-image'].indexOf(',') == -1 && // TODO 忽略掉多背景的属性
             (imageUrl = getImageUrl(style['background-image']))){
             
+            // 遇到写绝对路径的图片就跳过
+            if(ignoreNetworkRegexp.test(imageUrl)){
+
+                // 这里直接返回了, 因为一个style里面是不会同时存在两个 background-image 的
+                continue;
+            }
         }
     });
 
@@ -459,94 +597,6 @@ var getImageUrl = function(backgroundImage){
     return null;
 }
 
-/**
- * 把background 属性拆分
- * e.g. background: #fff url('...') repeat-x 0px top;
- */
-var splitStyleBackground = function(style){
-    var background, 
-        value;
-    // 撕裂 background-position
-    if(value = style['background-position']){
-        value = value.trim().replace(/\s{2}/g,'').split(' ');
-        if(!value[1]){
-            value[1] = value[0];
-        }
-        style['background-position-x'] = value[0];
-        style['background-position-y'] = value[1];
-    }
-    background = bgItpreter.analyse(style.background);
-    if(background.length != 1){
-        //TODO 暂时跳过多背景的属性
-        return;
-    }
-    background = background[0];
-    if(background['background-image']){
-        removeStyleAttr(style, 'background');
-        mergeStyleAttr(style, background);
-    }
-}
-
-/**
- * 从 style 中删除属性
- */
-var removeStyleAttr = function(style, attr){
-    if(!style[attr]){
-        return;
-    }
-    delete style[attr];
-    for(var i = 0, item; item = style[i]; i++) {
-        if(item === attr){
-            for(var j = i; j < style.length - 1; j++){
-                style[j] = style[j + 1];
-            }
-            delete style[style.length--];
-            break;
-        }
-    };
-}
-
-/**
- * 合并两个style, 并调整下标
- * 如果 style 里面有的属性, 就不用 exStyle 的覆盖
- */
-var mergeStyleAttr = function(style, exStyle){
-    for(var i in exStyle){
-        if(style[i]){
-            continue;
-        }
-        style[i] = exStyle[i];
-        style[style.length++] = i;
-    }
-
-}
-
-/**
- * 把 style 里面的background属性转换成简写形式
- * 用于减少代码
- */
-var mergeBackgound = function(style){
-    var background = '';
-
-    style['background-position'] = (('background-position-x' in style) ? style['background-position-x'] : '') + ' ' +
-         (('background-position-y' in style) ? style['background-position-y'] : '');
-    style['background-position'] = style['background-position'].trim();
-
-    removeStyleAttr(style, 'background-position-x');
-    removeStyleAttr(style, 'background-position-y');
-    var attrList = [
-        'background-color', 'background-image', 'background-position', 'background-repeat',
-        'background-attachment', 'background-origin', 'background-clip'];
-    for(var i = 0, item; item = attrList[i]; i++) {
-        if(style[item]){
-            background += style[item] + ' ';
-            removeStyleAttr(style, item);
-        }
-    }
-    style['background'] = background.trim();
-    style[style.length++] = 'background';
-    
-}
 
 //****************************************************************
 // 主逻辑
