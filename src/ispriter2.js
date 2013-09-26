@@ -267,7 +267,7 @@ function SpriteTask(fileName){
  * @example
  * CSSStyleSheet: {
  *  cssRules: [
- *      {
+ *      { // CSSStyleDeclaration
  *          selectorText: "img",
  *         style: {
  *             0: "border",
@@ -335,7 +335,7 @@ var BaseCSSStyleDeclaration = {
         if(background['background-image']){
 
             // 把原来缩写的 background 属性删掉
-            this.removeAttr('background');
+            this.removeProperty('background');
 
             this.extend(background);
         }
@@ -351,50 +351,20 @@ var BaseCSSStyleDeclaration = {
              (('background-position-y' in style) ? style['background-position-y'] : '');
         style['background-position'] = style['background-position'].trim();
 
-        this.removeAttr('background-position-x');
-        this.removeAttr('background-position-y');
+        this.removeProperty('background-position-x');
+        this.removeProperty('background-position-y');
 
         var toMergeAttrs = [
             'background-color', 'background-image', 'background-position', 'background-repeat',
             'background-attachment', 'background-origin', 'background-clip'];
         for(var i = 0, item; item = toMergeAttrs[i]; i++) {
             if(style[item]){
-                background += this.removeAttr(item) + ' ';
+                background += this.removeProperty(item) + ' ';
             }
         }
         style['background'] = background.trim();
         style[style.length++] = 'background';
         
-    },
-
-    /**
-     * 移除一个属性
-     * @param  {String} attr 
-     * @return {String} 返回被移除的属性值
-     */
-    removeAttr: function(attr){
-        var value;
-        if(!this[attr]){
-            return null;
-        }
-        value = this[attr];
-        delete this[attr];
-
-        // 同时移除用数字下标索引的属性名称
-        for(var i = 0, item; item = this[i]; i++) {
-            if(item === attr){
-
-                // 把后面的索引往前推进
-                for(var j = i; j < this.length - 1; j++){
-                    this[j] = this[j + 1];
-                }
-
-                // 删除最后一个索引
-                delete this[this.length--];
-                break;
-            }
-        }
-        return value;
     },
 
     /**
@@ -409,8 +379,7 @@ var BaseCSSStyleDeclaration = {
             }else if(this[i] && !override){
                 continue;
             }
-            this[i] = obj[i];
-            this[this.length++] = i;
+            this.setProperty(i, obj[i], null);
         }
 
     }
@@ -444,14 +413,14 @@ var regexp = {
  * }       
  */
 var collectStyleRules = function(styleSheet, result){
-    if(!styleSheet.cssRules.length){
-        return;
-    }
-
     if(!result){
         result = {
             length: 0
         }
+    }
+
+    if(!styleSheet.cssRules.length){
+        return result;
     }
 
     // 遍历所有 css 规则收集进行图片合并的样式规则
@@ -540,18 +509,20 @@ var collectStyleRules = function(styleSheet, result){
             return;
         }
 
+        var imageUrl = null;
         if(style['background-image'] && 
             style['background-image'].indexOf(',') == -1 && // TODO 忽略掉多背景的属性
             (imageUrl = getImageUrl(style['background-image']))){
             
             // 遇到写绝对路径的图片就跳过
-            if(ignoreNetworkRegexp.test(imageUrl)){
+            if(regexp.ignoreNetwork.test(imageUrl)){
 
                 // 这里直接返回了, 因为一个style里面是不会同时存在两个 background-image 的
-                continue;
+                return;
             }
         }
     });
+    return result;
 
     for(var i = 0, rule, style, imageUrl, imagePath; rule = styleSheet.cssRules[i]; i++) {
                 style = rule.style;
@@ -602,26 +573,32 @@ var getImageUrl = function(backgroundImage){
 // 主逻辑
 //****************************************************************
 
-var mergeTask = {
-    config: null,
-    cache: null,
-    onDone: null,
+// sprite 的配置
+var spriteConfig = null;
 
-    start: function(config, done){
-        this.start = +new Date;
-        this.cache = {};
-        this.onDone = done;
+// sprite 缓存
+var spriteCache = null;
 
-        // 1. 读取和处理合图配置
-        this.config = readConfig(config);
+// sprite 完成之后的回调
+var onSpriteDone = null;
 
+// 记录 sprite 开始的时间
+var spriteStart = 0;
 
-    },
-    finish: function(){
-        var timeUse = +new Date - this.start;
-        console.log('>>all done. time use:', timeUse, 'ms');
-        this.onDone && this.onDone(timeUse);
-    }
+/**
+ * sprite 开始之前执行的函数
+ */
+var onSpriteStart = function(){
+    spriteStart = +new Date;
+}
+
+/**
+ * sprite 完成之后执行的函数
+ */
+var onSpriteEnd = function(){
+    var timeUse = +new Date - spriteStart;
+    console.log('>>all done. time use:', timeUse, 'ms');
+    onSpriteDone && onSpriteDone(timeUse);
 }
 
 /**
@@ -631,8 +608,24 @@ var mergeTask = {
  * @param {Function} done 当精灵图合并完成后触发
  */
 exports.merge = function(config, done){
+    onSpriteStart();
 
-    mergeTask.start(config, done);
+    spriteCache = {};
+    onSpriteDone = done;
+
+    // 1. 读取和处理合图配置
+    spriteConfig = readConfig(config);
+
+    // 2. 读取文件内容并解析 
+    spriteConfig.input.cssSource.forEach(function(cssFile){
+        var spriteObj = {
+            cssFile: cssFile,
+            styleSheet: readStyleSheet(cssFile)
+        };
+
+        var styleObjList
+
+    });
 
 }
 
