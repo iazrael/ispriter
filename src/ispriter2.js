@@ -412,7 +412,7 @@ var regexp = {
  *     }
  * }       
  */
-var collectStyleRules = function(styleSheet, result){
+var collectStyleRules = function(styleSheet, result, styleSheetUrl){
     if(!result){
         result = {
             length: 0
@@ -422,6 +422,8 @@ var collectStyleRules = function(styleSheet, result){
     if(!styleSheet.cssRules.length){
         return result;
     }
+
+    var styleSheetDir = path.dirname(styleSheetUrl);
 
     // 遍历所有 css 规则收集进行图片合并的样式规则
     styleSheet.cssRules.forEach(function(rule, i){
@@ -447,16 +449,17 @@ var collectStyleRules = function(styleSheet, result){
                 return;
             }
             rule.styleSheet = styleSheet;
+            var url = path.join(styleSheetDir, fileName);
 
             // 继续收集 import 的样式
-            collectStyleRules(styleSheet, result);
+            collectStyleRules(styleSheet, result, url);
             return;
         }
 
         if(rule.cssRules && rule.cssRules.length){
 
             // 遇到有子样式的，比如 @media, @keyframes，递归收集
-            collectStyleRules(rule, result);
+            collectStyleRules(rule, result, styleSheetUrl);
             return;
         }
 
@@ -509,7 +512,7 @@ var collectStyleRules = function(styleSheet, result){
             return;
         }
 
-        var imageUrl = null;
+        var imageUrl = null, imagePath;
         if(style['background-image'] && 
             style['background-image'].indexOf(',') == -1 && // TODO 忽略掉多背景的属性
             (imageUrl = getImageUrl(style['background-image']))){
@@ -520,38 +523,24 @@ var collectStyleRules = function(styleSheet, result){
                 // 这里直接返回了, 因为一个style里面是不会同时存在两个 background-image 的
                 return;
             }
-        }
-    });
-    return result;
-
-    for(var i = 0, rule, style, imageUrl, imagePath; rule = styleSheet.cssRules[i]; i++) {
-                style = rule.style;
-        
-        // 有背景图片, 就抽取并合并
-        if(style['background-image'] && 
-            style['background-image'].indexOf(',') == -1 &&//TODO 忽略掉多背景的属性
-            (imageUrl = getImageUrl(style['background-image']))){
-            //遇到写绝对路径的图片就跳过
-            if(ignoreNetworkRegexp.test(imageUrl)){
-                //这里直接返回了, 因为一个style里面是不会同时存在两个background-image的
-                continue;
-            }
-            imagePath = path.join(spriteConfig.input.imageRoot, imageUrl);
+            imagePath = path.join(styleSheetDir, imageUrl);
             if(!fs.existsSync(imagePath)){
-                //如果这个图片是不存在的, 就直接返回了, 进行容错
-                continue;
+
+                // 如果这个图片是不存在的, 就直接返回了, 进行容错
+                return;
             }
+
             // 把用了同一个文件的样式汇集在一起
             if(!result[imageUrl]){
-                result[imageUrl] = {// an StyleObj
-                    url: imageUrl,
+                result[imageUrl] = { // an StyleObj
+                    imageUrl: imageUrl,
                     cssRules: []
                 };
                 result.length++;
             }
             result[imageUrl].cssRules.push(style);
         }
-    }
+    });
     return result;
 }
 
@@ -623,7 +612,9 @@ exports.merge = function(config, done){
             styleSheet: readStyleSheet(cssFile)
         };
 
-        var styleObjList
+        // 收集需要合并的图片信息
+        var styleObjList = collectStyleRules(spriteObj.styleSheet, null, cssFile);
+
 
     });
 
