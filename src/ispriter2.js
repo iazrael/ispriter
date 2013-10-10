@@ -501,7 +501,7 @@ var collectStyleRules = function(styleSheet, result, styleSheetUrl){
 
         var imageUrl, imageAbsUrl;
         if(style['background-image'] && 
-            style['background-image'].indexOf(',') == -1 && // TODO 忽略掉多背景的属性
+            style['background-image'].indexOf(',') == -1 && // TODO 暂时忽略掉多背景的属性
             (imageUrl = getImageUrl(style['background-image']))){
             
             // 遇到写绝对路径的图片就跳过
@@ -618,6 +618,11 @@ var readImageInfo = function(fileName, callback){
  */
 var getImageSize = function(image, callback){
     var size = 0;
+
+    /*
+     * 这里读取图片大小的范式比较折腾, pngjs 没有提供直接获取 size 的通用方法, 
+     * 同时它只提供了文件流的方式读取, 所以只能一段一段的读取数据时把长度相加
+     */
     image.pack().on('data', function(chunk){
 
         size += chunk.length;
@@ -639,7 +644,9 @@ var setImageWidthHeight = function(styleObj, imageInfo){
         mw = imageInfo.width, 
         mh = imageInfo.height
     ;
-    for(var i = 0, rule; rule = styleObj.cssRules[i]; i++) {
+
+    // 遍历所有规则, 取最大值
+    styleObj.cssRules.forEach(function(rule){
         w = getPxValue(rule.width),
         h = getPxValue(rule.height);
         if(w > mw){
@@ -648,13 +655,20 @@ var setImageWidthHeight = function(styleObj, imageInfo){
         if(h > mh){
             mh = h;
         }
-    }
+    });
+
+    /*
+     * 最后的大小还要加上 config 中配置的 margin 值
+     * 这里之所以用 w / h 来表示宽高, 而不是用 with / height
+     * 是因为 packer 算法限定死了, 值读取传入元素的 w / h 值
+     */
     styleObj.w = mw + spriteConfig.output.margin;
     styleObj.h = mh + spriteConfig.output.margin;
 }
 
 /**
- * 把像素值转换成数字, 如果没有该值则设置为 0
+ * 把像素值转换成数字, 如果没有该值则设置为 0, 
+ * 非 px 的值会忽略, 当成 0 来处理
  * @param  {String} cssValue 
  */
 var getPxValue = function(cssValue){
@@ -724,23 +738,25 @@ var positionImages = function(styleObjList){
         styleObjArr.push(arr);
     }
     
-    /* 
-     * packer 算法需要把最大的一个放在首位...
-     * 排序算法会对结果造成比较大的影响
-     */
-    for(var j = 0; arr = styleObjArr[j]; j++) {
+    styleObjArr.forEach(function(arr){
+
+        /* 
+         * packer 算法需要把最大的一个放在首位...
+         * 排序算法会对结果造成比较大的影响
+         */
         arr.sort(function(a, b){
             return b.w * b.h - a.w * a.h;
         });
-        //packer 定位
+
+        // packer 定位
         packer.fit(arr);
+
+        // root 的值就是 packer 定位的结果
         arr.root = packer.root;
-    }
+    });
     if(existArr.length){
         styleObjArr.push(existArr);
     }
-    // console.log(styleObjArr.length, styleObjArr);
-    // console.log('-------------------------------');
     return styleObjArr;
 }
 
