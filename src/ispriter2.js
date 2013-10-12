@@ -356,7 +356,7 @@ var BaseCSSStyleDeclaration = {
     /**
      * 把 obj 的属性和属性值扩展合并过来, 并调整下标, 方法将被忽略
      * @param  {Object} obj 
-     * @param  {Boolean} override 是否覆盖也有属性
+     * @param  {Boolean} override 是否覆盖已有属性
      */
     extend: function(obj, override){
         for(var i in obj){
@@ -390,7 +390,7 @@ var regexp = {
  * @param  {Object} result StyleObjList
  * @return {Object}     
  * @example
- * result: {
+ * result: { // StyleObjList
  *     length: 1,
  *     "./img/icon1.png": { // StyleObj
  *         imageUrl: "./img/icon1.png",
@@ -947,12 +947,31 @@ var mergeCombineSprites = function(spriteObjList){
     combineFileName = path.resolve(combineFileName);
 
     spriteObjList.forEach(function(spriteObj){
-        // TODO
+        
         // var spriteObj = { // an SpriteObj
         //     cssFileName: cssFileName, // css 文件的路径
         //     styleSheet: readStyleSheet(cssFileName), // css 文件的内容
         //     styleObjList: null, // 搜集到的需要合并图片的样式和相关图片信息(大小宽高等)
         // };
+        
+        var styleObj,
+            existSObj,
+            styleObjList = spriteObj.styleObjList;
+
+        for(var url in styleObjList){
+            if(url === 'length'){
+                continue;
+            }
+            styleObj = styleObjList[url];
+            if(existSObj = combineStyleObjList[url]){
+                existSObj.cssRules = existSObj.cssRules.concat(styleObj.cssRules);
+            }else{
+                combineStyleObjList[url] = styleObj;
+                combineStyleObjList.length++;
+            }
+        }
+
+        combineStyleSheetList.push(spriteObj.styleSheet);
     });
 
     combineSpriteObj = {
@@ -961,7 +980,7 @@ var mergeCombineSprites = function(spriteObjList){
         styleObjList: combineStyleObjList
     }
 
-    return combineSpriteObj;
+    return [combineSpriteObj];
 }
 
 //****************************************************************
