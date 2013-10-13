@@ -139,6 +139,13 @@ var DEFAULT_CONFIG = {
     }
 };
 
+var debuging = true;
+
+var debug = function(msg){
+    if(debuging){
+        console.log('>>>', +new Date, msg, '\n<<<===================');
+    }
+}
 
 //****************************************************************
 // 1. 读取配置
@@ -194,7 +201,7 @@ var readConfig = function(config){
         if(zTool.endsWith(cssPattern, path.sep)){
             cssPattern += '*.css';
         }
-        queryResult = nf.query(CURRENT_DIR, cssPattern);
+        queryResult = nf.query(config.input.workspace, cssPattern);
         cssFiles = cssFiles.concat(queryResult);
     }
     if(!cssFiles.length){
@@ -215,7 +222,7 @@ var readConfig = function(config){
     // 确保 margin 是整数
     config.output.margin = parseInt(config.output.margin);
     
-    console.log(config);
+    // debug(config);
     return config;
 }
 
@@ -266,7 +273,9 @@ var adjustOldProperty = function(config){
  *  } 
  */
 var readStyleSheet = function(fileName) {
-    fileName = path.join(spriteConfig.input.workspace, fileName);
+
+    // TODO workspace 未完全测试
+    // fileName = path.join(spriteConfig.input.workspace, fileName);
     if(!fs.existsSync(fileName)){
         return null;
     }
@@ -312,7 +321,7 @@ var BaseCSSStyleDeclaration = {
             this['background-position-x'] = value[0];
             this['background-position-y'] = value[1];
         }
-        background = bgItpreter.analyse(this['background']);
+        background = BI.analyse(this['background']);
         if(background.length != 1){
 
             // TODO 暂时跳过多背景的属性
@@ -420,9 +429,9 @@ var collectStyleRules = function(styleSheet, result, styleSheetUrl){
 
             // @import 引入的样式表, 把 css 文件读取进来继续处理
             var fileName = rule.href;
-            
+
             // 忽略掉链接到网络上的文件
-            if(!fileName || !regexp.ignoreNetwork.test(fileName)){
+            if(!fileName || regexp.ignoreNetwork.test(fileName)){
                 return;
             }
             var match = fileName.match(regexp.css);
@@ -431,12 +440,15 @@ var collectStyleRules = function(styleSheet, result, styleSheetUrl){
             }
             fileName = match[1];
 
-            var styleSheet = readStyleSheet(fileName);
+            var url = path.join(styleSheetDir, fileName);
+            var styleSheet = readStyleSheet(url);
+            debug('read import style: ' + url + ' , has styleSheet == : ' + !!styleSheet);
             if(!styleSheet){
                 return;
             }
             rule.styleSheet = styleSheet;
-            var url = path.join(styleSheetDir, fileName);
+            
+            debug('collect import style: ' + fileName);
 
             // 继续收集 import 的样式
             collectStyleRules(styleSheet, result, url);
@@ -559,7 +571,7 @@ var readImagesInfo = function(styleObjList, onDone){
     zTool.forEach(styleObjList, function(styleObj, url, next){
 
         if(url === 'length'){
-            return; // 跳过 styleObjList 的 length 字段
+            return next(); // 跳过 styleObjList 的 length 字段
         }
         var imageInfo = imageInfoCache[url];
 
@@ -685,12 +697,13 @@ var getPxValue = function(cssValue){
 /**
  * 对需要合并的图片进行布局定位
  * @param  {StyleObjList} styleObjList 
- * @return {Array} 返回 SpriteArray 的数组, 
+ * @return {Array} 返回 spriteArrayay 的数组, 
  * SpriteImageArray 的每个元素都是 StyleObj 数组, 
  * 一个 StyleObj 数组包含了一张精灵图的所有小图片
  */
 var positionImages = function(styleObjList){
-    var spriteArr = [], 
+    var styleObj,
+        spriteArray = [],
         arr = [], 
         existArr = [], // 保存已经合并过的图片的样式
         maxSize = spriteConfig.output.maxSingleSize,
@@ -698,13 +711,17 @@ var positionImages = function(styleObjList){
     ;
 
     // 把已经合并了并已输出的图片先排除掉
-    styleObjList.forEach(function(styleObj){
+    for(var i in styleObjList){
+        if(i === 'length'){
+            continue;
+        }
+        styleObj = styleObjList[i];
         if(styleObj.imageInfo.drew){
             existArr.push(styleObj);
         }else{
             arr.push(styleObj);
         }
-    });
+    }
 
     // 如果限制了输出图片的大小, 则进行分组
     if(maxSize){
@@ -725,7 +742,7 @@ var positionImages = function(styleObjList){
 
             if(total > maxSize){
                 if(ret.length){ // 避免出现空图片
-                    spriteArr.push(ret);
+                    spriteArray.push(ret);
                     ret = [];
                     total = styleObj.imageInfo.size;
                 }
@@ -734,13 +751,13 @@ var positionImages = function(styleObjList){
         });
 
         if(ret.length){
-            spriteArr.push(ret);
+            spriteArray.push(ret);
         }
     }else{
-        spriteArr.push(arr);
+        spriteArray.push(arr);
     }
     
-    spriteArr.forEach(function(arr){
+    spriteArray.forEach(function(arr){
 
         /* 
          * packer 算法需要把最大的一个放在首位...
@@ -762,9 +779,9 @@ var positionImages = function(styleObjList){
         arr.root = packer.root;
     });
     if(existArr.length){
-        spriteArr.push(existArr);
+        spriteArray.push(existArr);
     }
-    return spriteArr;
+    return spriteArray;
 }
 
 //****************************************************************
@@ -773,15 +790,15 @@ var positionImages = function(styleObjList){
 
 var drawImageAndPositionBackground = function(spriteObj){
     
-    var spriteArr = spriteObj.spriteArr;
+    var spriteArray = spriteObj.spriteArray;
 
-    if(!spriteArr[spriteArr.length - 1].root){
+    if(!spriteArray[spriteArray.length - 1].root){
 
         /* 
          * 若最后一个元素, 没有root 属性, 说明它的样式都是复用已合并的图片的, 
          * 直接替换样式即可
          */
-        var styleObjArr = spriteArr.pop();
+        var styleObjArr = spriteArray.pop();
 
         for(var j = 0, styleObj; styleObj = styleObjArr[j]; j++) {
             
@@ -796,14 +813,15 @@ var drawImageAndPositionBackground = function(spriteObj){
         });
     }
 
-    spriteArr.forEach(function(styleObjArr, i){
+    spriteArray.forEach(function(styleObjArr, i){
         var png, 
-            imageName;
+            imageName,
+            imageAbsName;
 
         png = createPng(styleObjArr.root.w, styleObjArr.root.h);
         
         imageName = createSpriteImageName(spriteObj.cssFileName, i,
-                        spriteArr.length);
+                        spriteArray.length);
 
         styleObjArr.forEach(function(styleObj){
 
@@ -825,9 +843,9 @@ var drawImageAndPositionBackground = function(spriteObj){
 
         // 没必要输出一张空白图片
         if(styleObjArr.length){
-            imageName = path.resolve(spriteConfig.output.cssDist + imageName);
-            nf.mkdirsSync(path.dirname(imageName));
-            png.pack().pipe(fs.createWriteStream(imageName));
+            imageAbsName = path.resolve(spriteConfig.output.cssDist + imageName);
+            nf.mkdirsSync(path.dirname(imageAbsName));
+            png.pack().pipe(fs.createWriteStream(imageAbsName));
 
             console.log('>>output image:', imageName);
         }
@@ -932,21 +950,21 @@ var setPxValue = function(style, attr, newValue){
 
 /**
  * 合并所有 spriteObj
- * @param  {Array} spriteObjList 
+ * @param  {Array} spriteObjArray 
  * @return {Array} 转换后的 SpriteObj 数组, 只会包含一个 SpriteObj
  */
-var mergeCombineSprites = function(spriteObjList){
+var mergeCombineSprites = function(spriteObjArray){
 
     var combineFileName,
         combineSpriteObj,
-        combineStyleSheetList = [],
+        combineStyleSheetArray = [],
         combineStyleObjList = { length: 0 };
 
     combineFileName = spriteConfig.output.cssDist + spriteConfig.output.prefix +
                       'all.css';
     combineFileName = path.resolve(combineFileName);
 
-    spriteObjList.forEach(function(spriteObj){
+    spriteObjArray.forEach(function(spriteObj){
         
         // var spriteObj = { // an SpriteObj
         //     cssFileName: cssFileName, // css 文件的路径
@@ -971,12 +989,12 @@ var mergeCombineSprites = function(spriteObjList){
             }
         }
 
-        combineStyleSheetList.push(spriteObj.styleSheet);
+        combineStyleSheetArray.push(spriteObj.styleSheet);
     });
 
     combineSpriteObj = {
         cssFileName: combineFileName,
-        styleSheetList: combineStyleSheetList,
+        styleSheetArray: combineStyleSheetArray,
         styleObjList: combineStyleObjList
     }
 
@@ -992,26 +1010,28 @@ var mergeCombineSprites = function(spriteObjList){
  * @param  {SpriteObj} spriteObj        
  */
 var exportCssFile = function(spriteObj){
-    // TODO
-    if(!ztool.isArray(spriteObjList)){
-        spriteObjList = [spriteObjList];
+    var styleSheetArray = spriteObj.styleSheetArray;
+    if(!styleSheetArray){
+        styleSheetArray = [spriteObj.styleSheet]
     }
-    var fileName, spriteObj, cssContentList = [];
-    for(var i in spriteObjList){
-        spriteObj = spriteObjList[i];
-        fileName = spriteConfig.output.cssRoot + spriteObj.fileName;
-        fileName = path.resolve(fileName);
-        if(spriteConfig.output.combine){
-            cssContentList.push(styleSheetToString(spriteObj.styleSheet));
-        }else{
-            nf.writeFileSync(fileName, styleSheetToString(spriteObj.styleSheet), true);
-        }
-    }
-    if(spriteConfig.output.combine && cssContentList.length){
-        fileName = spriteConfig.output.cssRoot + spriteConfig.output.prefix + 'all.css';
-        fileName = path.resolve(fileName);
-        nf.writeFileSync(fileName, cssContentList.join(''), true);
-    }
+    
+    // var fileName, spriteObj, cssContentList = [];
+    // for(var i in spriteObjArray){
+    //     spriteObj = spriteObjArray[i];
+    //     fileName = spriteConfig.output.cssRoot + spriteObj.fileName;
+    //     fileName = path.resolve(fileName);
+    //     if(spriteConfig.output.combine){
+    //         cssContentList.push(styleSheetToString(spriteObj.styleSheet));
+    //     }else{
+    //         nf.writeFileSync(fileName, styleSheetToString(spriteObj.styleSheet), true);
+    //     }
+    // }
+    // if(spriteConfig.output.combine && cssContentList.length){
+    //     fileName = spriteConfig.output.cssRoot + spriteConfig.output.prefix + 'all.css';
+    //     fileName = path.resolve(fileName);
+    //     nf.writeFileSync(fileName, cssContentList.join(''), true);
+    // }
+    console.log('>>output css:', spriteObj.cssFileName);
 }
 
 
@@ -1050,7 +1070,7 @@ var spriteStart = 0;
 var imageInfoCache = null;
 
 // sprite 数据的缓存, 用于需要合并所有 css 文件和图片的情况
-var spriteObjList = null;
+var spriteObjArray = null;
 
 /**
  * sprite 开始之前执行的函数
@@ -1081,7 +1101,7 @@ exports.merge = function(config, done){
     onSpriteDone = done;
 
     imageInfoCache = {};
-    spriteObjList = [];
+    spriteObjArray = [];
 
     // 1. 读取和处理合图配置
     spriteConfig = readConfig(config);
@@ -1093,19 +1113,19 @@ exports.merge = function(config, done){
             cssFileName: cssFileName, // css 文件的路径
             styleSheet: readStyleSheet(cssFileName), // css 文件的内容
             styleObjList: null, // 搜集到的需要合并图片的样式和相关图片信息(大小宽高等)
-            spriteArr: null // 精灵图的所有小图片数组
+            spriteArray: null // 精灵图的所有小图片数组
         };
-
+        // debug(spriteObj.styleSheet);
         // 收集需要合并的图片信息
         var styleObjList = collectStyleRules(spriteObj.styleSheet, null, cssFileName);
         spriteObj.styleObjList = styleObjList;
 
-        // 把结果塞到列表中方便 combine 使用
-        spriteObjList.push(spriteObj);
-
         if(!styleObjList.length){
             next(); // 这个 css 没有需要合并的图片
         }else{
+
+            // 把结果塞到列表中方便 combine 使用
+            spriteObjArray.push(spriteObj);
 
             // 读取图片的内容, 宽高和大小
             readImagesInfo(styleObjList, next);
@@ -1114,26 +1134,26 @@ exports.merge = function(config, done){
 
         // 3. 对小图片进行定位排列和输出, 输出合并后的 css 文件
 
-        if(!spriteConfig.output.combine){
+        if(spriteConfig.output.combine){
 
             // 如果指定了 combine, 先把所有 cssRules 和 styleSheet 合并
-            spriteObjList = mergeCombineSprites(spriteObjList);
+            spriteObjArray = mergeCombineSprites(spriteObjArray);
         }
-        spriteObjList.forEach(function(spriteObj){
+        spriteObjArray.forEach(function(spriteObj){
 
-            // spriteArr 的每个元素就是每张精灵图
-            var spriteArr = positionImages(spriteObj.styleObjList);
-            spriteObj.spriteArr = spriteArr;
+            // spriteArray 的每个元素就是每张精灵图
+            var spriteArray = positionImages(spriteObj.styleObjList);
+            spriteObj.spriteArray = spriteArray;
 
             // 输出合并的图片 并修改样式表里面的background
             drawImageAndPositionBackground(spriteObj);
 
             // 输出修改后的样式表
             exportCssFile(spriteObj);
-
-            // 大功告成
-            onSpriteEnd();
         });
+
+        // 大功告成
+        onSpriteEnd();
     });
 
 }
@@ -1146,4 +1166,4 @@ exports.run = function(options, done){
 //****************************************************************
 // 0000. for test
 //****************************************************************
-readConfig('./config.example.json');
+exports.merge('./config.example.json');
