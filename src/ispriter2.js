@@ -72,9 +72,9 @@ var DEFAULT_CONFIG = {
          * 精灵图合并之后, css 文件的输出目录
          * 
          * @optional 
-         * @default "./sprite/"
+         * @default "./sprite/css/"
          */
-        "cssDist": "./sprite/",
+        "cssDist": "./sprite/css/",
 
         /**
          * 原 imageRoot
@@ -196,11 +196,13 @@ var readConfig = function(config){
     // 读取所有指定的 css 文件
     var cssFiles = [], cssPattern, queryResult;
     for(var i = 0; i < cssSource.length; i++){
-        cssPattern = path.normalize(cssSource[i]);
+
+        cssPattern = path.normalize(cssSource[i]).replace(/\\/g, '\\\\');
 
         if(zTool.endsWith(cssPattern, path.sep)){
             cssPattern += '*.css';
         }
+
         queryResult = nf.query(config.input.workspace, cssPattern);
         cssFiles = cssFiles.concat(queryResult);
     }
@@ -214,7 +216,10 @@ var readConfig = function(config){
     config.input.cssSource = cssFiles;
 
     // 确保输出路径是个目录
-    config.output.cssDist = path.resolve(config.output.cssDist) + path.sep;
+    if(!zTool.endsWith(config.output.cssDist, '/')){
+        config.output.cssDist += '/';
+    }
+    config.output.cssDist = path.normalize(config.output.cssDist);
     
     // KB 换算成 B
     config.output.maxSingleSize *= 1024;
@@ -275,7 +280,7 @@ var adjustOldProperty = function(config){
 var readStyleSheet = function(fileName) {
 
     // TODO workspace 未完全测试
-    // fileName = path.join(spriteConfig.input.workspace, fileName);
+    fileName = path.join(spriteConfig.input.workspace, fileName);
     if(!fs.existsSync(fileName)){
         return null;
     }
@@ -403,7 +408,7 @@ var regexp = {
  *     length: 1,
  *     "./img/icon1.png": { // StyleObj
  *         imageUrl: "./img/icon1.png",
- *         imageAbsUrl: "/User/home/ispriter/test/img/icon1.png",
+ *         imageAbsUrl: "./img/icon1.png", //相对于 workspace 的路径
  *         cssRules: []
  *     }
  * }
@@ -511,7 +516,9 @@ var collectStyleRules = function(styleSheet, result, styleSheetUrl){
             return;
         }
 
-        var imageUrl, imageAbsUrl;
+        var imageUrl, 
+            imageAbsUrl,
+            fileName;
         if(style['background-image'] && 
             style['background-image'].indexOf(',') == -1 && // TODO 暂时忽略掉多背景的属性
             (imageUrl = getImageUrl(style['background-image']))){
@@ -523,7 +530,9 @@ var collectStyleRules = function(styleSheet, result, styleSheetUrl){
                 return;
             }
             imageAbsUrl = path.join(styleSheetDir, imageUrl);
-            if(!fs.existsSync(imageAbsUrl)){
+            fileName = path.join(spriteConfig.input.workspace, imageAbsUrl);
+            
+            if(!fs.existsSync(fileName)){
 
                 // 如果这个图片是不存在的, 就直接返回了, 进行容错
                 return;
@@ -606,6 +615,7 @@ var readImagesInfo = function(styleObjList, onDone){
  * }
  */
 var readImageInfo = function(fileName, callback){
+    fileName = path.join(spriteConfig.input.workspace, fileName);
     fs.createReadStream(fileName).pipe(new PNG())
     .on('parsed', function() {
 
@@ -898,9 +908,7 @@ var createSpriteImageName = function(cssFileName, index, total){
 
     // 设置了 maxSingleSize, 文件名会是类似 _1, _2 这种
     if(spriteConfig.output.maxSingleSize && total > 1){
-        name += (spriteConfig.output.combine ? '' : '_') + index;
-    }else if(spriteConfig.output.combine){
-        name = 'all';
+        name += '_' + index;
     }
     return spriteConfig.output.imageDist + spriteConfig.output.prefix +
         name + '.' + spriteConfig.output.format;
@@ -960,9 +968,8 @@ var mergeCombineSprites = function(spriteObjArray){
         combineStyleSheetArray = [],
         combineStyleObjList = { length: 0 };
 
-    combineFileName = spriteConfig.output.cssDist + spriteConfig.output.prefix +
-                      'all.css';
-    combineFileName = path.resolve(combineFileName);
+    combineFileName = 'all.css';
+    // combineFileName = path.resolve(combineFileName);
 
     spriteObjArray.forEach(function(spriteObj){
         
