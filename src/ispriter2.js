@@ -826,6 +826,7 @@ var drawImageAndPositionBackground = function(spriteObj){
     spriteArray.forEach(function(styleObjArr, i){
         var png, 
             imageName,
+            imageName2, // 用于输出 log 
             imageAbsName;
 
         png = createPng(styleObjArr.root.w, styleObjArr.root.h);
@@ -853,11 +854,15 @@ var drawImageAndPositionBackground = function(spriteObj){
 
         // 没必要输出一张空白图片
         if(styleObjArr.length){
-            imageAbsName = path.resolve(spriteConfig.output.cssDist + imageName);
+            imageName2 = path.join(spriteConfig.output.cssDist, imageName);
+            imageName2 = path.normalize(imageName2);
+
+            imageAbsName = path.join(spriteConfig.workspace, imageName2);
+            imageAbsName = path.resolve(imageAbsName);
             nf.mkdirsSync(path.dirname(imageAbsName));
             png.pack().pipe(fs.createWriteStream(imageAbsName));
 
-            console.log('>>output image:', imageName);
+            console.log('>>output image:', imageName2);
         }
     });
 }
@@ -1017,31 +1022,36 @@ var mergeCombineSprites = function(spriteObjArray){
  * @param  {SpriteObj} spriteObj        
  */
 var exportCssFile = function(spriteObj){
-    var styleSheetArray = spriteObj.styleSheetArray;
+    var fileName,
+        fileName2, // 用于输出 log
+        cssContentList = [],
+        styleSheetArray = spriteObj.styleSheetArray;
     if(!styleSheetArray){
         styleSheetArray = [spriteObj.styleSheet]
     }
+
+    styleSheetArray.forEach(function(styleSheet){
+        cssContentList.push(styleSheetToString(styleSheet));
+    });
+
+    fileName = path.basename(spriteObj.cssFileName);
     
-    // var fileName, spriteObj, cssContentList = [];
-    // for(var i in spriteObjArray){
-    //     spriteObj = spriteObjArray[i];
-    //     fileName = spriteConfig.output.cssRoot + spriteObj.fileName;
-    //     fileName = path.resolve(fileName);
-    //     if(spriteConfig.output.combine){
-    //         cssContentList.push(styleSheetToString(spriteObj.styleSheet));
-    //     }else{
-    //         nf.writeFileSync(fileName, styleSheetToString(spriteObj.styleSheet), true);
-    //     }
-    // }
-    // if(spriteConfig.output.combine && cssContentList.length){
-    //     fileName = spriteConfig.output.cssRoot + spriteConfig.output.prefix + 'all.css';
-    //     fileName = path.resolve(fileName);
-    //     nf.writeFileSync(fileName, cssContentList.join(''), true);
-    // }
-    console.log('>>output css:', spriteObj.cssFileName);
+    fileName2 = path.join(spriteConfig.output.cssDist, fileName);
+    fileName2 = path.normalize(fileName2);
+
+    fileName = path.join(spriteConfig.workspace, fileName2);
+    fileName = path.resolve(fileName);
+    
+    nf.writeFileSync(fileName, cssContentList.join(''), true);
+    
+    console.log('>>output css:', fileName2, '\n');
 }
 
-
+/**
+ * 把 StyleSheet 的内容转换成 css 字符串
+ * @param  {StyleSheet} styleSheet 
+ * @return {String} css 字符串
+ */
 var styleSheetToString = function(styleSheet) {
     var result = "";
     var rules = styleSheet.cssRules, rule;
@@ -1169,8 +1179,3 @@ exports.merge = function(config, done){
 exports.run = function(options, done){
     exports.merge(options, done);
 }
-
-//****************************************************************
-// 0000. for test
-//****************************************************************
-exports.merge('./config.example.json');

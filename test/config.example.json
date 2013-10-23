@@ -1,6 +1,6 @@
 {
 	"input": {
-		"cssRoot": ["./css/", "./css/main.css"], //required
+		"cssRoot": ["./css/style*.css"], //required
 		"format": "png"//optional, 只支持输出PNG格式, 如果是其他格式, 也是以PNG格式输出, 仅仅把后缀改为其他后缀
 	},
 	"output": {
@@ -10,6 +10,6 @@
 		"margin": 5,//optional 合成之后, 图片间的空隙, 默认 0
 		"prefix": "sprite_",//optional 
 		"format": "png",//optional 输出的图片格式
-		"combine": false//optional 为true时将所有图片合并为一张, 同时所有css文件合并为一个文件
+		"combine": true//optional 为true时将所有图片合并为一张, 同时所有css文件合并为一个文件
 	}
 }
