@@ -351,7 +351,7 @@ var BaseCSSStyleDeclaration = {
         var positionText = this.removeProperty('background-position-x') + ' ' +
                            this.removeProperty('background-position-y');
 
-        style['background-position'] = positionText.trim();
+        style.setProperty('background-position', positionText.trim(), null);
 
         var toMergeAttrs = [
                'background-color', 'background-image', 'background-position', 
@@ -800,7 +800,16 @@ var positionImages = function(styleObjList){
 
 var drawImageAndPositionBackground = function(spriteObj){
     
-    var spriteArray = spriteObj.spriteArray;
+    var spriteCssRules,
+        spriteArray = spriteObj.spriteArray;
+
+    // 保存用了同一张精灵图的选择器, 用于最后输出 css 文件的时候统一设置 background-image
+    spriteCssRules = { 
+        selectors: [], 
+        imageName: null 
+    };//TODO
+
+    spriteObj.spriteCssRules = spriteCssRules;
 
     if(!spriteArray[spriteArray.length - 1].root){
 
@@ -810,16 +819,13 @@ var drawImageAndPositionBackground = function(spriteObj){
          */
         var styleObjArr = spriteArray.pop();
 
-        for(var j = 0, styleObj; styleObj = styleObjArr[j]; j++) {
-            
-        }
         styleObjArr.forEach(function(styleObj){
 
             var imageInfo = styleObj.imageInfo;
             styleObj.fit = imageInfo.fit;
 
             // 修改 background 属性
-            replaceAndPositionBackground(imageInfo.imageName, styleObj);
+            replaceAndPositionBackground(imageInfo.imageName, styleObj, spriteCssRules);
         });
     }
 
@@ -833,6 +839,8 @@ var drawImageAndPositionBackground = function(spriteObj){
         
         imageName = createSpriteImageName(spriteObj.cssFileName, i,
                         spriteArray.length);
+        //TODO 不能这么直接赋值, imageName 可是有多个的
+        spriteCssRules.imageName = imageName;
 
         styleObjArr.forEach(function(styleObj){
 
@@ -844,7 +852,7 @@ var drawImageAndPositionBackground = function(spriteObj){
             imageInfo.fit = styleObj.fit;
 
             // 修改 background 属性
-            replaceAndPositionBackground(imageName, styleObj);
+            replaceAndPositionBackground(imageName, styleObj, spriteCssRules);
             
             // 对图片进行填充
             image.bitblt(png, 0, 0, image.width, image.height, 
@@ -852,8 +860,8 @@ var drawImageAndPositionBackground = function(spriteObj){
 
         });
 
-        // 没必要输出一张空白图片
-        if(styleObjArr.length){
+        //  输出定位后的图片
+        if(styleObjArr.length){ // 没必要输出一张空白图片
             imageName2 = path.join(spriteConfig.output.cssDist, imageName);
             imageName2 = path.normalize(imageName2);
 
@@ -865,6 +873,7 @@ var drawImageAndPositionBackground = function(spriteObj){
             console.log('>>output image:', imageName2);
         }
     });
+    
 }
 
 /**
@@ -924,11 +933,16 @@ var createSpriteImageName = function(cssFileName, index, total){
  * 并且把 background 的字属性都合并掉
  * @param  {String} imageName   
  * @param  {StyleObj} styleObj    
+ * @param  {SpriteCssRules} spriteCssRules    
  */
-var replaceAndPositionBackground = function(imageName, styleObj){
+var replaceAndPositionBackground = function(imageName, styleObj, spriteCssRules){
     styleObj.cssRules.forEach(function(style){
 
-        style['background-image'] = 'url(' + imageName + ')';
+        // 不再分别设置 background-image, 改为统一设置, 减少 css 文件大小
+        // style['background-image'] = 'url(' + imageName + ')';
+
+        style.removeProperty('background-image');
+        spriteCssRules.selectors.push(style.parentRule.selectorText);
 
         // set background-position-x
         setPxValue(style, 'background-position-x', styleObj.fit.x);
@@ -938,6 +952,7 @@ var replaceAndPositionBackground = function(imageName, styleObj){
 
         // mergeBackgound, 合并 background 属性, 减少代码量
         style.mergeBackgound();
+
     });
 }
 
@@ -1126,7 +1141,7 @@ exports.merge = function(config, done){
     // 2. 读取文件内容并解析, 读取相关图片的信息
     zTool.forEach(spriteConfig.input.cssSource, function(cssFileName, i, next){ // onEach
 
-        var spriteObj = { // an SpriteObj
+        var spriteObj = { // an SpriteObj, 一个文件一个 SpriteObj
             cssFileName: cssFileName, // css 文件的路径
             styleSheet: readStyleSheet(cssFileName), // css 文件的内容
             styleObjList: null, // 搜集到的需要合并图片的样式和相关图片信息(大小宽高等)
@@ -1150,7 +1165,7 @@ exports.merge = function(config, done){
     }, function(){ // onDone
 
         // 3. 对小图片进行定位排列和输出, 输出合并后的 css 文件
-
+        
         if(spriteConfig.output.combine){
 
             // 如果指定了 combine, 先把所有 cssRules 和 styleSheet 合并
