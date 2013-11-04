@@ -36,7 +36,6 @@ var DEFAULT_CONFIG = {
     "algorithm": "growingpacker",
 
     /**
-     * @test
      * 工作目录, 可以是相对路径或者绝对路径
      * 
      * @optional
