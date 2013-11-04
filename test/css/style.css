@@ -14,8 +14,7 @@ div:nth-of-type(1){
     background: url(../images/add.png);
 }
 div:nth-of-type(2){
-    width: 48px;
-    height: 48px;
+    /* 没有指定宽高 */
     background: url(../images/app_icon.png);
 }
 div:nth-of-type(3){

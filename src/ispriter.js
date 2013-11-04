@@ -23,6 +23,11 @@ var CURRENT_DIR =  path.resolve('./');
 var DEFAULT_CONFIG = {
 
     /**
+     * 调试时使用, 输出调试日志
+     */
+    "debug": false,
+
+    /**
      * 精灵图合并算法, 目前只有 growingpacker
      * 
      * @optional 
@@ -136,16 +141,31 @@ var DEFAULT_CONFIG = {
          * @optional
          * @default false
          */
-        "combine": false
+        "combine": false,
+
+        /**
+         * 配置是否把合并了图片的样式整合成一条规则, 统一设置 background-image, 例如:
+         * .cls1, .cls2{
+         *     background-image: url(xxx);
+         * }
+         * 
+         * @optional
+         * @default true
+         */
+        "combineCSSRule": true
     }
 };
 
-var debuging = true;
+var DEFAULT_COMBINE_CSS_NAME = 'all.css';
 
-var debug = function(msg){
-    if(debuging){
+function debug(msg){
+    if(spriteConfig.debug){
         console.log('>>>', +new Date, msg, '\n<<<===================');
     }
+}
+
+function info(msg){
+    console.info.apply(console, arguments);
 }
 
 //****************************************************************
@@ -159,7 +179,7 @@ var debug = function(msg){
  * @param  {Object|String} config 配置文件或者配置对象
  * @return {Config}        读取并解析完成的配置对象
  */
-var readConfig = function(config){
+function readConfig(config){
     if(us.isString(config)){
         if(!fs.existsSync(config)){
             throw 'place give in a sprite config or config file!';
@@ -221,7 +241,11 @@ var readConfig = function(config){
         config.output.cssDist += '/';
     }
     config.output.cssDist = path.normalize(config.output.cssDist);
-    
+
+    if(!zTool.endsWith(config.output.imageDist, '/')){
+        config.output.imageDist += '/';
+    }
+
     // KB 换算成 B
     config.output.maxSingleSize *= 1024;
 
@@ -237,7 +261,7 @@ var readConfig = function(config){
  * @param  {Config} config 
  * @return {Config}        
  */
-var adjustOldProperty = function(config){
+function adjustOldProperty(config){
     if(!config.input.cssSource && config.input.cssRoot){
         config.input.cssSource = config.input.cssRoot;
         delete config.input.cssRoot;
@@ -278,9 +302,8 @@ var adjustOldProperty = function(config){
  *   ]
  *  } 
  */
-var readStyleSheet = function(fileName) {
+function readStyleSheet(fileName) {
 
-    // TODO workspace 未完全测试
     fileName = path.join(spriteConfig.workspace, fileName);
     if(!fs.existsSync(fileName)){
         return null;
@@ -330,7 +353,7 @@ var BaseCSSStyleDeclaration = {
         background = BI.analyse(this['background']);
         if(background.length != 1){
 
-            // TODO 暂时跳过多背景的属性
+            // FIXME 暂时跳过多背景的属性
             return;
         }
         background = background[0];
@@ -414,7 +437,7 @@ var regexp = {
  *     }
  * }
  */
-var collectStyleRules = function(styleSheet, result, styleSheetUrl){
+function collectStyleRules(styleSheet, result, styleSheetUrl){
     if(!result){
         result = { // an StyleObjList
             length: 0
@@ -462,8 +485,11 @@ var collectStyleRules = function(styleSheet, result, styleSheetUrl){
         }
 
         if(rule.cssRules && rule.cssRules.length){
+            if(rule instanceof CSSOM.CSSKeyframesRule){
+                return; // FIXME 先跳过 keyframes 的属性
+            }
 
-            // 遇到有子样式的，比如 @media, @keyframes，递归收集
+            // 遇到有子样式的，比如 @media, 递归收集
             collectStyleRules(rule, result, styleSheetUrl);
             return;
         }
@@ -521,7 +547,7 @@ var collectStyleRules = function(styleSheet, result, styleSheetUrl){
             imageAbsUrl,
             fileName;
         if(style['background-image'] && 
-            style['background-image'].indexOf(',') == -1 && // TODO 暂时忽略掉多背景的属性
+            style['background-image'].indexOf(',') == -1 && // FIXME 暂时忽略掉多背景的属性
             (imageUrl = getImageUrl(style['background-image']))){
             
             // 遇到写绝对路径的图片就跳过
@@ -558,7 +584,7 @@ var collectStyleRules = function(styleSheet, result, styleSheetUrl){
  * 从background-image 的值中提取图片的路径
  * @return {String}       url
  */
-var getImageUrl = function(backgroundImage){
+function getImageUrl(backgroundImage){
     var format = spriteConfig.input.format;
     var m = backgroundImage.match(regexp.image);
     if(m && format.indexOf(m[2]) > -1){
@@ -575,7 +601,7 @@ var getImageUrl = function(backgroundImage){
  * @param  {StyleObjList}   styleObjList 
  * @param  {Function} onDone     
  */
-var readImagesInfo = function(styleObjList, onDone){
+function readImagesInfo(styleObjList, onDone){
 
     // pngjs 没有提供同步 api, 所以只能用异步的方式读取图片信息
     zTool.forEach(styleObjList, function(styleObj, url, next){
@@ -615,7 +641,7 @@ var readImagesInfo = function(styleObjList, onDone){
  *     size: 0 // 图片数据的大小
  * }
  */
-var readImageInfo = function(fileName, callback){
+function readImageInfo(fileName, callback){
     fileName = path.join(spriteConfig.workspace, fileName);
     fs.createReadStream(fileName).pipe(new PNG())
     .on('parsed', function() {
@@ -639,7 +665,7 @@ var readImageInfo = function(fileName, callback){
  * @param  {PNG}   image    
  * @param  {Function} callback callback(Number)
  */
-var getImageSize = function(image, callback){
+function getImageSize(image, callback){
     var size = 0;
 
     /*
@@ -661,7 +687,7 @@ var getImageSize = function(image, callback){
  * @param {StyleObj} styleObj 
  * @param {ImageInfo} imageInfo 
  */
-var setImageWidthHeight = function(styleObj, imageInfo){
+function setImageWidthHeight(styleObj, imageInfo){
     var w = 0, 
         h = 0, 
         mw = imageInfo.width, 
@@ -694,7 +720,7 @@ var setImageWidthHeight = function(styleObj, imageInfo){
  * 非 px 的值会忽略, 当成 0 来处理
  * @param  {String} cssValue 
  */
-var getPxValue = function(cssValue){
+function getPxValue(cssValue){
     if(cssValue && cssValue.indexOf('px') > -1){
         return parseInt(cssValue);
     }
@@ -712,7 +738,7 @@ var getPxValue = function(cssValue){
  * SpriteImageArray 的每个元素都是 StyleObj 数组, 
  * 一个 StyleObj 数组包含了一张精灵图的所有小图片
  */
-var positionImages = function(styleObjList){
+function positionImages(styleObjList){
     var styleObj,
         spriteArray = [],
         arr = [], 
@@ -799,7 +825,7 @@ var positionImages = function(styleObjList){
 // 5. 根据定位合并图片并输出, 同时修改样式表里面的background
 //****************************************************************
 
-var drawImageAndPositionBackground = function(spriteTask){
+function drawImageAndPositionBackground(spriteTask){
     
     var combinedCssRules,
         spriteArray = spriteTask.spriteArray;
@@ -879,7 +905,7 @@ var drawImageAndPositionBackground = function(spriteTask){
             nf.mkdirsSync(path.dirname(imageAbsName));
             png.pack().pipe(fs.createWriteStream(imageAbsName));
 
-            console.log('>>output image:', imageName2);
+            info('>>output image:', imageName2);
         }
     });
     
@@ -890,7 +916,7 @@ var drawImageAndPositionBackground = function(spriteTask){
  * @param  {Number} width 
  * @param  {Number} height
  */
-var createPng = function(width, height) {
+function createPng(width, height) {
     var png = new PNG({
         width: width,
         height: height
@@ -920,7 +946,7 @@ var createPng = function(width, height) {
  * @param  {Number} index       
  * @param  {Number} total       
  */
-var createSpriteImageName = function(cssFileName, index, total){
+function createSpriteImageName(cssFileName, index, total){
 
     var name = '';
     if(cssFileName){ // 去掉文件后缀, 提取出文件名字
@@ -934,7 +960,7 @@ var createSpriteImageName = function(cssFileName, index, total){
         name += '_' + index;
     }
     name = spriteConfig.output.prefix + name + '.' + spriteConfig.output.format;
-    return path.join(spriteConfig.output.imageDist, name);
+    return spriteConfig.output.imageDist + name;
 }
 
 /**
@@ -944,20 +970,27 @@ var createSpriteImageName = function(cssFileName, index, total){
  * @param  {StyleObj} styleObj    
  * @param  {Array} combinedSelectors 被合并了图片的选择器
  */
-var replaceAndPositionBackground = function(imageName, styleObj, combinedSelectors){
+function replaceAndPositionBackground(imageName, styleObj, combinedSelectors){
     styleObj.cssRules.forEach(function(style){
 
-        // 不再分别设置 background-image, 改为统一设置, 减少 css 文件大小
-        // style['background-image'] = 'url(' + imageName + ')';
+        if(spriteConfig.output.combineCSSRule){
 
-        style.removeProperty('background-image');
-        combinedSelectors.push(style.parentRule.selectorText);
+            // 不分别设置 background-image, 改为统一设置, 减少 css 文件大小
+            style.removeProperty('background-image');
+            if(style.parentRule.selectorText){
+                combinedSelectors.push(style.parentRule.selectorText);
+            }
+        }else{
+            style['background-image'] = 'url(' + imageName + ')';
+        }
 
         // set background-position-x
         setPxValue(style, 'background-position-x', styleObj.fit.x);
 
         // set background-position-y
         setPxValue(style, 'background-position-y', styleObj.fit.y);
+
+        style.setProperty('background-repeat', 'no-repeat', null);
 
         // mergeBackgound, 合并 background 属性, 减少代码量
         style.mergeBackgound();
@@ -968,7 +1001,7 @@ var replaceAndPositionBackground = function(imageName, styleObj, combinedSelecto
 /**
  * 调整 样式规则的像素值, 如果原来就有值, 则在原来的基础上变更
  */
-var setPxValue = function(style, attr, newValue){
+function setPxValue(style, attr, newValue){
     var value;
     if(style[attr]){
         value = parseInt(style[attr]);
@@ -990,7 +1023,7 @@ var setPxValue = function(style, attr, newValue){
  * @param  {Array} spriteTaskArray 
  * @return {Array} 转换后的 SpriteTask 数组, 只会包含一个 SpriteTask
  */
-var combineSpriteTasks = function(spriteTaskArray){
+function combineSpriteTasks(spriteTaskArray){
 
     var combinedStyleSheetArray = [],
         combinedStyleObjList = { 
@@ -999,7 +1032,7 @@ var combineSpriteTasks = function(spriteTaskArray){
         combinedFileName,
         combinedSpriteTask;
 
-    combinedFileName = 'all.css';
+    combinedFileName = DEFAULT_COMBINE_CSS_NAME;
     // combineFileName = path.resolve(combineFileName);
 
     spriteTaskArray.forEach(function(spriteTask){
@@ -1047,7 +1080,7 @@ var combineSpriteTasks = function(spriteTaskArray){
  * 输出修改后的样式表
  * @param  {SpriteTask} spriteTask        
  */
-var exportCssFile = function(spriteTask){
+function exportCssFile(spriteTask){
     var cssContentList = [],
         styleSheetArray = spriteTask.styleSheetArray,
         cssContent = '',
@@ -1073,16 +1106,18 @@ var exportCssFile = function(spriteTask){
     fileName = path.resolve(fileName);
     
     // 把合并了的样式统一在一起输出到文件的最后
-    combinedCssRules = spriteTask.combinedCssRules;
-    for(imageName in combinedCssRules){
-        cssContent += combinedCssRules[imageName].join(',') + '{' +
-                      'background-image: url(' + imageName +');' + 
-                     '}\n';
+    if(spriteConfig.output.combineCSSRule){
+        combinedCssRules = spriteTask.combinedCssRules;
+        for(imageName in combinedCssRules){
+            cssContent += combinedCssRules[imageName].join(',') + '{' +
+                          'background-image: url(' + imageName +');' + 
+                         '}\n';
+        }
     }
     
     cssContent = cssContentList.join('\n') + cssContent;
     nf.writeFileSync(fileName, cssContent, true);
-    console.log('>>output css:', fileName2, '\n');
+    info('>>output css:', fileName2, '\n');
 }
 
 /**
@@ -1090,7 +1125,7 @@ var exportCssFile = function(spriteTask){
  * @param  {StyleSheet} styleSheet 
  * @return {String} css 字符串
  */
-var styleSheetToString = function(styleSheet) {
+function styleSheetToString(styleSheet) {
     var result = "";
     var rules = styleSheet.cssRules, rule;
     for (var i=0; i<rules.length; i++) {
@@ -1130,16 +1165,16 @@ var spriteTaskArray = null;
 /**
  * sprite 开始之前执行的函数
  */
-var onSpriteStart = function(){
+function onSpriteStart(){
     spriteStart = +new Date;
 }
 
 /**
  * sprite 完成之后执行的函数
  */
-var onSpriteEnd = function(){
+function onSpriteEnd(){
     var timeUse = +new Date - spriteStart;
-    console.log('>>all done. time use:', timeUse, 'ms');
+    info('>>all done. time use:', timeUse, 'ms');
     onSpriteDone && onSpriteDone(timeUse);
 }
 

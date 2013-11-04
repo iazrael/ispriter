@@ -39,7 +39,7 @@ div{
 div:nth-of-type(5){
     width: 48px !important;
     height: 48px !important;
-    /* 动画变更背景图片 */
+    /* @FIXME 动画变更背景图片, 暂不支持 */
     -webkit-animation: forever 1s step-start infinite;
 }
 @-webkit-keyframes forever{
@@ -57,7 +57,7 @@ div:nth-of-type(6){
     width: 48px;
     height: 48px;
     background: url(../images/loading.png);
-    /* 动画变更背景图片的位置 */
+    /* @FIXME 动画变更背景图片的位置, 暂不支持  */
     -webkit-animation: circle 1s step-end infinite;
 }
 @-webkit-keyframes circle{

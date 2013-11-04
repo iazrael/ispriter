@@ -6,9 +6,14 @@
 var us = require('underscore');
 
 
+exports.startsWith = function(str, start){
+    var index = str.indexOf(start);
+    return index === 0;
+}
+
 exports.endsWith = function(str, end){
     var index = str.lastIndexOf(end);
-    return index + end.length == str.length;
+    return index + end.length === str.length;
 }
 
 exports.jsonParse = function(jsonStr){

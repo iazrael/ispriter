@@ -1,12 +1,13 @@
 {
+	"workspace": "../../", // 相对于当前目录, ../../ 也就是根目录
 	"input": {
-		"cssRoot": ["./css/style*.css"], //required
+		"cssRoot": ["test/css/main.css"], //required
 		"format": "png"//optional, 只支持输出PNG格式, 如果是其他格式, 也是以PNG格式输出, 仅仅把后缀改为其他后缀
 	},
 	"output": {
-		"cssRoot": "./sprite_output/css/",//required
-		"imageRoot": "../images/",//optional 相对于 cssRoot 的路径, 默认 "./image/", 最终会变成合并后的的图片路径写在css文件中
-		"maxSize": 60,//optional 图片容量的最大大小, 单位 KB, 默认 0
+		"cssRoot": "examples/import-css/css/",//required
+		"imageRoot": "../img/",//optional 相对于 cssRoot 的路径, 默认 "./image/", 最终会变成合并后的的图片路径写在css文件中
+		"maxSize": 0,//optional 图片容量的最大大小, 单位 KB, 默认 0
 		"margin": 5,//optional 合成之后, 图片间的空隙, 默认 0
 		"prefix": "sprite_",//optional 
 		"format": "png",//optional 输出的图片格式

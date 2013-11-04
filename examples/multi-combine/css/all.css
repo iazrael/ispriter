@@ -1,0 +1,44 @@
+body {background: #ddd;}
+div {min-height: 10px; border: 1px solid #8A7676; margin: 20px; min-width: 10px; float: left;}
+div:nth-of-type(1) {width: 12px; height: 12px; background: -86px -73px no-repeat;}
+div:nth-of-type(2) {background: 0 -43px no-repeat;}
+div:nth-of-type(3) {width: 43px; height: 43px; background: -192px 0 no-repeat;}
+div:nth-of-type(4) {width: 15px; height: 18px; background: -84px -149px no-repeat;}
+div:nth-of-type(5) {width: 15px; height: 15px; background: -86px -53px no-repeat;}
+div:nth-of-type(6) {width: 20px; height: 20px; background: -192px -91px no-repeat;}
+div:nth-of-type(7) {width: 15px; height: 18px; background: -64px -149px no-repeat;}
+div:nth-of-type(8) {width: 16px; height: 16px; background: -217px -91px no-repeat;}
+div:nth-of-type(9) {width: 16px; height: 16px; background: -192px -116px no-repeat;}
+div:nth-of-type(10) {width: 16px; height: 16px; background: -160px -53px no-repeat;}
+div:nth-of-type(11) {width: 16px; height: 16px; background: -139px -74px no-repeat;}
+div:nth-of-type(12) {width: 16px; height: 16px; border: 1px dotted red; background-image: url(http://www.qq.com/cdn/images/level_4.png);}
+div:nth-of-type(13) {width: 16px; height: 16px; border: 1px dotted red; background-image: url(../images/level_5_no_exits.png);}
+div:nth-of-type(14) {width: 38px; height: 38px; background: -192px -48px no-repeat;}
+div:nth-of-type(15) {width: 13px; height: 11px; background: blue -103px -73px no-repeat;}
+div:nth-of-type(16) {width: 46px; height: 44px; background: -106px -96px no-repeat;}
+div:nth-of-type(17) {width: 48px; height: 48px; background: -53px -96px no-repeat;}
+div:nth-of-type(18) {width: 48px; height: 48px; background: 0 -96px no-repeat;}
+div:nth-of-type(19) {width: 48px; height: 48px; border: 1px dotted red; background: 0 -96px no-repeat;}
+div:nth-of-type(20) {width: 15px; height: 12px; background: -106px -53px no-repeat;}
+div:nth-of-type(21) {width: 40px; height: 38px; background: -41px 0 no-repeat;}
+
+body {background: #bbb;}
+div {min-height: 10px; border: 1px solid #8A7676; margin: 20px; min-width: 10px; float: left;}
+div:nth-of-type(1) {width: 48px; height: 48px; background: -86px 0 no-repeat;}
+div:nth-of-type(2) {width: 48px; height: 48px; background: 0 -43px no-repeat;}
+div:nth-of-type(3) {width: 43px; height: 43px; background: -192px 0 no-repeat;}
+div:nth-of-type(4) {width: 79px; height: 18px; background: -84px -149px no-repeat;}
+div:nth-of-type(5) {width: 15px; height: 15px; background: -86px -53px no-repeat;}
+div:nth-of-type(6) {width: 20px; height: 60px; background: 0 -172px no-repeat;}
+div:nth-of-type(7) {width: 16px; height: 16px; background: -139px -53px no-repeat;}
+div:nth-of-type(8) {width: 20px; height: 20px; background: -192px -91px no-repeat;}
+div:nth-of-type(9) {width: 79px; height: 18px; background: 0 -149px no-repeat;}
+div:nth-of-type(10) {width: 16px; height: 16px; background: -217px -91px no-repeat;}
+div:nth-of-type(11) {width: 16px; height: 16px; background: -192px -116px no-repeat;}
+div:nth-of-type(12) {width: 16px; height: 16px; background: -160px -53px no-repeat;}
+div:nth-of-type(13) {width: 16px; height: 16px; background: -139px -74px no-repeat;}
+div:nth-of-type(14) {width: 16px; height: 16px; background: -213px -116px no-repeat;}
+div:nth-of-type(15) {width: 16px; height: 16px; background: -160px -74px no-repeat;}
+div:nth-of-type(16) {width: 48px; height: 48px; background: -139px 0 no-repeat;}
+div:nth-of-type(17) {width: 81px; height: 38px; background: 0 0 no-repeat;}
+div:nth-of-type(21),div:nth-of-type(17),div:nth-of-type(2),div:nth-of-type(2),div:nth-of-type(1),div:nth-of-type(16),div:nth-of-type(18),div:nth-of-type(19),div:nth-of-type(17),div:nth-of-type(16),div:nth-of-type(3),div:nth-of-type(3),div:nth-of-type(7),div:nth-of-type(9),div:nth-of-type(4),div:nth-of-type(4),div:nth-of-type(14),div:nth-of-type(6),div:nth-of-type(6),div:nth-of-type(8),div:nth-of-type(8),div:nth-of-type(10),div:nth-of-type(9),div:nth-of-type(11),div:nth-of-type(14),div:nth-of-type(7),div:nth-of-type(10),div:nth-of-type(12),div:nth-of-type(11),div:nth-of-type(13),div:nth-of-type(15),div:nth-of-type(5),div:nth-of-type(5),div:nth-of-type(20),div:nth-of-type(1),div:nth-of-type(15){background-image: url(../img/sprite_all.png);}
