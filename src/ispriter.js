@@ -25,7 +25,7 @@ var DEFAULT_CONFIG = {
     /**
      * 调试时使用, 输出调试日志
      */
-    "debug": false,
+    "debug": true,
 
     /**
      * 精灵图合并算法, 目前只有 growingpacker
@@ -189,14 +189,16 @@ function readConfig(config){
     config = config || {};
 
     // 适配最简配置
-    if(us.isString(config.input)){
+    if(us.isString(config.input) || us.isArray(config.input)){
         config.input = {
             cssSource: config.input
         };
     }
-    if(us.isString(config.output)){
+    if(!config.output){
+        config.output = {};
+    }else if(us.isString(config.output)){
         config.output = {
-            cssSource: config.output
+            cssDist: config.output
         }
     }
 
@@ -205,6 +207,8 @@ function readConfig(config){
 
     // 
     config = zTool.merge({}, DEFAULT_CONFIG, config);
+    console.log(config);
+
 
     var cssSource = config.input.cssSource;
     if(!cssSource){

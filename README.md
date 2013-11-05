@@ -183,6 +183,8 @@
 
     ispriter -c config.example.json
 
+    ispriter -f style.css, style2.css ...
+
 ### 从 [Mod](https://github.com/modulejs/modjs) 中调用
 
     // Modfile

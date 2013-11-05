@@ -6,25 +6,89 @@
 
 var fs = require('fs'),
     path = require('path'),
+    us = require('underscore'),
     program = require('commander'),
+    zTool = require('../src/ztool'),
     ispriter = require('../src/ispriter.js');
 
+function handleConfigFile(configFile){
+    if(us.isEmpty(configFile) || !us.isString(configFile) || !configFile.trim()){
+        console.log("you haven't specify the config file");
+        return;
+    }
+    configFile = path.resolve(configFile);
+    if(!fs.existsSync(configFile)){
+        console.log("the config file is not exists: " + configFile);
+    }else{
+        ispriter.merge(configFile);
+    }
+}
+
+function handleCSSFiles(fileList){
+    var config = {};
+    if(us.isEmpty(fileList) || !fileList.trim()){
+        console.log("you haven't specify a css file");
+        return;
+    }
+
+    fileList = fileList.split(',');
+    config.input = [];
+
+    fileList.forEach(function(file){
+        if(file && file.trim()){
+            config.input.push(file.trim());
+        }
+    });
+    ispriter.merge(config);
+}
+
+function handleHelpCommand(){
+    console.log('  Examples:');
+    console.log('');
+    console.log('    ispriter -c config.json');
+    console.log('    ispriter -f style.css, style2.css, style3.css');
+    console.log('');
+}
 
 program
-  .version('0.2.2')
-  .usage('[options] [file]')
-  .option('-c, --config [file]', 'assign the config file')
-  .parse(process.argv);
+    .version('0.3.0')
+    .usage('[options] <file ...>')
+    .option('-c, --config [file]', 'assign the config file')
+    .option('-f, --files [file list]', 'assign the css files, split with ","')
+    .on('--help', handleHelpCommand)
+    .parse(process.argv);
 
-var configFile = program.config;
+console.log(program)
 
-if(!configFile || typeof configFile !== 'string' || !configFile.trim()){
-    console.log("you haven't specify the config file");
-    return;
-}
-configFile = path.resolve(configFile);
-if(!fs.existsSync(configFile)){
-    console.log("the config file is not exists: " + configFile);
+if(program.config){
+    handleConfigFile(program.config);
+
+}else if(program.files){
+    if(us.isEmpty(program.files) || !us.isString(program.files) || 
+            !program.files.trim()){
+
+        console.log("you haven't specify a css file");
+        return;
+    }
+
+    handleCSSFiles(program.files + program.args.join(''));
+    
+}else if(program.args.length){
+    var args = program.args,
+        name = args[0];
+    if(args.length === 1){
+        if(zTool.endsWith(name, '.json')){
+            handleConfigFile(name);
+        }else if(zTool.endsWith(name, '.css')){
+            handleCSSFiles(name);
+        }else{
+            handleHelpCommand();
+        }
+    }else{
+        handleCSSFiles(args.join(''));
+    }
+
 }else{
-    ispriter.merge(configFile);
+    handleHelpCommand();
 }
+
