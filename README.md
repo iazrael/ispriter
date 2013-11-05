@@ -171,9 +171,13 @@
 
     var spriter = require('ispriter');
 
-    var configFile = '../src/config.example.json';
+    spriter.merge('../src/config.example.json');
 
-    spriter.merge(configFile);
+    or 
+
+    spriter.merge({
+        input: ['./css/style.css', './css/style2.css']
+    });
 
 ### 从命令行调用
     
@@ -182,6 +186,8 @@
     cd ./test
 
     ispriter -c config.example.json
+    
+    or
 
     ispriter -f style.css, style2.css ...
 

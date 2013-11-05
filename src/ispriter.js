@@ -207,8 +207,6 @@ function readConfig(config){
 
     // 
     config = zTool.merge({}, DEFAULT_CONFIG, config);
-    console.log(config);
-
 
     var cssSource = config.input.cssSource;
     if(!cssSource){
@@ -701,6 +699,14 @@ function setImageWidthHeight(styleObj, imageInfo){
     styleObj.cssRules.forEach(function(style){
         w = getPxValue(style.width),
         h = getPxValue(style.height);
+
+        // TODO 这一步有必要么? // 没有设置宽高的样式, 用图片的大小来设置
+        // if(!style.hasOwnProperty('width')){
+        //     style.setProperty('width', imageInfo.width + 'px', null);
+        // }
+        // if(!style.hasOwnProperty('height')){
+        //     style.setProperty('height', imageInfo.height + 'px', null);
+        // }
         if(w > mw){
             mw = w;
         }

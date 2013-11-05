@@ -7,12 +7,14 @@ div:nth-of-type(4) {width: 15px; height: 18px; background: -99px -96px no-repeat
 div:nth-of-type(5) {width: 15px; height: 15px; background: -21px -145px no-repeat;}
 div:nth-of-type(6) {width: 20px; height: 20px; background: -86px -53px no-repeat;}
 div:nth-of-type(7) {width: 15px; height: 18px; background: -163px -119px no-repeat;}
-div:nth-of-type(8) {width: 16px; height: 16px; background: -53px -43px no-repeat;}
-div:nth-of-type(9) {width: 16px; height: 16px; background: -53px -64px no-repeat;}
-div:nth-of-type(10) {width: 16px; height: 16px; background: 0 -145px no-repeat;}
-div:nth-of-type(11) {width: 16px; height: 16px; background: -111px -53px no-repeat;}
-div:nth-of-type(12) {width: 16px; height: 16px; border: 1px dotted red; background-image: url(http://www.qq.com/cdn/images/level_4.png);}
-div:nth-of-type(13) {width: 16px; height: 16px; border: 1px dotted red; background-image: url(../images/level_5_no_exits.png);}
+div:nth-of-type(8), div:nth-of-type(9), div:nth-of-type(10), div:nth-of-type(11),
+        div:nth-of-type(12), div:nth-of-type(13) {width: 16px; height: 16px;}
+div:nth-of-type(8) {background: -53px -43px no-repeat;}
+div:nth-of-type(9) {background: -53px -64px no-repeat;}
+div:nth-of-type(10) {background: 0 -145px no-repeat;}
+div:nth-of-type(11) {background: -111px -53px no-repeat;}
+div:nth-of-type(12) {border: 1px dotted red; background-image: url(http://www.qq.com/cdn/images/level_4.png);}
+div:nth-of-type(13) {border: 1px dotted red; background-image: url(../images/level_5_no_exits.png);}
 div:nth-of-type(14) {width: 38px; height: 38px; background: -139px -53px no-repeat;}
 div:nth-of-type(15) {width: 13px; height: 11px; background: blue -41px -145px no-repeat;}
 div:nth-of-type(16) {width: 46px; height: 44px; background: 0 -96px no-repeat;}

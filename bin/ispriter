@@ -45,6 +45,7 @@ function handleCSSFiles(fileList){
 function handleHelpCommand(){
     console.log('  Examples:');
     console.log('');
+    console.log('    ispriter -h');
     console.log('    ispriter -c config.json');
     console.log('    ispriter -f style.css, style2.css, style3.css');
     console.log('');
@@ -58,8 +59,6 @@ program
     .on('--help', handleHelpCommand)
     .parse(process.argv);
 
-console.log(program)
-
 if(program.config){
     handleConfigFile(program.config);
 
@@ -72,7 +71,7 @@ if(program.config){
     }
 
     handleCSSFiles(program.files + program.args.join(''));
-    
+
 }else if(program.args.length){
     var args = program.args,
         name = args[0];
@@ -91,4 +90,3 @@ if(program.config){
 }else{
     handleHelpCommand();
 }
-

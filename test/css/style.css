@@ -45,36 +45,29 @@ div:nth-of-type(7){
     /* 位置有偏移的, 已合并的图片 */
     background: url(../images/gray-star.png) -64px 0;
 }
-div:nth-of-type(8){
+div:nth-of-type(8), div:nth-of-type(9), div:nth-of-type(10), div:nth-of-type(11),
+        div:nth-of-type(12), div:nth-of-type(13){
     width: 16px;
     height: 16px;
+}
+div:nth-of-type(8){
     background: url(../images/level_0.png);
 }
 div:nth-of-type(9){
-    width: 16px;
-    height: 16px;
     background: url(../images/level_1.png);
 }
 div:nth-of-type(10){
-    width: 16px;
-    height: 16px;
     background: url(../images/level_2.png);
 }
 div:nth-of-type(11){
-    width: 16px;
-    height: 16px;
     background: url(../images/level_3.png);
 }
 div:nth-of-type(12){
-    width: 16px;
-    height: 16px;
     border: 1px dotted red;
     /* 网络的图片 */
     background: url(http://www.qq.com/cdn/images/level_4.png);
 }
 div:nth-of-type(13){
-    width: 16px;
-    height: 16px;
     border: 1px dotted red;
     /* 不存在的图片 */
     background: url(../images/level_5_no_exits.png);
