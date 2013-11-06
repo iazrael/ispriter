@@ -1288,11 +1288,5 @@ exports.merge = function(config, done){
 
 // Task.JS Specification API https://github.com/taskjs/spec
 exports.run = function(options, done){
-<<<<<<< HEAD
-    onMergeFinish = onMergeFinish.bind(this, done);
-    exports.merge(options);
-}
-=======
     exports.merge(options, done);
 }
->>>>>>> v3.0dev
