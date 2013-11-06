@@ -26,7 +26,7 @@ div:nth-of-type(4){
     width: 15px;
     height: 18px;
     /* 已合并的图片 */
-    background: url(../images/bright-star.png);
+    background: url(../images/bright-star1.png);
 }
 div:nth-of-type(5){
     width: 15px;
@@ -43,7 +43,7 @@ div:nth-of-type(7){
     width: 15px;
     height: 18px;
     /* 位置有偏移的, 已合并的图片 */
-    background: url(../images/gray-star.png) -64px 0;
+    background: url(../images/gray-star2.png) -64px 0;
 }
 div:nth-of-type(8), div:nth-of-type(9), div:nth-of-type(10), div:nth-of-type(11),
         div:nth-of-type(12), div:nth-of-type(13){

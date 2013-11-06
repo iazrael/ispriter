@@ -33,7 +33,7 @@ div{
         width: 15px;
         height: 18px;
         /* 位置有偏移的, 已合并的图片 */
-        background: url(../images/bright-star.png) -32px 0;
+        background: url(../images/bright-star1.png) -32px 0;
     }
 }
 div:nth-of-type(5){
@@ -93,7 +93,7 @@ div:nth-of-type(6){
 div:nth-of-type(7){
     width: 110px;
     height: 110px;
-    background: url(../images/play_icon.png);
+    background: url(../images/play_icon1.png);
 }
 div:nth-of-type(8){
     width: 20px;

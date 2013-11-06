@@ -26,7 +26,7 @@ div:nth-of-type(3){
 div:nth-of-type(4){
     width: 79px;
     height: 18px;
-    background: url(../images/bright-star.png);
+    background: url(../images/bright-star1.png);
 }
 div:nth-of-type(5){
     width: 15px;
@@ -51,7 +51,7 @@ div:nth-of-type(8){
 div:nth-of-type(9){
     width: 79px;
     height: 18px;
-    background: url(../images/gray-star.png);
+    background: url(../images/gray-star2.png);
 }
 div:nth-of-type(10){
     width: 16px;
