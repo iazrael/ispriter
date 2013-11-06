@@ -9,7 +9,7 @@ var fs = require('fs'),
     us = require('underscore'),
     program = require('commander'),
     zTool = require('../src/ztool'),
-    ispriter = require('../src/ispriter.js');
+    ispriter = require('../src/ispriter');
 
 function handleConfigFile(configFile){
     if(us.isEmpty(configFile) || !us.isString(configFile) || !configFile.trim()){

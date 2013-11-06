@@ -19,6 +19,7 @@
     "cssom",
     "pngjs",
     "underscore",
-    "commander"
+    "commander",
+    "clean-css"
   ]
 }

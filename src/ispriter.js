@@ -5,6 +5,7 @@ var fs = require('fs'),
     us = require('underscore'),
     CSSOM = require('cssom'),
     PNG = require('pngjs').PNG,
+    CleanCSS = require('clean-css'),
     GrowingPacker = require('./GrowingPacker'),
     BI = require('./BackgroundInterpreter'),
     nf = require('./node-file'),
@@ -117,7 +118,7 @@ var DEFAULT_CONFIG = {
         "margin": 0,
 
         /**
-         * 生成的精灵图的前缀
+         * 配置生成的精灵图的前缀
          * 
          * @optional
          * @default "sprite_"
@@ -151,7 +152,18 @@ var DEFAULT_CONFIG = {
          * @optional
          * @default true
          */
-        "combineCSSRule": true
+        "combineCSSRule": true,
+
+        /**
+         * 配置是否压缩 css 文件, 将使用 clean-css 进行压缩, 其值如下:
+         * false: 不进行压缩; 
+         * true: 用 clean-css 的默认配置进行压缩; 
+         * Object{"keepBreaks": true, ... }: 用指定的配置进行压缩.
+         *
+         * @optional
+         * @default false
+         */
+        "compress": false
     }
 };
 
@@ -1139,6 +1151,9 @@ function exportCssFile(spriteTask){
     }
     
     cssContent = cssContentList.join('\n') + cssContent;
+    if(spriteConfig.output.compress){ // 压缩
+        cssContent = new CleanCSS().minify(cssContent);
+    }
     nf.writeFileSync(fileName, cssContent, true);
     info('>>Output css:', fileName2);
 }
