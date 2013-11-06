@@ -1,16 +1,17 @@
 body{
-    background: #ddd;
+    background: #bbb;
 }
 div{
     min-height: 10px;
-    border: 1px solid #339;
+    border: 1px solid #8A7676;
     margin: 20px;
     min-width: 10px;
+    float: left;
 }
 div:nth-of-type(1){
-    width: 12px;
-    height: 12px;
-    background: url(../images/add.png);
+    width: 48px;
+    height: 48px;
+    background: url(../images/appmarket.png);
 }
 div:nth-of-type(2){
     width: 48px;
@@ -25,7 +26,7 @@ div:nth-of-type(3){
 div:nth-of-type(4){
     width: 79px;
     height: 18px;
-    background: url(../images/bright-star.png);
+    background: url(../images/bright-star1.png);
 }
 div:nth-of-type(5){
     width: 15px;
@@ -50,7 +51,7 @@ div:nth-of-type(8){
 div:nth-of-type(9){
     width: 79px;
     height: 18px;
-    background: url(../images/gray-star.png);
+    background: url(../images/gray-star2.png);
 }
 div:nth-of-type(10){
     width: 16px;
@@ -84,13 +85,12 @@ div:nth-of-type(15){
 }
 
 div:nth-of-type(16){
-    width: 38px;
-    height: 38px;
-    background: url(../images/info.png);
+    width: 48px;
+    height: 48px;
+    background: url(../images/file_rar.png);
 }
 div:nth-of-type(17){
-    width: 13px;
-    height: 11px;
-    background: url(../images/open.png);
+    width: 81px;
+    height: 38px;
+    background: url(../images/tips_icons.png);
 }
-

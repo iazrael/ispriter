@@ -1,0 +1,15 @@
+{
+    "workspace": "../../", // 相对于当前目录, ../../ 也就是根目录
+
+    "input": ["test/css/style.css"],
+    "output": {
+
+        "cssDist": "examples/limit-image-size/css/",
+
+        "imageDist": "../img/",
+
+        "maxSingleSize": 20,
+
+        "margin": 5
+    }
+}

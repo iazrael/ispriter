@@ -221,7 +221,11 @@ var isDirectoryPath = function(dir){
 var query = function(root, pattern){
     var reg = explainPattern(pattern);
     var sources = listFilesSync(root, false, true);
+<<<<<<< HEAD
     // console.log(sources)
+=======
+
+>>>>>>> v3.0dev
     var result = [];
     for(var i = 0, s; s = sources[i]; i++){
         if(reg.test(s)){
@@ -239,11 +243,20 @@ var explainPattern = function(pattern){
         '?': '[^\\' + sep + ']{1}',
         '/': '\\' + sep,
         '.': '\\.'
+<<<<<<< HEAD
     }
     var reg = pattern.replace(/\*\*|\*|\?|\/|\./g, function(m, i, str){
         return map[m] || m;
     });
     console.log(reg);
+=======
+    };
+
+    var reg = pattern.replace(/\*\*|\*|\?|\/|\./g, function(m, i, str){
+        return map[m] || m;
+    });
+
+>>>>>>> v3.0dev
     reg = new RegExp('^' + reg);
     return reg;
 }

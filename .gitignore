@@ -4,3 +4,23 @@
 ispriter.sublime-project
 
 ispriter.sublime-workspace
+/examples/single/css
+/examples/single/img
+/examples/multi/css
+/examples/multi/img
+/examples/multi-combine/css
+/examples/multi-combine/img
+/examples/multi/css
+/examples/multi/img
+
+examples/animation/img/
+
+examples/animation/css/
+
+examples/import-css/css/
+
+examples/import-css/img/
+
+examples/limit-image-size/css/
+
+examples/limit-image-size/img/
