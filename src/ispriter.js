@@ -25,7 +25,7 @@ var DEFAULT_CONFIG = {
     /**
      * 调试时使用, 输出调试日志
      */
-    "debug": true,
+    "debug": false,
 
     /**
      * 精灵图合并算法, 目前只有 growingpacker
@@ -263,19 +263,19 @@ function readConfig(config){
  * @return {Config}        
  */
 function adjustOldProperty(config){
-    if(!config.input.cssSource && config.input.cssRoot){
+    if(!config.input.cssSource && 'cssRoot' in config.input){
         config.input.cssSource = config.input.cssRoot;
         delete config.input.cssRoot;
     }
-    if(!config.output.cssDist && config.output.cssRoot){
+    if(!config.output.cssDist && 'cssRoot' in config.output){
         config.output.cssDist = config.output.cssRoot;
         delete config.output.cssRoot;
     }
-    if(!config.output.imageDist && config.output.imageRoot){
+    if(!config.output.imageDist && 'imageRoot' in config.output){
         config.output.imageDist = config.output.imageRoot;
         delete config.output.imageRoot;
     }
-    if(!config.output.maxSingleSize && config.output.maxSize){
+    if(!config.output.maxSingleSize && 'maxSize' in config.output){
         config.output.maxSingleSize = config.output.maxSize;
         delete config.output.maxSize;
     }
@@ -384,12 +384,11 @@ var BaseCSSStyleDeclaration = {
                'background-origin', 'background-clip'
         ];
         for(var i = 0, item; item = toMergeAttrs[i]; i++) {
-            if(style[item]){
+            if(style.hasOwnProperty(item)){
                 background += this.removeProperty(item) + ' ';
             }
         }
-        style['background'] = background.trim();
-        style[style.length++] = 'background';
+        style.setProperty('background', background.trim(), null);
     },
 
     /**
@@ -563,6 +562,7 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
             if(!fs.existsSync(fileName)){
 
                 // 如果这个图片是不存在的, 就直接返回了, 进行容错
+                info('>>>>Skip: "' + fileName + '" is not exist.');
                 return;
             }
 
@@ -613,12 +613,21 @@ function readImagesInfo(styleObjList, onDone){
         var imageInfo = imageInfoCache[url];
 
         var onGetImageInfo = function(imageInfo){
-            imageInfoCache[url] = imageInfo;
+            if(imageInfo){
+                imageInfoCache[url] = imageInfo;
 
-            // 从所有style里面，选取图片宽高最大的作为图片宽高
-            setImageWidthHeight(styleObj, imageInfo);
+                // 从所有style里面，选取图片宽高最大的作为图片宽高
+                setImageWidthHeight(styleObj, imageInfo);
 
-            styleObj.imageInfo = imageInfo;
+                styleObj.imageInfo = imageInfo;
+
+            }else{ // 没有读取到图片信息, 可能是图片签名或格式不对, 读取出错了
+                delete imageInfoCache[url];
+                delete styleObjList[url];
+                styleObj.cssRules.forEach(function(style){
+                    style.mergeBackgound();
+                });
+            }
             next();
         }
 
@@ -658,6 +667,10 @@ function readImageInfo(fileName, callback){
             imageInfo.size = size;
             callback(imageInfo);
         });
+    })
+    .on('error', function(e){
+        info('>>>>Skip: ' + e.message + ' of "' + fileName + '"');
+        callback(null);
     });
 }
 
@@ -914,7 +927,7 @@ function drawImageAndPositionBackground(spriteTask){
             nf.mkdirsSync(path.dirname(imageAbsName));
             png.pack().pipe(fs.createWriteStream(imageAbsName));
 
-            info('>>output image:', imageName2);
+            info('>>Output image:', imageName2);
         }
     });
     
@@ -1126,7 +1139,7 @@ function exportCssFile(spriteTask){
     
     cssContent = cssContentList.join('\n') + cssContent;
     nf.writeFileSync(fileName, cssContent, true);
-    info('>>output css:', fileName2, '\n');
+    info('>>Output css:', fileName2);
 }
 
 /**
@@ -1183,7 +1196,7 @@ function onSpriteStart(){
  */
 function onSpriteEnd(){
     var timeUse = +new Date - spriteStart;
-    info('>>all done. time use:', timeUse, 'ms');
+    info('>>All done: Time use:', timeUse, 'ms');
     onSpriteDone && onSpriteDone(timeUse);
 }
 
