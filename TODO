@@ -1,5 +1,0 @@
-0. 修改 config 为新的 config [done]
-1. 给没有设置宽高的 style 加上图片的宽高来做为样式宽高, 不能单纯的加, 要加上智能判断:当前上下文有没有相同的 selector 已经设置过宽高, 有就不能加
-2. 动画用了背景图片的, 也要进行合并
-3. 默认 ispriter 可以不带 -c 参数 [done]
-4. 支持用 cleancss 压缩 css [done]
