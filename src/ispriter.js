@@ -554,6 +554,7 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
             if(regexp.ignoreNetwork.test(imageUrl)){
 
                 // 这里直接返回了, 因为一个style里面是不会同时存在两个 background-image 的
+                info('>>Skip: Network image "' + imageUrl + '"');
                 return;
             }
             imageAbsUrl = path.join(styleSheetDir, imageUrl);
@@ -562,7 +563,7 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
             if(!fs.existsSync(fileName)){
 
                 // 如果这个图片是不存在的, 就直接返回了, 进行容错
-                info('>>>>Skip: "' + fileName + '" is not exist.');
+                info('>>Skip: "' + fileName + '" is not exist');
                 return;
             }
 
@@ -669,7 +670,7 @@ function readImageInfo(fileName, callback){
         });
     })
     .on('error', function(e){
-        info('>>>>Skip: ' + e.message + ' of "' + fileName + '"');
+        info('>>Skip: ' + e.message + ' of "' + fileName + '"');
         callback(null);
     });
 }
