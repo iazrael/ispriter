@@ -62,31 +62,31 @@ div:nth-of-type(6){
 }
 @-webkit-keyframes circle{
     0%{
-      background-position-x: 0%;
+      background-position-x: 0;
     }
     12.5%{
-      background-position-x: -100%;
+      background-position-x: -48px;
     }
     25%{
-      background-position-x: -200%;
+      background-position-x: -96px;
     }
     37.5%{
-      background-position-x: -300%;
+      background-position-x: -144px;
     }
     50%{
-      background-position-x: -400%;
+      background-position-x: -192px;
     }
     62.5%{
-      background-position-x: -500%;
+      background-position-x: -240px;
     }
     75%{
-      background-position-x: -600%;
+      background-position-x: -288px;
     }
     87.5%{
-      background-position-x: -700%;
+      background-position-x: -336px;
     }
     100%{
-      background-position-x: -800%;
+      background-position-x: -384px;
     }
 }
  
