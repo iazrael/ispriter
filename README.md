@@ -188,9 +188,7 @@
 
     or 
 
-    spriter.merge({
-        input: ['./css/style.css', './css/style2.css']
-    });
+    spriter.merge(['./css/style.css', './css/style2.css']);
 
 ### 从命令行调用
     

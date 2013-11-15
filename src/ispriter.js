@@ -197,6 +197,10 @@ function readConfig(config){
         }
         var content = fs.readFileSync(config).toString();
         config = zTool.jsonParse(content);
+    }else if(us.isArray(config)){
+        config = {
+            input: config
+        };
     }
     config = config || {};
 
