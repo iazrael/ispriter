@@ -31,6 +31,7 @@
 + 支持读取 @import 的样式表进行处理 【新】
 + 支持将所有合并了图片的 CSS 统一输出, 减少代码量 【新】
 + 支持对输出的 CSS 进行压缩(使用 clean-css)【新】
++ 支持排除不需要合并的图片【新】
 + 跳过 background-position 是 right/center/bottom 的图片
 + 跳过显式的设置平铺方式为 repreat 的图片
 + 跳过设置了 background-size 的图片
@@ -234,7 +235,16 @@
             }
         }
     }
+
+### 排除不需要合并的图片
+只要在写样式的时候，在 background-image 的图片url加上 #unsprite 即可，例如：
     
+    background: url(../images/loading.png#unsprite);
+
+    background: url(../images/loading.png?t=123#unsprite);
+
+    background: url(../images/loading.png#hash#unsprite);
+
 Example
 =======
 

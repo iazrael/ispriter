@@ -13,7 +13,7 @@ div{
     div:nth-of-type(1){
         width: 48px;
         height: 48px;
-        background: url(../images/doc.png);
+        background: url(../images/doc.png?t=123#unsprite);
     }
     div:nth-of-type(2){
         width: 48px;
@@ -56,7 +56,7 @@ div:nth-of-type(5){
 div:nth-of-type(6){
     width: 48px;
     height: 48px;
-    background: url(../images/loading.png);
+    background: url(../images/loading.png#unsprite);
     /* @FIXME 动画变更背景图片的位置, 暂不支持  */
     -webkit-animation: circle 1s step-end infinite;
 }

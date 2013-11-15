@@ -429,8 +429,9 @@ var regexp = {
     ignoreNetwork: /^(https?|ftp):\/\//i,
     ignorePosition: /right|center|bottom/i,
     ignoreRepeat: /^(repeat-x|repeat-y|repeat)$/i,
-    image: /\(['"]?(.+\.(png|jpg|jpeg))(\?.*?)?['"]?\)/i,
-    css: /(.+\.css).*/i
+    image: /\(['"]?(.+\.(png|jpg|jpeg))((\?|#).*?)?['"]?\)/i,
+    css: /(.+\.css).*/i,
+    ignoreImage: /#unsprite\b/i
 
 }
 
@@ -555,20 +556,12 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
             return;
         }
 
-        var imageUrl, 
+        var imageUrl = getImageUrl(style), 
             imageAbsUrl,
             fileName;
-        if(style['background-image'] && 
-            style['background-image'].indexOf(',') == -1 && // FIXME 暂时忽略掉多背景的属性
-            (imageUrl = getImageUrl(style['background-image']))){
-            
-            // 遇到写绝对路径的图片就跳过
-            if(regexp.ignoreNetwork.test(imageUrl)){
 
-                // 这里直接返回了, 因为一个style里面是不会同时存在两个 background-image 的
-                info('>>Skip: Network image "' + imageUrl + '"');
-                return;
-            }
+        if(imageUrl){
+
             imageAbsUrl = path.join(styleSheetDir, imageUrl);
             fileName = path.join(spriteConfig.workspace, imageAbsUrl);
             
@@ -598,13 +591,48 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
  * 从background-image 的值中提取图片的路径
  * @return {String}       url
  */
-function getImageUrl(backgroundImage){
-    var format = spriteConfig.input.format;
-    var m = backgroundImage.match(regexp.image);
-    if(m && format.indexOf(m[2]) > -1){
-        return m[1];
+function getImageUrl(style){
+    var format = spriteConfig.input.format,
+        backgroundImage = style['background-image'],
+        url = null,
+        match;
+
+    if(!backgroundImage){
+        return null;
     }
-    return null;
+
+    if(backgroundImage.indexOf(',') > -1){
+
+        // FIXME 暂时忽略掉多背景的属性
+        return null;
+    }
+
+    match = backgroundImage.match(regexp.image);
+
+    if(match && format.indexOf(match[2]) > -1){ // 去掉非指定后缀的图片
+        url = match[1];
+        
+        if(regexp.ignoreImage.test(backgroundImage)){ // 去掉不需要合并图片
+
+            info('>>Skip: Unsprite image "' + url + '"');
+            url = backgroundImage.replace(regexp.ignoreImage, '');
+            style.setProperty('background-image', url, null);
+            return null;
+        }
+
+    }else{
+        debug('not match image bg: '+ backgroundImage);
+    }
+    
+    // 遇到网络图片就跳过
+    if(regexp.ignoreNetwork.test(url)){
+
+        // 这里直接返回了, 因为一个style里面是不会同时存在两个 background-image 的
+        info('>>Skip: Network image "' + url + '"');
+        return null;
+    }
+    
+    return url;
 }
 //****************************************************************
 // 3. 收集图片相关信息
