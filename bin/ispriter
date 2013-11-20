@@ -8,6 +8,7 @@ var fs = require('fs'),
     path = require('path'),
     us = require('underscore'),
     program = require('commander'),
+    pkg = require("../package.json"),
     zTool = require('../src/ztool'),
     ispriter = require('../src/ispriter');
 
@@ -49,10 +50,11 @@ function handleHelpCommand(){
     console.log('    ispriter -c config.json');
     console.log('    ispriter -f style.css, style2.css, style3.css');
     console.log('');
+    console.log('  see more: ' + pkg.homepage);
 }
 
 program
-    .version('0.3.0')
+    .version(pkg.version)
     .usage('[options] <file ...>')
     .option('-c, --config [file]', 'assign the config file')
     .option('-f, --files [file list]', 'assign the css files, split with ","')
