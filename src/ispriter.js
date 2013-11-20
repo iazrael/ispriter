@@ -163,7 +163,15 @@ var DEFAULT_CONFIG = {
          * @optional
          * @default false
          */
-        "compress": false
+        "compress": false,
+
+        /**
+         * 配置是否把没有合并的图片进行拷贝, 默认是不不会进行拷贝的
+         *
+         * @optional
+         * @default false
+         */
+        "copyUnspriteImage": false
     }
 };
 
@@ -560,7 +568,7 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
             return;
         }
 
-        var imageUrl = getImageUrl(style), 
+        var imageUrl = getImageUrl(style, styleSheetDir), 
             imageAbsUrl,
             fileName;
 
@@ -595,10 +603,11 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
  * 从background-image 的值中提取图片的路径
  * @return {String}       url
  */
-function getImageUrl(style){
+function getImageUrl(style, dir){
     var format = spriteConfig.input.format,
         backgroundImage = style['background-image'],
         url = null,
+        ext,
         match;
 
     if(!backgroundImage){
@@ -608,16 +617,24 @@ function getImageUrl(style){
     if(backgroundImage.indexOf(',') > -1){
 
         // FIXME 暂时忽略掉多背景的属性
+        // FIXME 提取 url 进行拷贝
         return null;
     }
 
     match = backgroundImage.match(regexp.image);
 
-    if(match && format.indexOf(match[2]) > -1){ // 去掉非指定后缀的图片
+    if(match){
         url = match[1];
+        ext = match[2];
         
+        if(format.indexOf(ext) == -1){ // 去掉非指定后缀的图片
+
+            unspriteImageArray.push(path.join(dir, url));
+            return null;
+        }
         if(regexp.ignoreImage.test(backgroundImage)){ // 去掉不需要合并图片
 
+            unspriteImageArray.push(path.join(dir, url));
             info('>>Skip: Unsprite image "' + url + '"');
             url = backgroundImage.replace(regexp.ignoreImage, '');
             style.setProperty('background-image', url, null);
@@ -1151,6 +1168,7 @@ function exportCssFile(spriteTask){
     var cssContentList = [],
         styleSheetArray = spriteTask.styleSheetArray,
         cssContent = '',
+        compressOptions = spriteConfig.output.compress,
         fileName,
         fileName2, // 用于输出 log
         combinedCssRules,
@@ -1183,8 +1201,11 @@ function exportCssFile(spriteTask){
     }
     
     cssContent = cssContentList.join('\n') + cssContent;
-    if(spriteConfig.output.compress){ // 压缩
-        cssContent = new CleanCSS().minify(cssContent);
+    if(compressOptions){ // 压缩
+        if(!us.isObject(compressOptions)){
+            compressOptions = null;
+        }
+        cssContent = new CleanCSS(compressOptions).minify(cssContent);
     }
     nf.writeFileSync(fileName, cssContent, true);
     info('>>Output css:', fileName2);
@@ -1209,6 +1230,15 @@ function styleSheetToString(styleSheet) {
     return result;
 };
 
+//****************************************************************
+// 8. 拷贝不需合并的图片
+//****************************************************************
+function execCopyUnspriteImage(){
+
+    // unspriteImageArray.forEach(function(url){
+    // TODO 未完成
+    // })
+}
 
 //****************************************************************
 // 主逻辑
@@ -1231,6 +1261,9 @@ var imageInfoCache = null;
 
 // sprite 数据的缓存, 用于需要合并所有 css 文件和图片的情况
 var spriteTaskArray = null;
+
+// 不需要合并的图片的数组, 可以配置成一起拷贝到目标 workspace
+var unspriteImageArray = null;
 
 /**
  * sprite 开始之前执行的函数
@@ -1262,6 +1295,7 @@ exports.merge = function(config, done){
 
     imageInfoCache = {};
     spriteTaskArray = [];
+    unspriteImageArray = [];
 
     // 1. 读取和处理合图配置
     spriteConfig = readConfig(config);
@@ -1311,6 +1345,12 @@ exports.merge = function(config, done){
             // 输出修改后的样式表
             exportCssFile(spriteTask);
         });
+
+        if(spriteConfig.output.copyUnspriteImage){
+
+            // 把不需要合并的图片进行拷贝
+            execCopyUnspriteImage();
+        }
 
         // 大功告成
         onSpriteEnd();

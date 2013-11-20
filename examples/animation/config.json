@@ -10,6 +10,8 @@
 
         "imageDist": "../img/",
 
-        "margin": 3
+        "margin": 3,
+
+        "copyUnspriteImage": true
     }
 }

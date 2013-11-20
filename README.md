@@ -190,6 +190,13 @@
 
     spriter.merge(['./css/style.css', './css/style2.css']);
 
+    or
+
+    spriter.merge({
+        "input":  "./../test/css/",
+        "output": "./../test/sprite_output/css/"
+    });
+
 ### 从命令行调用
     
     npm install ispriter -g
