@@ -13,7 +13,7 @@ exports.startsWith = function(str, start){
 
 exports.endsWith = function(str, end){
     var index = str.lastIndexOf(end);
-    return index + end.length === str.length;
+    return index !== -1 && index + end.length === str.length;
 }
 
 exports.jsonParse = function(jsonStr){

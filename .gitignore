@@ -28,3 +28,9 @@ examples/limit-image-size/img/
 sprite/css/img/sprite_style.png
 
 sprite/css/style.css
+
+/test/sprite/css/img/sprite_main.png
+/test/sprite/css/main.css
+/test/sprite/css/style.css
+/test/sprite/css/style2.css
+/test/sprite/css/style3.css

@@ -239,6 +239,8 @@ function readConfig(config){
 
         if(zTool.endsWith(cssPattern, path.sep)){
             cssPattern += '*.css';
+        }else if(!zTool.endsWith(cssPattern, '.css')){
+            cssPattern += '/*.css';
         }
 
         queryResult = nf.query(config.workspace, cssPattern);
