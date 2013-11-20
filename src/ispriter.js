@@ -54,6 +54,7 @@ var DEFAULT_CONFIG = {
         /**
          * 原 cssRoot
          * 需要进行精灵图合并的 css 文件路径或文件列表, 单个时使用字符串, 多个时使用数组.
+         * 路径可使用 ant 风格的路径写法
          * 
          * @required 
          * @example
@@ -61,6 +62,17 @@ var DEFAULT_CONFIG = {
          * "cssSource": ["../css/style.css", "../css2/*.css"]
          */
         "cssSource": null,
+
+        /**
+         * 排除不想合并的图片, 可使用通配符
+         * 也可以直接在 css 文件中, 在不想合并的图片 url 后面添加 #unsprite, iSpriter 会排除该图片, 并把 #unsprite 删除
+         * 
+         * @optional
+         * @example
+         * "ignoreImages": "icons/*"
+         * "ignoreImages": ["icons/*", "loading.png"]
+         */
+        "ignoreImages": null,
 
         /**
          * 输出的精灵图的格式, 目前只支持输出 png 格式, 
@@ -254,6 +266,17 @@ function readConfig(config){
     cssFiles = us.unique(cssFiles);
 
     config.input.cssSource = cssFiles;
+
+    // 解析要排除的图片规则
+    var ignoreImages = config.input.ignoreImages;
+    if(ignoreImages){
+        if(!us.isArray(ignoreImages)){
+            ignoreImages = [ignoreImages];
+        }
+        ignoreImages.forEach(function(pattern, i){
+            ignoreImages[i] = zTool.wildcardToPattern(pattern);
+        });
+    }
 
     // 确保输出路径是个目录
     if(!zTool.endsWith(config.output.cssDist, '/')){
@@ -599,6 +622,7 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
  */
 function getImageUrl(style){
     var format = spriteConfig.input.format,
+        ignoreImages = spriteConfig.input.ignoreImages,
         backgroundImage = style['background-image'],
         url = null,
         match;
@@ -628,6 +652,7 @@ function getImageUrl(style){
 
     }else{
         debug('not match image bg: '+ backgroundImage);
+        return null;
     }
     
     // 遇到网络图片就跳过
@@ -636,6 +661,16 @@ function getImageUrl(style){
         // 这里直接返回了, 因为一个style里面是不会同时存在两个 background-image 的
         info('>>Skip: Network image "' + url + '"');
         return null;
+    }
+
+    if(ignoreImages){
+        for(var i = 0; i < ignoreImages.length; i++){
+            
+            if(ignoreImages[i].test(url)){
+                info('>>Skip: Unsprite image "' + url + '"');
+                return null;
+            }
+        }
     }
     
     return url;

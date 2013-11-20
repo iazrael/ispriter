@@ -31,7 +31,7 @@
 + 支持读取 @import 的样式表进行处理 【新】
 + 支持将所有合并了图片的 CSS 统一输出, 减少代码量 【新】
 + 支持对输出的 CSS 进行压缩(使用 clean-css)【新】
-+ 支持排除不需要合并的图片【新】
++ 支持排除不需要合并的图片（在 url 后面添加 #unsprite 或者使用 config 文件来配置）【新】
 + 跳过 background-position 是 right/center/bottom 的图片
 + 跳过显式的设置平铺方式为 repreat 的图片
 + 跳过设置了 background-size 的图片
@@ -60,6 +60,7 @@
             /**
              * 原 cssRoot
              * 需要进行精灵图合并的 css 文件路径或文件列表, 单个时使用字符串, 多个时使用数组.
+             * 路径可使用 ant 风格的路径写法
              * 
              * @required 
              * @example
@@ -67,6 +68,17 @@
              * "cssSource": ["../css/style.css", "../css2/*.css"]
              */
             "cssSource": ["./css/style*.css"],
+                
+            /**
+             * 排除不想合并的图片, 可使用通配符
+             * 也可以直接在 css 文件中, 在不想合并的图片 url 后面添加 #unsprite, iSpriter 会排除该图片, 并把 #unsprite 删除
+             * 
+             * @optional
+             * @example
+             * "ignoreImages": "icons/*"
+             * "ignoreImages": ["icons/*", "loading.png"]
+             */
+            "ignoreImages": ["*logo.png"],
 
             /**
              * 输出的精灵图的格式, 目前只支持输出 png 格式, 

@@ -77,3 +77,17 @@ var merge = exports.merge = function(baseObj, extendObj1, extendObj2/*, extnedOb
     }
     return baseObj;
 }
+
+exports.wildcardToPattern = function(wildcard){
+    var map = {
+        '*': '.*?',
+        '?': '.{1}',
+        '.': '\\.'
+    };
+
+    var reg = wildcard.replace(/\*|\?|\./g, function(m, i, str){
+        return map[m] || m;
+    });
+
+    return new RegExp(reg);
+}
