@@ -66,7 +66,6 @@
              * @example
              * 如果指定 imageDist 为 "./images/sprite/", 则在输出的 css 中会显示为
              * background: url("./images/sprite/sprite_1.png");
-             * 
              */
             "imageDist": "./img/",
 
@@ -80,7 +79,6 @@
              * @example
              * 如指定 "maxSingleSize": 60, 而生成的精灵图(sprite_all.png)的容量为 80KB, 
              * 则会把精灵图拆分为 sprite_0.png 和 sprite_1.png 两张
-             * 
              */
             "maxSingleSize": 0,
 
