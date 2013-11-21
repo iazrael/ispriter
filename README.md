@@ -24,8 +24,8 @@
 + 智能设置被合并图片的宽高
 + 智能判断使用了 background-position（使用px为单位）定位的图片并重新定位
 + 支持已经合并了的精灵图再次合并和定位
-+ 支持对小图片去重
-+ 支持限制合并后图片的最大大小
++ 支持图片去重
++ 支持限制合并后图片的大小
 + 支持设置合并后的图片间距
 + 支持将所有图片合并为一张, 同时所有 CSS 文件合并为一个文件 【新】
 + 支持读取 @import 的样式表进行处理 【新】
@@ -142,13 +142,19 @@ config 的详细参数说明见[CONFIG](./CONFIG.md)
     }
 
 ### 排除不需要合并的图片
-只要在写样式的时候，在 background-image 的图片url加上 #unsprite 即可，例如：
+只要在写样式的时候, 在 background-image 的图片url加上 #unsprite 即可, 例如:
     
     background: url(../images/loading.png#unsprite);
 
     background: url(../images/loading.png?t=123#unsprite);
 
     background: url(../images/loading.png#hash#unsprite);
+
+也可以在 config 中指定 ignoreImages 来实现, 所有匹配上的图片都不会合并, 可以使用通配符, 例如: 
+
+    "ignoreImages": "icons/*"
+    
+    "ignoreImages": ["icons/*", "loading.png"]
 
 Example
 =======
