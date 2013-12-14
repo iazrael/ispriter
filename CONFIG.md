@@ -50,7 +50,7 @@
 
             /**
              * 原 cssRoot
-             * 精灵图合并之后, css 文件的输出目录
+             * 精灵图合并之后, css 文件的输出目录, 只支持填写目录, 输出的 css 文件名由 iSpriter 生成
              * 
              * @optional 
              * @default "./sprite/css/"

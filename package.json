@@ -2,7 +2,7 @@
   "author": "azrael <azrael@imatlas.com> (http://imatlas.com/about)",
   "name": "ispriter",
   "description": "an intelligent merge sprite tool",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "homepage": "http://imatlas.com/posts/ispriter-update/",
   "repository": {
     "type": "git",

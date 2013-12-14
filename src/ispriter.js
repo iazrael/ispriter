@@ -1111,7 +1111,8 @@ function replaceAndPositionBackground(imageName, styleObj, combinedSelectors){
         // set background-position-y
         setPxValue(style, 'background-position-y', styleObj.fit.y);
 
-        style.setProperty('background-repeat', 'no-repeat', null);
+        // 没必要增加这个属性
+        // style.setProperty('background-repeat', 'no-repeat', null);
 
         // mergeBackgound, 合并 background 属性, 减少代码量
         style.mergeBackgound();
