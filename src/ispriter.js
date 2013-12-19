@@ -1154,7 +1154,7 @@ function combineSpriteTasks(spriteTaskArray){
         combinedSpriteTask;
 
     //combinedFileName = DEFAULT_COMBINE_CSS_NAME;
-    //output.combine  扩展配置类型, 可以指定输出的文件名, 如: "combine": "exam_all.css"
+    //output.combine  扩展配置类型, 可以指定输出的文件名, 如: "combine": "exam_all.css" , 精灵图则为: sprite_exam_all.png
     combinedFileName = typeof spriteConfig.output.combine == 'string' ?  spriteConfig.output.combine : DEFAULT_COMBINE_CSS_NAME ;
     // combineFileName = path.resolve(combineFileName);
 
