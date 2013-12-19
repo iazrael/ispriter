@@ -1,4 +1,3 @@
-
 var fs = require('fs'),
     path = require('path'),
 
@@ -1154,7 +1153,9 @@ function combineSpriteTasks(spriteTaskArray){
         combinedFileName,
         combinedSpriteTask;
 
-    combinedFileName = DEFAULT_COMBINE_CSS_NAME;
+    //combinedFileName = DEFAULT_COMBINE_CSS_NAME;
+    //output.combine  扩展配置类型, 可以指定输出的文件名, 如: "combine": "exam_all.css"
+    combinedFileName = typeof spriteConfig.output.combine == 'string' ?  spriteConfig.output.combine : DEFAULT_COMBINE_CSS_NAME ;
     // combineFileName = path.resolve(combineFileName);
 
     spriteTaskArray.forEach(function(spriteTask){
