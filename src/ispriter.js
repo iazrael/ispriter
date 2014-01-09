@@ -465,7 +465,7 @@ var regexp = {
     ignoreNetwork: /^(https?|ftp):\/\//i,
     ignorePosition: /right|center|bottom/i,
     ignoreRepeat: /^(repeat-x|repeat-y|repeat)$/i,
-    image: /\(['"]?(.+\.(png|jpg|jpeg))((\?|#).*?)?['"]?\)/i,
+    image: /\(['"]?(.+\.(png|jpg|jpeg|gif|bmp))((\?|#).*?)?['"]?\)/i,
     css: /(.+\.css).*/i,
     ignoreImage: /#unsprite\b/i
 

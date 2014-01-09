@@ -118,3 +118,9 @@ div:nth-of-type(21){
     /* 位置有偏移的, 已合并的图片 */
     background: url(../images/tips_icons.png) -41px 0;
 }
+div:nth-of-type(22){
+    width: 96px;
+    height: 96px;
+    /* gif 图片 */
+    background: url(../images/play_icon.gif);
+}
