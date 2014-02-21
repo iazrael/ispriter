@@ -1279,6 +1279,28 @@ function execCopyUnspriteImage(){
     // })
 }
 
+function copyUnspriteCss(spriteTask) {
+    var fileName,
+        fileName2, // 用于输出 log
+        cssContent;
+
+
+    fileName = path.basename(spriteTask.cssFileName);
+    
+    fileName2 = path.join(spriteConfig.output.cssDist, fileName);
+    fileName2 = path.normalize(fileName2);
+
+    fileName = path.join(spriteConfig.workspace, fileName2);
+    fileName = path.resolve(fileName);
+
+    cssContent = styleSheetToString(spriteTask.styleSheet);
+
+    nf.writeFileSync(fileName, cssContent, true);
+    info('>>Output unsprite css:', fileName2);
+};
+
+
+
 //****************************************************************
 // 主逻辑
 //****************************************************************
@@ -1353,8 +1375,10 @@ exports.merge = function(config, done){
         var styleObjList = collectStyleRules(spriteTask.styleSheet, null, cssFileName);
         spriteTask.styleObjList = styleObjList;
 
-        if(!styleObjList.length){
-            next(); // 这个 css 没有需要合并的图片
+        if(!styleObjList.length){// 这个 css 没有需要合并的图片
+            // 把没有处理的 css 文件也拷贝过去
+            copyUnspriteCss(spriteTask);
+            next(); 
         }else{
 
             // 把结果塞到列表中方便 combine 使用
