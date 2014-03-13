@@ -1,5 +1,6 @@
 var fs = require('fs'),
     path = require('path'),
+    EventProxy = require('eventproxy'),
 
     us = require('underscore'),
     CSSOM = require('cssom'),
@@ -945,7 +946,7 @@ function positionImages(styleObjList){
 // 5. 根据定位合并图片并输出, 同时修改样式表里面的background
 //****************************************************************
 
-function drawImageAndPositionBackground(spriteTask){
+function drawImageAndPositionBackground(spriteTask, callback){
     
     var combinedCssRules,
         spriteArray = spriteTask.spriteArray;
@@ -1023,9 +1024,12 @@ function drawImageAndPositionBackground(spriteTask){
             imageAbsName = path.join(spriteConfig.workspace, imageName2);
             imageAbsName = path.resolve(imageAbsName);
             nf.mkdirsSync(path.dirname(imageAbsName));
-            png.pack().pipe(fs.createWriteStream(imageAbsName));
+            png.pack().pipe(fs.createWriteStream(imageAbsName))
+                    .on('finish', function(){
 
-            info('>>Output image:', imageName2);
+                info('>>Output image:', imageName2);
+                callback && callback(null);
+            });
         }
     });
     
@@ -1396,6 +1400,20 @@ exports.merge = function(config, done){
             // 如果指定了 combine, 先把所有 cssRules 和 styleSheet 合并
             spriteTaskArray = combineSpriteTasks(spriteTaskArray);
         }
+
+        var ep = new EventProxy();
+
+        ep.after('drawImage', spriteTaskArray.length, function(){
+            if(spriteConfig.output.copyUnspriteImage){
+
+                // 把不需要合并的图片进行拷贝
+                execCopyUnspriteImage();
+            }
+
+            // 大功告成
+            onSpriteEnd();
+        });
+
         spriteTaskArray.forEach(function(spriteTask){
 
             // spriteArray 的每个元素就是每张精灵图
@@ -1403,20 +1421,15 @@ exports.merge = function(config, done){
             spriteTask.spriteArray = spriteArray;
 
             // 输出合并的图片 并修改样式表里面的background
-            drawImageAndPositionBackground(spriteTask);
+            drawImageAndPositionBackground(spriteTask, function(){
+                // 输出修改后的样式表
+                exportCssFile(spriteTask);
 
-            // 输出修改后的样式表
-            exportCssFile(spriteTask);
+                ep.emit('drawImage');
+            });
+
         });
 
-        if(spriteConfig.output.copyUnspriteImage){
-
-            // 把不需要合并的图片进行拷贝
-            execCopyUnspriteImage();
-        }
-
-        // 大功告成
-        onSpriteEnd();
     });
 
 }
