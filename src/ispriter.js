@@ -570,6 +570,14 @@ function collectStyleRules(styleSheet, result, styleSheetUrl){
             
             // 有 background 属性的 style 就先把 background 简写拆分出来
             style.splitBackground();
+        }else if(style['background-position']){
+            var value = style['background-position'];
+            value = value.trim().replace(/\s{2}/g,'').split(' ');
+            if(!value[1]){
+                value[1] = value[0];
+            }
+            style.setProperty('background-position-x', value[0]);
+            style.setProperty('background-position-y', value[1]);
         }
         
         if(regexp.ignorePosition.test(style['background-position-x']) || 
