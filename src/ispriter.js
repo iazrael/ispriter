@@ -990,6 +990,10 @@ function drawImageAndPositionBackground(spriteTask, callback){
         });
     }
 
+    var ep = new EventProxy();
+
+    ep.after('drawSpriteImage', spriteArray.length, callback);
+
     spriteArray.forEach(function(styleObjArr, i){
         var png, 
             imageName,
@@ -1036,8 +1040,10 @@ function drawImageAndPositionBackground(spriteTask, callback){
                     .on('finish', function(){
 
                 info('>>Output image:', imageName2);
-                callback && callback(null);
+                ep.emit('drawSpriteImage');
             });
+        }else {
+            ep.emit('drawSpriteImage');
         }
     });
     
