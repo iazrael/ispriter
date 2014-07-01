@@ -1,0 +1,64 @@
+body{
+    background: #ddd;
+}
+div{
+    min-height: 10px;
+    border: 1px solid #8A7676;
+    margin: 20px;
+    min-width: 10px;
+    float: left;
+}
+div:nth-of-type(1){
+    width: 12px;
+    height: 12px;
+    background-image: url(../images/add.png);
+}
+div:nth-of-type(2){
+    /* 没有指定宽高 */
+    background: url(../images/app_icon.png);
+}
+div:nth-of-type(3){
+    width: 19px;
+    height: 19px;
+    background: url(../images/info.png);
+    background-size: 19px 19px;
+}
+div:nth-of-type(4){
+    width: 15px;
+    height: 18px;
+    /* 已合并的图片 */
+    background: url(../images/bright-star.png);
+}
+div:nth-of-type(5){
+    width: 19px;
+    height: 19px;
+    background: url(../images/info.png);
+    background-size: 100% 100%;
+}
+
+div:nth-of-type(6){
+    width: 10px;
+    height: 10px;
+    background: url(../images/friends.png);
+    background-size: 100% 100%;
+}
+div:nth-of-type(7){
+    width: 15px;
+    height: 18px;
+    /* 位置有偏移的, 已合并的图片 */
+    background: url(../images/gray-star.png) -64px 0;
+}
+
+
+div:nth-of-type(8){
+    width: 38px;
+    height: 38px;
+    background: url(../images/info.png);
+}
+
+div:nth-of-type(9){
+    width: 40px;
+    height: 38px;
+    /* 位置有偏移的, 已合并的图片 */
+    background: url(../images/tips_icons.png) -41px 0;
+}

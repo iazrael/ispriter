@@ -13,6 +13,5 @@
     "expr": true,
     "sub": true,
 
-    "node": true,
-    "browser": true
+    "node": true
 }

@@ -1,5 +1,5 @@
 iSpriter {Main}
-    - SpriteTask {}
+    - SpriteTask {} 一个合并任务
 
     - CSSSheet {} css 文件信息汇总
         - filename css 文件名
@@ -8,7 +8,7 @@ iSpriter {Main}
         - imports [CSSSheet] @import 引入的所有样式文件
         - url css 文件中 @import 的原始值
 
-    - CSSRule {} css 规则信息汇总
+    - CSSRule {} css 规则信息汇总, 数据结构与具体的 CSS 解析器有关
 
     - CSSImage {} css 图片信息汇总
         - url css 文件中 url() 中的原始值
@@ -19,7 +19,7 @@ iSpriter {Main}
         - height 图片高度
         - size 图片大小
 
-    - SpriteImage
+    - SpriteImage 一张精灵图实例, 包装了图片处理的底层库
         + clear
         + drawImage
         + toFile

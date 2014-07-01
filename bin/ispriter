@@ -10,7 +10,7 @@ var fs = require('fs'),
     program = require('commander'),
     pkg = require("../package.json"),
     zTool = require('../src/ztool'),
-    ispriter = require('../src/ispriter');
+    ispriter = require('../lib');
 
 function handleConfigFile(configFile){
     if(us.isEmpty(configFile) || !us.isString(configFile) || !configFile.trim()){

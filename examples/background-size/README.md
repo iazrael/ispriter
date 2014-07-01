@@ -1,0 +1,1 @@
+在当前目录运行 ispriter -c config.json

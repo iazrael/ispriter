@@ -3,10 +3,10 @@
     
     "workspace": "../../", // 相对于当前目录, ../../ 也就是根目录
 
-    "input": ["test/css/style.css"],
+    "input": ["test/css/style-mobile.css"],
     "output": {
 
-        "cssDist": "examples/single/css/",
+        "cssDist": "examples/background-size/css/",
 
         "imageDist": "../img/",
 
