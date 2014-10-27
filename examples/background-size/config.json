@@ -5,6 +5,7 @@
 
     "input": ["test/css/style-mobile.css"],
     "output": {
+    	"combine": true,
 
         "cssDist": "examples/background-size/css/",
 
