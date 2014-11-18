@@ -10,13 +10,16 @@ div{
 }
 div:nth-of-type(1){
     color: #fff;
-    width    : 12px;
+    width: 12px;
     height: 12px;
     background-image: url(../images/add.png);
+    background-position: -10px -20px;  /* add by bizai for test 1 */
 }
 div:nth-of-type(2){
     /* 没有指定宽高 */
     background: url(../images/app_icon.png);
+    background-position-x: -10px;
+    background-position-y: -20px;  /* add by bizai for test 2*/
 }
 div:nth-of-type(3){
     width: 19px;
