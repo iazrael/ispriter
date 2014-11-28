@@ -4,3 +4,6 @@
 2. env 对象被传来传去，需要把他全局化
 3. 有些地方叫spriteTask，有些地方叫task，underscore 叫 us 或 _ (统一变量名字吧)
 4. background 现在是数组，但是进过过滤后，background和background-image都知会有一个。后继去除掉关于background是数组的逻辑代码。
+
+
+5. 合图的对象填写的宽高必须是px，不能写得比图片大，如果比图片大ispriter会把它设置为原图大小
