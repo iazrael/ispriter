@@ -11,8 +11,18 @@
     height: 12px;
     background-image: url(../images/add.png);
     background-position: -10px -20px; }
-.app_icon{
+.hello_icon{
     background: url(../images/app_icon.png);
     background-position-x: -10px;
     background-position-y: -20px;  
+}
+
+.game-icon{
+    width: 48px;
+    height: 48px;
+    background: url(../images/game.png);
+}
+.game-icon:hover{
+    /* 没有指定宽高 */
+    background: url(../images/game_o.png);
 }
