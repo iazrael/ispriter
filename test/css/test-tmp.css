@@ -5,14 +5,33 @@
     min-width: 10px;
     float: left;
 }
+
+.wrap1{
+    min-height: 44px;
+    border: 1px solid #8A7676;
+    margin: 20px;
+    min-width: 10px;
+    float: left;
+}
+
+.wrap2{
+    min-height: 44px;
+    border: 1px solid #8A7676;
+    margin: 20px;
+    min-width: 10px;
+    float: left;
+    background: #ddd;
+}
+
 .add-icon{
     color: #fff;
     width: 12px;
     height: 12px;
-    background-image: url(../images/add.png);
-    background-position: -10px -20px; }
+    background-image: url(../images/add.png#unsprite);
+    background-position: -10px -20px; 
+}
 .hello_icon{
-    background: url(../images/app_icon.png);
+    background: url(../images/app_icon.png#unsprite);
     background-position-x: -10px;
     background-position-y: -20px;  
 }
@@ -23,6 +42,6 @@
     background: url(../images/game.png);
 }
 .game-icon:hover{
-    /* 没有指定宽高 */
     background: url(../images/game_o.png);
 }
+

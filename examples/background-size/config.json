@@ -4,8 +4,11 @@
     "workspace": "../../", // 相对于当前目录, ../../ 也就是根目录
 
     "input": ["test/css/style-mobile.css", "test/css/test-tmp.css"],
+
     "output": {
     	"combine": false,
+
+    	"copyUnspriteImage": true,
 
         "cssDist": "examples/background-size/css/",
 
