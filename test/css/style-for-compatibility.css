@@ -1,0 +1,35 @@
+body{
+    background: #bbb;
+}
+div{
+    min-height: 10px;
+    border: 1px solid #8A7676;
+    margin: 20px;
+    min-width: 10px;
+    float: left;
+}
+div:nth-of-type(1){
+    width: 48px;
+    height: 48px;
+    background: url(../images/appmarket.png);
+}
+/** 你好我是 class 注释 **/
+div:nth-of-type(2){
+    width: 48px;
+    height: 48px;/** 我是 属性注释 **/
+    background: url(../images/app_icon.png);
+}
+
+@media (max-width: 600px) {
+    div:nth-of-type(16){
+        width: 48px;
+        height: 48px;
+        background: url(../images/file_rar.png);
+    }
+    div:nth-of-type(17){
+        width: 81px;
+        height: 38px;
+        background: url(../images/tips_icons.png);
+    }
+}
+
