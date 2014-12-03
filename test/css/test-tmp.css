@@ -36,6 +36,12 @@
     background-position-y: -20px;  
 }
 
+.cannotsee-icon{
+    width: 48px;
+    height: 48px;
+    background: url(../images/game.png);
+}
+
 .game-icon{
     width: 48px;
     height: 48px;
