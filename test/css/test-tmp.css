@@ -31,7 +31,7 @@
     background-position: -10px -20px; 
 }
 .hello_icon{
-    background: url(../images/app_icon.png#unsprite);
+    background: url(../images/app_icon.png);
     background-position-x: -10px;
     background-position-y: -20px;  
 }

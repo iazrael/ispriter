@@ -8,8 +8,6 @@
     "output": {
     	"combine": false,
 
-    	"copyUnspriteImage": true,
-
         "cssDist": "examples/background-size/css/",
 
         "imageDist": "../img/",
