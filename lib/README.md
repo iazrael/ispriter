@@ -1,3 +1,6 @@
+##了解最新ispriter结构，请查看脑图：
+[http://naotu.baidu.com/viewshare.html?shareId=art0stlhnwck](http://naotu.baidu.com/viewshare.html?shareId=art0stlhnwck)
+
 iSpriter {Main}
     - SpriteTask {} 一个合并任务
 
