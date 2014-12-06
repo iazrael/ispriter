@@ -6,7 +6,7 @@
     "input": ["test/css/style-mobile.css", "test/css/test-tmp.css"],
 
     "output": {
-    	"combine": false,
+    	"combine": true,
 
         "cssDist": "examples/background-size/css/",
 
