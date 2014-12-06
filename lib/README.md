@@ -19,10 +19,7 @@ iSpriter {Main}
         - height 图片高度
         - size 图片大小
 
-    - SpriteImage 一张精灵图实例, 包装了图片处理的底层库
-        + clear
-        + drawImage
-        + toFile
+    - SpriteUtils 辅助工具类，task流程的非核心函数
 
     - Logger 日志方法
 
