@@ -633,6 +633,10 @@ function collectStyleRules(styleSheet, result, styleSheetUrl) {
             }
             result[imageUrl].cssRules.push(style);
         }
+        else{
+           //图片找不到css_backgound合并还原  20150405
+           style.mergeBackgound();
+        }
     });
     return result;
 }
