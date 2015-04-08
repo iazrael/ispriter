@@ -426,7 +426,9 @@ var BaseCSSStyleDeclaration = {
     mergeBackgound: function() {
         var background = '',
             style = this;
-
+        if(style.getPropertyValue('background')) {
+			return;
+		}
         var positionText = this.removeProperty('background-position-x') + ' ' +
             this.removeProperty('background-position-y');
 
@@ -442,7 +444,9 @@ var BaseCSSStyleDeclaration = {
                 background += this.removeProperty(item) + ' ';
             }
         }
-        style.setProperty('background', background.trim(), null);
+        if(background.trim()) {
+            style.setProperty('background', background.trim(), null);
+        }
     },
 
     /**
