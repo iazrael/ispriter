@@ -1,4 +1,4 @@
-#智能合并CSS精灵图(iSpriter)
+# 智能合并CSS精灵图(iSpriter)
 
 什么是智能?
 =========
