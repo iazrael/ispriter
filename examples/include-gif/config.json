@@ -1,16 +1,12 @@
 {
-    "workspace": "../../", // 相对于当前目录, ../../ 也就是根目录
-    "debug": true,
-    "input": {
-        "cssSource": "test/css/style.css",
-        "format": "png,gif"
-    },
-    "output": {
-
-        "cssDist": "examples/include-gif/css/",
-
-        "imageDist": "../img/",
-
-        "margin": 5
-    }
+  "workspace": "../../",
+  "input": {
+    "cssSource": ["tests/fixtures/css/style.css"],
+    "ignoreImages": ["*.gif"]
+  },
+  "output": {
+    "cssDist": "examples/include-gif/dist/css/",
+    "imageDist": "../img/",
+    "margin": 5
+  }
 }

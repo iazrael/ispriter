@@ -1,0 +1,1 @@
+{"name":"ispriter-example-multi-combine","private":true,"scripts":{"sprite":"ispriter -c config.json"}}
