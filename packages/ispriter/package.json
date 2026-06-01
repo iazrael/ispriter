@@ -1,6 +1,6 @@
 {
   "name": "ispriter",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Smart CSS sprite generator",
   "type": "module",
   "bin": {
@@ -11,7 +11,9 @@
     "@ispriter/core": "^2.0.0"
   },
   "files": [
-    "bin"
+    "bin",
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=20.0.0"
