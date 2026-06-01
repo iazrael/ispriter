@@ -1073,20 +1073,8 @@ function createPng(width, height) {
         height: height
     });
 
-    /*
-     * 必须把图片的所有像素都设置为 0, 否则会出现一些随机的噪点
-     */
-    for (var y = 0; y < png.height; y++) {
-        for (var x = 0; x < png.width; x++) {
-            var idx = (png.width * y + x) << 2;
-
-            png.data[idx] = 0;
-            png.data[idx + 1] = 0;
-            png.data[idx + 2] = 0;
-
-            png.data[idx + 3] = 0;
-        }
-    }
+    // 必须把图片的所有像素都设置为 0, 否则会出现一些随机的噪点
+    png.data.fill(0);
     return png;
 }
 
