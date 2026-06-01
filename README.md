@@ -48,6 +48,38 @@ npx ispriter -c config.json
 
 ---
 
+## CLI 用法
+
+```
+Usage: ispriter [options] [command]
+
+CSS sprite generator
+
+Options:
+  -V, --version           output the version number
+  -h, --help              display help for command
+
+Commands:
+  run [options]           Generate sprites from CSS files
+  help [command]          display help for command
+```
+
+```
+Usage: ispriter run [options]
+
+Generate sprites from CSS files
+
+Options:
+  -c, --config <path>     config file path (JSON)
+  -f, --files <paths>     CSS files (comma separated)
+  -o, --output <path>     CSS output directory
+  --watch                 watch for file changes and regenerate
+  --dry-run               preview what would be sprited without writing files
+  -h, --help              display help for command
+```
+
+---
+
 ## Monorepo 结构
 
 ```
