@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Spriter } from '../../packages/core/dist/index.js';
-import { readFile, readdir, rm, mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 
@@ -54,12 +53,6 @@ function exampleConfig(overrides: {
       format: overrides.format || 'png',
     },
   };
-}
-
-async function cleanup(dir: string) {
-  if (existsSync(dir)) {
-    await rm(dir, { recursive: true, force: true });
-  }
 }
 
 describe('E2E: examples', () => {

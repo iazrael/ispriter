@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { Spriter } from '@ispriter/core';
-import { parseConfig, type SpriterConfig } from '@ispriter/core';
+import { parseConfig, type SpriterConfig, type ResolvedConfig } from '@ispriter/core';
 import { readFile, writeFile, mkdir, glob } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +10,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json');
 
+interface CliOptions {
+  config?: string;
+  files?: string;
+  output?: string;
+  watch?: boolean;
+  dryRun?: boolean;
+}
+
+interface CollectedInputs {
+  resolved: ResolvedConfig;
+  workspace: string;
+  cssFiles: Map<string, string>;
+  images: Map<string, Buffer>;
+}
+
 const program = new Command();
 
 program
@@ -18,9 +33,12 @@ program
   .version(pkg.version);
 
 function createRunAction() {
-  return async (opts: any) => {
+  return async (opts: CliOptions) => {
     try {
       const config = await resolveConfig(opts);
+      if (opts.dryRun && opts.watch) {
+        console.warn('⚠️ --dry-run and --watch are mutually exclusive. Running dry-run only.');
+      }
       if (opts.dryRun) {
         await runSpriterDry(config);
       } else {
@@ -49,7 +67,7 @@ program
   .option('--dry-run', 'preview what would be sprited without writing files')
   .action(createRunAction());
 
-async function resolveConfig(opts: any): Promise<SpriterConfig> {
+async function resolveConfig(opts: CliOptions): Promise<SpriterConfig> {
   if (opts.config) {
     const configPath = path.resolve(opts.config);
     try {
@@ -73,7 +91,7 @@ async function resolveConfig(opts: any): Promise<SpriterConfig> {
   return {} as SpriterConfig;
 }
 
-async function collectInputs(config: SpriterConfig) {
+async function collectInputs(config: SpriterConfig): Promise<CollectedInputs | null> {
   const resolved = parseConfig(config);
   const workspace = path.resolve(resolved.workspace);
 
@@ -140,7 +158,15 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
   const result = await spriter.run({ css: cssFiles, images, cssBaseDir: workspace });
 
   const cssDist = path.resolve(workspace, resolved.output.cssDist);
+  if (!cssDist.startsWith(workspace)) {
+    console.error(`❌ output.cssDist must be inside workspace: "${resolved.output.cssDist}" resolves outside`);
+    process.exit(1);
+  }
   const imgDist = path.resolve(cssDist, resolved.output.imageDist);
+  if (!imgDist.startsWith(workspace)) {
+    console.error(`❌ output.imageDist must be inside workspace: "${resolved.output.imageDist}" resolves outside`);
+    process.exit(1);
+  }
 
   await mkdir(imgDist, { recursive: true });
 

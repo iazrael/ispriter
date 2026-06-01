@@ -21,6 +21,7 @@ Generate sprites from CSS files.
 ispriter -c config.json
 ispriter -f style.css,style2.css -o ./dist/css/
 ispriter -c config.json --watch
+ispriter -c config.json --dry-run
 ```
 
 ### Options
@@ -31,6 +32,7 @@ ispriter -c config.json --watch
 | `--files <paths>` | `-f` | CSS files, comma separated |
 | `--output <path>` | `-o` | CSS output directory |
 | `--watch` | — | Watch for file changes and regenerate |
+| `--dry-run` | — | Preview what would be sprited without writing files |
 | `--version` | `-V` | Print version |
 | `--help` | `-h` | Print help |
 
@@ -45,4 +47,7 @@ ispriter -f src/css/style.css -o dist/css/
 
 # Watch mode
 ispriter -c config.json --watch
+
+# Preview mode (no files written)
+ispriter -c config.json --dry-run
 ```

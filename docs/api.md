@@ -43,11 +43,13 @@ Execute sprite generation.
 - `input.css` — `Map<string, string>` — CSS filename → content
 - `input.images` — `Map<string, Buffer>` — image path → buffer
 - `input.cssBaseDir` — `string` — base directory for resolving relative image paths
+- `input.dryRun` — `boolean` (optional) — preview mode, don't generate images or CSS
 
 **Result:**
 - `result.cssFiles` — `Map<string, string>` — updated CSS filename → content
 - `result.spriteImages` — `Map<string, Buffer>` — sprite filename → image buffer
 - `result.skippedImages` — `string[]` — skipped image URLs
+- `result.dryRunReport` — `string | undefined` — analysis report (only when `dryRun: true`)
 
 ### Error Handling
 
@@ -62,4 +64,22 @@ try {
     // e.code: CONFIG_INVALID | CSS_PARSE_ERROR | IMAGE_NOT_FOUND | ...
   }
 }
+```
+
+### Dry-run (Preview)
+
+Analyze what would be sprited without writing files:
+
+```typescript
+const result = await spriter.run({ css, images, cssBaseDir: './src/css/', dryRun: true });
+
+// No files written:
+// result.cssFiles.size === 0
+// result.spriteImages.size === 0
+
+// But you get:
+// result.manifest — full layout data (sprite file, x, y, width, height for each image)
+// result.dryRunReport — human-readable analysis string
+// result.skippedImages — images that would be skipped
+console.log(result.dryRunReport);
 ```
