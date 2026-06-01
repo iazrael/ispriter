@@ -68,7 +68,9 @@ async function resolveConfig(opts: any): Promise<SpriterConfig> {
     };
   }
 
-  throw new Error('Either --config or --files is required');
+  program.help();
+  // unreachable, but keeps type checker happy
+  return {} as SpriterConfig;
 }
 
 async function collectInputs(config: SpriterConfig) {
