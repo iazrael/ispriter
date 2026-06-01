@@ -8,10 +8,10 @@ var fs = require('fs'),
     CSSOM = require('cssom'),
     PNG = require('pngjs').PNG,
     CleanCSS = require('clean-css'),
-    GrowingPacker = require('./GrowingPacker'),
-    BI = require('./BackgroundInterpreter'),
-    nf = require('./node-file'),
-    zTool = require('./ztool');
+    GrowingPacker = require('./GrowingPacker.cjs'),
+    BI = require('./BackgroundInterpreter.cjs'),
+    nf = require('./node-file.cjs'),
+    zTool = require('./ztool.cjs');
 
 //****************************************************************
 // 0. 声明和配置一些常量
