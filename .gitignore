@@ -39,4 +39,5 @@ sprite/css/style.css
 packages/*/dist/
 packages/*/.tsbuildinfo
 *.tsbuildinfo
+node_modules/
 /test/sprite/css/img/sprite_style.png
