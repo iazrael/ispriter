@@ -16,3 +16,5 @@ export { analyseBackground, shouldSkip, cleanImageUrl, isUnsprite } from './css/
 export { emitCSS } from './css/emitter.js';
 export { generateSprites } from './image/sprite.js';
 export { Spriter } from './spriter.js';
+export { runSpriteGeneration } from './plugin-helper.js';
+export type { PluginRunOptions } from './plugin-helper.js';
