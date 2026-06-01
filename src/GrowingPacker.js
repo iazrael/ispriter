@@ -1,3 +1,5 @@
+'use strict';
+
 /******************************************************************************
 
 This is a binary tree based bin packing algorithm that is more complex than

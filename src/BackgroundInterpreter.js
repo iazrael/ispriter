@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * @author azrael
  * @date 2012-6-16
