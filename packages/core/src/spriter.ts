@@ -121,15 +121,23 @@ export class Spriter {
     return { assets: Array.from(assetMap.values()), skipped };
   }
 
-  /** Fix #17: Promise.all 并行填充图片尺寸 */
+  /** B1: Promise.allSettled with error handling */
   private async fillImageSizes(assets: ImageAsset[]): Promise<void> {
-    await Promise.all(
+    const results = await Promise.allSettled(
       assets.map(async (asset) => {
         const meta = await sharp(asset.buffer).metadata();
-        asset.naturalWidth = meta.width || 0;
-        asset.naturalHeight = meta.height || 0;
+        return { asset, width: meta.width || 0, height: meta.height || 0 };
       }),
     );
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        result.value.asset.naturalWidth = result.value.width;
+        result.value.asset.naturalHeight = result.value.height;
+      } else {
+        // 保留原始 0 值，后续 pack 时会自然跳过
+        console.warn(`Failed to read image metadata: ${result.reason}`);
+      }
+    }
   }
 
   /** Fix #14: 按 groups 配置分桶 */
@@ -187,8 +195,8 @@ export class Spriter {
     return [
       {
         spriteFile,
-        canvasWidth: Math.max(...results.map((r) => r.x + r.width)),
-        canvasHeight: Math.max(...results.map((r) => r.y + r.height)),
+        canvasWidth: results.reduce((max, r) => Math.max(max, r.x + r.width), 0),
+        canvasHeight: results.reduce((max, r) => Math.max(max, r.y + r.height), 0),
         items: results.map((r) => ({
           asset: r.data,
           x: r.x,
@@ -230,8 +238,8 @@ export class Spriter {
 
         result.push({
           spriteFile: newFile,
-          canvasWidth: Math.max(...items.map((it) => it.x + it.width)),
-          canvasHeight: Math.max(...items.map((it) => it.y + it.height)),
+          canvasWidth: items.reduce((max, it) => Math.max(max, it.x + it.width), 0),
+          canvasHeight: items.reduce((max, it) => Math.max(max, it.y + it.height), 0),
           items,
         });
       }

@@ -41,6 +41,10 @@ export function normalizeConfig(input: string | SpriterConfig): SpriterConfig {
 }
 
 export function parseConfig(raw: unknown): ResolvedConfig {
+  // B2: type guard - reject non-string non-object input
+  if (raw !== null && raw !== undefined && typeof raw !== 'string' && typeof raw !== 'object') {
+    throw new IspriterError('Config must be a string or object', 'CONFIG_INVALID');
+  }
   const config = normalizeConfig(raw as string | SpriterConfig);
   const result = SpriterConfigSchema.safeParse(config);
   if (!result.success) {
@@ -50,5 +54,19 @@ export function parseConfig(raw: unknown): ResolvedConfig {
       { issues: result.error.issues },
     );
   }
+  // S3: validate no path traversal
+  validateNoTraversal(result.data.workspace, 'workspace');
+  validateNoTraversal(result.data.output.cssDist, 'output.cssDist');
+  validateNoTraversal(result.data.output.imageDist, 'output.imageDist');
   return result.data;
+}
+
+function validateNoTraversal(pathStr: string, fieldName: string): void {
+  if (pathStr.includes('..')) {
+    throw new IspriterError(
+      `Path traversal detected in ${fieldName}: "${pathStr}"`,
+      'CONFIG_INVALID',
+      { field: fieldName },
+    );
+  }
 }

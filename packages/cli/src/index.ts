@@ -14,6 +14,24 @@ program
   .description('CSS sprite generator')
   .version('2.0.0-alpha.1');
 
+function createRunAction() {
+  return async (opts: any) => {
+    try {
+      const config = await resolveConfig(opts);
+      await runSpriter(config);
+      if (opts.watch) {
+        await startWatch(config);
+      }
+    } catch (e: any) {
+      if (e.name === 'IspriterError') {
+        console.error(`❌ ${e.code}: ${e.message}`);
+        process.exit(1);
+      }
+      throw e;
+    }
+  };
+}
+
 program
   .command('run')
   .description('Generate sprites from CSS files')
@@ -21,21 +39,7 @@ program
   .option('-f, --files <paths>', 'CSS files (comma separated)')
   .option('-o, --output <path>', 'CSS output directory')
   .option('--watch', 'watch mode (not yet implemented)')
-  .action(async (opts) => {
-    try {
-      const config = await resolveConfig(opts);
-      await runSpriter(config);
-      if (opts.watch) {
-        await startWatch(config);
-      }
-    } catch (e: any) {
-      if (e.name === 'IspriterError') {
-        console.error(`❌ ${e.code}: ${e.message}`);
-        process.exit(1);
-      }
-      throw e;
-    }
-  });
+  .action(createRunAction());
 
 // 默认命令：直接运行
 program
@@ -43,27 +47,17 @@ program
   .option('-f, --files <paths>', 'CSS files (comma separated)')
   .option('-o, --output <path>', 'CSS output directory')
   .option('--watch', 'watch for file changes and regenerate')
-  .action(async (opts) => {
-    try {
-      const config = await resolveConfig(opts);
-      await runSpriter(config);
-      if (opts.watch) {
-        await startWatch(config);
-      }
-    } catch (e: any) {
-      if (e.name === 'IspriterError') {
-        console.error(`❌ ${e.code}: ${e.message}`);
-        process.exit(1);
-      }
-      throw e;
-    }
-  });
+  .action(createRunAction());
 
 async function resolveConfig(opts: any): Promise<SpriterConfig> {
   if (opts.config) {
     const configPath = path.resolve(opts.config);
-    const raw = await readFile(configPath, 'utf-8');
-    return JSON.parse(raw);
+    try {
+      const raw = await readFile(configPath, 'utf-8');
+      return JSON.parse(raw);
+    } catch (e: any) {
+      throw new Error(`Failed to read/parse config file "${configPath}": ${e.message}`);
+    }
   }
 
   if (opts.files) {
@@ -124,6 +118,8 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
     for (const url of allUrls) {
       if (images.has(url)) continue;
       const imgPath = path.resolve(cssDir, url);
+      // S2: prevent path traversal
+      if (!imgPath.startsWith(workspace)) continue;
       try {
         const buf = await readFile(imgPath);
         images.set(url, buf);

@@ -89,6 +89,8 @@ import { cleanUrl as sharedCleanUrl } from '@ispriter/shared';
  * 清理 URL 中的 hash 和 query string，统一使用 shared cleanUrl
  */
 export function cleanImageUrl(url: string): string {
+  // S4: skip overly long URLs
+  if (url.length > 4096) return url;
   // 检查 #unsprite
   if (url.includes('#unsprite')) return url;
   return sharedCleanUrl(url);

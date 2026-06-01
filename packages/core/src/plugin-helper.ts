@@ -45,11 +45,15 @@ export async function runSpriteGeneration(options: PluginRunOptions): Promise<vo
   }
 
   const images = new Map<string, Buffer>();
+  const allowedDir = path.resolve(outputDir);
   for (const url of imageUrls) {
     if (url.startsWith('data:') || url.startsWith('http')) continue;
+    if (url.length > 4096) continue; // S4: skip overly long URLs
     // Try resolving relative to each CSS file's directory
     for (const [cssFile] of cssFiles) {
       const absPath = path.resolve(path.dirname(cssFile), url);
+      // S1: prevent path traversal
+      if (!absPath.startsWith(allowedDir)) continue;
       try {
         if (!images.has(url)) {
           images.set(url, await readFile(absPath));

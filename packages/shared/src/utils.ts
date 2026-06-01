@@ -16,7 +16,7 @@ export function cleanUrl(url: string): string {
  */
 export function matchGlob(pattern: string, path: string): boolean {
   const regex = pattern
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/[.+^${}()|[\]\\!]/g, '\\$&')
     .replace(/\*/g, '.*')
     .replace(/\?/g, '.');
   return new RegExp(`^${regex}$`).test(path);

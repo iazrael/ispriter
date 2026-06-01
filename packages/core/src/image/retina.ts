@@ -60,14 +60,14 @@ export async function generateRetinaSprites(
       width = retinaAsset.naturalWidth;
       height = retinaAsset.naturalHeight;
     } else {
-      // 放大普通版本
-      const resized = await sharp(asset.buffer)
-        .resize(asset.naturalWidth * scale, asset.naturalHeight * scale, { fit: 'fill' })
+      // 放大普通版本 (P2: 直接用计算值，不再双重 sharp)
+      const scaledWidth = asset.naturalWidth * scale;
+      const scaledHeight = asset.naturalHeight * scale;
+      buffer = await sharp(asset.buffer)
+        .resize(scaledWidth, scaledHeight, { fit: 'fill' })
         .toBuffer();
-      const meta = await sharp(resized).metadata();
-      buffer = resized;
-      width = meta.width || asset.naturalWidth * scale;
-      height = meta.height || asset.naturalHeight * scale;
+      width = scaledWidth;
+      height = scaledHeight;
     }
 
     preparedAssets.push({
@@ -101,8 +101,8 @@ export async function generateRetinaSprites(
   const ext = config.output.format === 'webp' ? 'webp' : 'png';
   const spriteFile = `${config.output.prefix}retina_${scale}x.${ext}`;
 
-  const canvasWidth = Math.max(...packedResults.map((r) => r.x + r.width));
-  const canvasHeight = Math.max(...packedResults.map((r) => r.y + r.height));
+  const canvasWidth = packedResults.reduce((max, r) => Math.max(max, r.x + r.width), 0);
+  const canvasHeight = packedResults.reduce((max, r) => Math.max(max, r.y + r.height), 0);
 
   const packedSprite: PackedSprite = {
     spriteFile,

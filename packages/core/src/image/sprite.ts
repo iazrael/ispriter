@@ -26,12 +26,16 @@ export async function generateSprites(
         },
       });
 
-      // 用 composite 叠加所有图片
-      const composites = [];
-      for (const item of items) {
-        const resized = sharp(item.asset.buffer).resize(item.width, item.height, { fit: 'fill' });
-        composites.push({ input: await resized.toBuffer(), left: item.x, top: item.y });
-      }
+      // 用 composite 叠加所有图片（P1: parallel）
+      const composites = await Promise.all(items.map(async (item) => {
+        let inputBuf = item.asset.buffer;
+        if (item.width !== item.asset.naturalWidth || item.height !== item.asset.naturalHeight) {
+          inputBuf = await sharp(item.asset.buffer)
+            .resize(item.width, item.height, { fit: 'fill' })
+            .toBuffer();
+        }
+        return { input: inputBuf, left: item.x, top: item.y };
+      }));
 
       let output = canvas.composite(composites);
 

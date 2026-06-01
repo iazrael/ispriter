@@ -22,5 +22,11 @@
   "devDependencies": {
     "tsup": "^8.4.0",
     "@types/node": "^22.10.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
