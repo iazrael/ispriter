@@ -4,15 +4,18 @@ import { parseConfig, type SpriterConfig } from '@ispriter/core';
 import { readFile, writeFile, mkdir, glob } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json');
 
 const program = new Command();
 
 program
   .name('ispriter')
   .description('CSS sprite generator')
-  .version('2.0.0-alpha.1');
+  .version(pkg.version);
 
 function createRunAction() {
   return async (opts: any) => {
@@ -33,16 +36,8 @@ function createRunAction() {
 }
 
 program
-  .command('run')
+  .command('run', { isDefault: true })
   .description('Generate sprites from CSS files')
-  .option('-c, --config <path>', 'config file path (JSON)')
-  .option('-f, --files <paths>', 'CSS files (comma separated)')
-  .option('-o, --output <path>', 'CSS output directory')
-  .option('--watch', 'watch mode (not yet implemented)')
-  .action(createRunAction());
-
-// 默认命令：直接运行
-program
   .option('-c, --config <path>', 'config file path (JSON)')
   .option('-f, --files <paths>', 'CSS files (comma separated)')
   .option('-o, --output <path>', 'CSS output directory')

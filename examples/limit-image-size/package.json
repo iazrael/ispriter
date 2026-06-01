@@ -1,0 +1,1 @@
+{"name":"ispriter-example-limit-image-size","private":true,"scripts":{"sprite":"ispriter -c config.json"}}

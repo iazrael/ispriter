@@ -1,17 +1,11 @@
 {
-    "debug": true,
-    
-    "workspace": "../../", // 相对于当前目录, ../../ 也就是根目录
-
-    "input": ["test/css/style2.css"],
-    "output": {
-
-        "cssDist": "examples/animation/css/",
-
-        "imageDist": "../img/",
-
-        "margin": 3,
-
-        "copyUnspriteImage": true
-    }
+  "workspace": "../../",
+  "input": {
+    "cssSource": ["tests/fixtures/css/style2.css"]
+  },
+  "output": {
+    "cssDist": "examples/animation/dist/css/",
+    "imageDist": "../img/",
+    "margin": 3
+  }
 }

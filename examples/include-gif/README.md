@@ -1,3 +1,11 @@
-在当前目录运行 ispriter -c config.json
+# include-gif
 
-目前的 node-png 不支持解析 gif, 因此 gif 图暂时无法合并
+使用 `ignoreImages` 排除 GIF 图片。演示图片排除功能。
+
+## 运行
+
+```bash
+npx ispriter -c examples/include-gif/config.json
+```
+
+输出到 `examples/include-gif/dist/`。

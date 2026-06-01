@@ -1,15 +1,12 @@
 {
-    "workspace": "../../", // 相对于当前目录, ../../ 也就是根目录
-
-    "input": ["test/css/style.css", "test/css/style3.css"],
-    "output": {
-
-        "cssDist": "examples/multi-combine/css/",
-
-        "imageDist": "../img/",
-
-        "margin": 5,
-
-        "combine": true
-    }
+  "workspace": "../../",
+  "input": {
+    "cssSource": ["tests/fixtures/css/style.css", "tests/fixtures/css/style3.css"]
+  },
+  "output": {
+    "cssDist": "examples/multi-combine/dist/css/",
+    "imageDist": "../img/",
+    "margin": 5,
+    "combine": true
+  }
 }
