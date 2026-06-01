@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { Spriter } from '@ispriter/core';
-import { parseConfig, type SpriterConfig } from '@ispriter/core';
+import { parseConfig, type SpriterConfig, type ResolvedConfig } from '@ispriter/core';
 import { readFile, writeFile, mkdir, glob } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,20 +10,39 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json');
 
+interface CliOptions {
+  config?: string;
+  files?: string;
+  output?: string;
+  watch?: boolean;
+  dryRun?: boolean;
+}
+
+interface CollectedInputs {
+  resolved: ResolvedConfig;
+  workspace: string;
+  cssFiles: Map<string, string>;
+  images: Map<string, Buffer>;
+}
+
 const program = new Command();
 
-program
-  .name('ispriter')
-  .description('CSS sprite generator')
-  .version(pkg.version);
+program.name('ispriter').description('CSS sprite generator').version(pkg.version);
 
 function createRunAction() {
-  return async (opts: any) => {
+  return async (opts: CliOptions) => {
     try {
       const config = await resolveConfig(opts);
-      await runSpriter(config);
-      if (opts.watch) {
-        await startWatch(config);
+      if (opts.dryRun && opts.watch) {
+        console.warn('⚠️ --dry-run and --watch are mutually exclusive. Running dry-run only.');
+      }
+      if (opts.dryRun) {
+        await runSpriterDry(config);
+      } else {
+        await runSpriter(config);
+        if (opts.watch) {
+          await startWatch(config);
+        }
       }
     } catch (e: any) {
       if (e.name === 'IspriterError') {
@@ -42,9 +61,10 @@ program
   .option('-f, --files <paths>', 'CSS files (comma separated)')
   .option('-o, --output <path>', 'CSS output directory')
   .option('--watch', 'watch for file changes and regenerate')
+  .option('--dry-run', 'preview what would be sprited without writing files')
   .action(createRunAction());
 
-async function resolveConfig(opts: any): Promise<SpriterConfig> {
+async function resolveConfig(opts: CliOptions): Promise<SpriterConfig> {
   if (opts.config) {
     const configPath = path.resolve(opts.config);
     try {
@@ -63,14 +83,15 @@ async function resolveConfig(opts: any): Promise<SpriterConfig> {
     };
   }
 
-  throw new Error('Either --config or --files is required');
+  program.help();
+  // unreachable, but keeps type checker happy
+  return {} as SpriterConfig;
 }
 
-async function runSpriter(config: SpriterConfig): Promise<void> {
+async function collectInputs(config: SpriterConfig): Promise<CollectedInputs | null> {
   const resolved = parseConfig(config);
   const workspace = path.resolve(resolved.workspace);
 
-  // 收集 CSS 文件
   const cssSource = Array.isArray(resolved.input.cssSource)
     ? resolved.input.cssSource
     : [resolved.input.cssSource];
@@ -88,14 +109,12 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
 
   if (cssFiles.size === 0) {
     console.warn('⚠️ No CSS files found');
-    return;
+    return null;
   }
 
-  // 收集图片
   const images = new Map<string, Buffer>();
   const allUrls: string[] = [];
 
-  // 简单提取 url() 用于读取图片
   for (const [, css] of cssFiles) {
     const urlMatches = css.matchAll(/url\(['"]?([^'")]+?)['"]?\)/g);
     for (const m of urlMatches) {
@@ -107,13 +126,11 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
     }
   }
 
-  // 读取图片文件
   for (const [cssFile] of cssFiles) {
     const cssDir = path.dirname(cssFile);
     for (const url of allUrls) {
       if (images.has(url)) continue;
       const imgPath = path.resolve(cssDir, url);
-      // S2: prevent path traversal
       if (!imgPath.startsWith(workspace)) continue;
       try {
         const buf = await readFile(imgPath);
@@ -124,15 +141,33 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
     }
   }
 
+  return { resolved, workspace, cssFiles, images };
+}
+
+async function runSpriter(config: SpriterConfig): Promise<void> {
+  const inputs = await collectInputs(config);
+  if (!inputs) return;
+  const { resolved, workspace, cssFiles, images } = inputs;
+
   console.log(`📦 Processing ${cssFiles.size} CSS files with ${images.size} images...`);
 
-  // 运行
   const spriter = new Spriter(config);
   const result = await spriter.run({ css: cssFiles, images, cssBaseDir: workspace });
 
-  // 输出
   const cssDist = path.resolve(workspace, resolved.output.cssDist);
+  if (!cssDist.startsWith(workspace)) {
+    console.error(
+      `❌ output.cssDist must be inside workspace: "${resolved.output.cssDist}" resolves outside`,
+    );
+    process.exit(1);
+  }
   const imgDist = path.resolve(cssDist, resolved.output.imageDist);
+  if (!imgDist.startsWith(workspace)) {
+    console.error(
+      `❌ output.imageDist must be inside workspace: "${resolved.output.imageDist}" resolves outside`,
+    );
+    process.exit(1);
+  }
 
   await mkdir(imgDist, { recursive: true });
 
@@ -145,10 +180,29 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
     await writeFile(path.join(cssDist, outName), content);
   }
 
-  console.log(`✅ Generated ${result.spriteImages.size} sprite(s), updated ${result.cssFiles.size} CSS file(s)`);
-  
+  console.log(
+    `✅ Generated ${result.spriteImages.size} sprite(s), updated ${result.cssFiles.size} CSS file(s)`,
+  );
+
   if (result.skippedImages.length > 0) {
-    console.warn(`⚠️ Skipped ${result.skippedImages.length} image(s): ${result.skippedImages.join(', ')}`);
+    console.warn(
+      `⚠️ Skipped ${result.skippedImages.length} image(s): ${result.skippedImages.join(', ')}`,
+    );
+  }
+}
+
+async function runSpriterDry(config: SpriterConfig): Promise<void> {
+  const inputs = await collectInputs(config);
+  if (!inputs) return;
+  const { workspace, cssFiles, images } = inputs;
+
+  console.log(`📦 Dry-run: analyzing ${cssFiles.size} CSS files with ${images.size} images...`);
+
+  const spriter = new Spriter(config);
+  const result = await spriter.run({ css: cssFiles, images, cssBaseDir: workspace, dryRun: true });
+
+  if (result.dryRunReport) {
+    console.log(result.dryRunReport);
   }
 }
 
@@ -163,9 +217,12 @@ async function startWatch(config: SpriterConfig): Promise<void> {
     ? resolved.input.cssSource
     : [resolved.input.cssSource];
 
-  const watcher = watch(cssPatterns.map((p) => path.resolve(workspace, p)), {
-    ignoreInitial: true,
-  });
+  const watcher = watch(
+    cssPatterns.map((p) => path.resolve(workspace, p)),
+    {
+      ignoreInitial: true,
+    },
+  );
 
   watcher.on('change', async (file) => {
     console.log(`📝 ${file} changed, regenerating...`);

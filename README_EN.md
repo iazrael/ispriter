@@ -91,10 +91,28 @@ Minimal `config.json`:
 ## CLI
 
 ```bash
-ispriter -c config.json            # config file
-ispriter -f style.css,style2.css   # specific CSS files
-ispriter -c config.json --watch    # watch mode
+# Config file
+ispriter -c config.json
+
+# Direct CSS files
+ispriter -f style.css,style2.css -o ./dist/css/
+
+# Preview mode (no files written)
+ispriter -c config.json --dry-run
+
+# Watch mode
+ispriter -c config.json --watch
 ```
+
+| Flag | Description |
+|------|-------------|
+| `-c, --config <path>` | Config file path (JSON) |
+| `-f, --files <paths>` | CSS files, comma separated |
+| `-o, --output <path>` | CSS output directory |
+| `--watch` | Watch for file changes and regenerate |
+| `--dry-run` | Preview mode, analyze without writing files |
+| `-V, --version` | Print version |
+| `-h, --help` | Print help |
 
 ---
 

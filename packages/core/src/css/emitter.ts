@@ -147,11 +147,16 @@ export async function emitCSS(
       // 压缩
       if (config.output.compress) {
         const cleaner = new CleanCSS(
-          typeof config.output.compress === 'object' ? (config.output.compress as ConstructorParameters<typeof CleanCSS>[0]) : {},
+          typeof config.output.compress === 'object'
+            ? (config.output.compress as ConstructorParameters<typeof CleanCSS>[0])
+            : {},
         );
         const minified = cleaner.minify(output);
         if (minified.errors.length > 0) {
-          throw new IspriterError(`CSS compression failed: ${minified.errors.join(', ')}`, 'OUTPUT_ERROR');
+          throw new IspriterError(
+            `CSS compression failed: ${minified.errors.join(', ')}`,
+            'OUTPUT_ERROR',
+          );
         }
         output = minified.styles;
       }
@@ -159,7 +164,9 @@ export async function emitCSS(
       results.set(filename, output);
     } catch (e) {
       if (e instanceof IspriterError) throw e;
-      throw new IspriterError(`Failed to emit CSS for ${filename}`, 'OUTPUT_ERROR', { file: filename });
+      throw new IspriterError(`Failed to emit CSS for ${filename}`, 'OUTPUT_ERROR', {
+        file: filename,
+      });
     }
   }
 

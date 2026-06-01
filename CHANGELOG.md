@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `--dry-run` CLI flag — preview sprite layout without writing files
+- `dryRun` option in `SpriterRunInput` — programmatic dry-run support
+- `dryRunReport` field in `SpriterResult` — structured analysis report
+- JSON Schema for config (`docs/config.schema.json`) with generator script
+- CONTRIBUTING.md
+- E2E tests for all 7 example projects + dry-run
+
+### Fixed
+- CLI version now reads from package.json (was hardcoded `2.0.0-alpha.1`)
+- `ispriter` without arguments shows help instead of throwing error
+- Path traversal validation no longer blocks valid relative paths (`../../`)
+- Output paths (`cssDist`/`imageDist`) now validated to stay within workspace
+- `--dry-run` and `--watch` flagged as mutually exclusive
+
+### Changed
+- Refactored CLI: extracted `collectInputs()` shared by run/dry-run/watch
+- Replaced `opts: any` with typed `CliOptions` interface
+- Cleaned up `.gitignore` — removed legacy scattered rules
+- Simplified README — moved detailed docs to `docs/` directory
+
 ## [2.0.1] - 2026-06-01
 
 ### Added

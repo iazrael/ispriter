@@ -6,10 +6,7 @@ import { IspriterError } from '../error.js';
  * 展开 CSS 中的 @import 语句
  * 将所有 @import 替换为实际内容
  */
-export async function expandImports(
-  css: string,
-  fromFile: string,
-): Promise<string> {
+export async function expandImports(css: string, fromFile: string): Promise<string> {
   try {
     const result = await postcss([postcssImport()]).process(css, { from: fromFile });
     return result.css;
