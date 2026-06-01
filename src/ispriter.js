@@ -773,20 +773,18 @@ function readImagesInfo(styleObjList, onDone) {
  */
 function readImageInfo(fileName, callback) {
     fileName = path.join(spriteConfig.workspace, fileName);
+    var fileSize = fs.statSync(fileName).size;
     fs.createReadStream(fileName).pipe(new PNG())
         .on('parsed', function() {
 
             var imageInfo = {
                 image: this,
                 width: this.width,
-                height: this.height
+                height: this.height,
+                size: fileSize
             };
 
-            getImageSize(this, function(size) {
-
-                imageInfo.size = size;
-                callback(imageInfo);
-            });
+            callback(imageInfo);
         })
         .on('error', function(e) {
             info('>>Skip: ' + e.message + ' of "' + fileName + '"');
@@ -794,26 +792,7 @@ function readImageInfo(fileName, callback) {
         });
 }
 
-/**
- * 读取图片内容所占硬盘空间的大小
- * @param  {PNG}   image
- * @param  {Function} callback callback(Number)
- */
-function getImageSize(image, callback) {
-    var size = 0;
 
-    /*
-     * 这里读取图片大小的范式比较折腾, pngjs 没有提供直接获取 size 的通用方法,
-     * 同时它只提供了文件流的方式读取, 所以只能一段一段的读取数据时把长度相加
-     */
-    image.pack().on('data', function(chunk) {
-
-        size += chunk.length;
-    }).on('end', function() {
-
-        callback(size);
-    });
-}
 
 /**
  * 把用了同一个图片的样式里写的大小 (with, height) 跟图片的大小相比较, 取最大值,
