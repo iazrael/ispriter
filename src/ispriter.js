@@ -216,7 +216,7 @@ function info(msg) {
 function readConfig(config) {
     if (us.isString(config)) {
         if (!fs.existsSync(config)) {
-            throw 'place give in a sprite config or config file!';
+            throw new Error('place give in a sprite config or config file!');
         }
         var content = fs.readFileSync(config).toString();
         config = zTool.jsonParse(content);
@@ -249,7 +249,7 @@ function readConfig(config) {
 
     var cssSource = config.input.cssSource;
     if (!cssSource) {
-        throw 'there is no cssSource specific!';
+        throw new Error('there is no cssSource specific!');
     } else if (us.isString(cssSource)) {
         cssSource = [cssSource];
     }
@@ -271,7 +271,7 @@ function readConfig(config) {
         cssFiles = cssFiles.concat(queryResult);
     }
     if (!cssFiles.length) {
-        throw 'there is no any css file contain!';
+        throw new Error('there is no any css file contain!');
     }
 
     // 去重

@@ -34,4 +34,9 @@ sprite/css/style.css
 /test/sprite/css/style.css
 /test/sprite/css/style2.css
 /test/sprite/css/style3.css
+
+# v2 monorepo
+packages/*/dist/
+packages/*/.tsbuildinfo
+*.tsbuildinfo
 /test/sprite/css/img/sprite_style.png

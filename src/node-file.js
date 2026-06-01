@@ -104,7 +104,7 @@ var copyFileSync = function (src, dst, overwrite) {
     var stat, input, output;
     // console.log('coping ' + src);
     if(!fs.existsSync(src)){
-        throw 'File ' + src + ' is not exists.';
+        throw new Error('File ' + src + ' is not exists.');
     }
     //创建目标目录
     mkdirsSync(path.dirname(dst));
@@ -121,7 +121,7 @@ var copyFileSync = function (src, dst, overwrite) {
         }
         if(stat.isFile() && !overwrite){
             //是个文件且不能覆盖
-            throw 'File ' + dst + ' is exists.';
+            throw new Error('File ' + dst + ' is exists.');
         }
     }else{
         if(isDirectoryPath(dst)){
@@ -145,7 +145,7 @@ var copyFile = function (src, dst, overwrite, callback) {
     var stat, input, output;
     // console.log('coping ', src, 'to', dst);
     if(!fs.existsSync(src)){
-        throw 'File ' + src + ' is not exists.';
+        throw new Error('File ' + src + ' is not exists.');
     }
     //创建目标目录
     mkdirsSync(path.dirname(dst));
@@ -163,7 +163,7 @@ var copyFile = function (src, dst, overwrite, callback) {
         if(stat.isFile()){
             if(!overwrite){
                 //是个文件且不能覆盖
-                throw 'File ' + dst + ' is exists.';
+                throw new Error('File ' + dst + ' is exists.');
             }else{
                 fs.unlinkSync(dst);
                 // console.log('--删除 ' , dst);
@@ -195,7 +195,7 @@ var writeFileSync = function(filenName, content, overwrite){
     mkdirsSync(path.dirname(filenName));
     if(fs.existsSync(filenName)){
         if(!overwrite){
-            throw 'File ' + filenName + ' is exists.';
+            throw new Error('File ' + filenName + ' is exists.');
         }else{
             fs.unlinkSync(filenName);
         }

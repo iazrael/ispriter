@@ -1,26 +1,23 @@
 {
-  "author": "azrael <azrael@imatlas.com> (http://imatlas.com/about)",
   "name": "ispriter",
-  "description": "an intelligent merge sprite tool",
-  "version": "0.3.9",
-  "homepage": "http://imatlas.com/posts/ispriter-update/",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/iazrael/ispriter.git"
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint 'packages/*/src/**/*.ts'",
+    "format": "prettier --write 'packages/*/src/**/*.ts'"
   },
-  "main": "./src/ispriter.js",
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.1.0",
+    "tsup": "^8.4.0",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.0",
+    "@types/node": "^22.10.0"
+  },
   "engines": {
-    "node": "*"
-  },
-  "bin":{
-    "ispriter": "./bin/ispriter"
-  },
-  "bundledDependencies": [
-    "cssom",
-    "pngjs",
-	"eventproxy",
-    "underscore",
-    "commander",
-    "clean-css"
-  ]
+    "node": ">=20.0.0"
+  }
 }
