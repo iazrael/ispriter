@@ -1,18 +1,30 @@
 import postcss, { type Root, type Rule, type Declaration } from 'postcss';
 import type { BackgroundRule } from '../types.js';
 import { analyseBackground, cleanImageUrl, isUnsprite, shouldSkip } from './background.js';
+import { expandImports } from './imports.js';
 
 /**
  * 从多个 CSS 文件中提取所有 background 规则
+ * Fix #15/#18: 自动展开 @import
  */
-export function extractBackgrounds(
+export async function extractBackgrounds(
   cssContents: Map<string, string>,
-): BackgroundRule[] {
+): Promise<BackgroundRule[]> {
   const rules: BackgroundRule[] = [];
 
   for (const [filename, css] of cssContents) {
     try {
-      const root = postcss.parse(css);
+      // Fix #15: 先展开 @import
+      let expandedCss = css;
+      if (css.includes('@import')) {
+        try {
+          expandedCss = await expandImports(css, filename);
+        } catch {
+          // @import 展开失败，继续用原始 CSS
+        }
+      }
+
+      const root = postcss.parse(expandedCss);
       processRules(root, filename, false, rules);
       // 也处理 @keyframes 中的规则
       root.walkAtRules(/keyframes/i, (atRule) => {
@@ -83,9 +95,14 @@ function processRules(
   });
 }
 
-function parseSizeDecl(decl: Declaration): { w: number; h: number } {
+function parseSizeDecl(decl: Declaration): { w: number; h: number } | undefined {
   const parts = decl.value.split(/\s+/);
-  const w = parseFloat(parts[0]) || 0;
-  const h = parseFloat(parts[1]) || w;
+  const first = parts[0];
+  // 无法解析的值（百分比、auto、cover、contain 等）返回 undefined
+  if (!/^-?\d+(\.\d+)?(px)?$/.test(first)) return undefined;
+  const w = parseFloat(first) || 0;
+  const hStr = parts[1];
+  if (hStr && !/^-?\d+(\.\d+)?(px)?$/.test(hStr)) return undefined;
+  const h = hStr ? parseFloat(hStr) || w : w;
   return { w, h };
 }

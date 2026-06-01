@@ -24,6 +24,8 @@ export interface ImageAsset {
   rules: BackgroundRule[];
 }
 
+import type { Rule } from 'postcss';
+
 /** CSS background 规则提取结果 */
 export interface BackgroundRule {
   file: string;
@@ -32,7 +34,7 @@ export interface BackgroundRule {
   position: { x: number | string; y: number | string };
   size?: { w: number; h: number };
   repeat: string;
-  node: unknown;
+  node: Rule;
   inAnimation: boolean;
 }
 

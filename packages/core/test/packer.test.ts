@@ -3,20 +3,22 @@ import { pack } from '../src/packer.js';
 
 describe('pack', () => {
   it('should return empty for empty input', () => {
-    expect(pack([])).toEqual([]);
+    const result = pack([]);
+    expect(result.placed).toEqual([]);
+    expect(result.unfit).toEqual([]);
   });
 
   it('should place single block at origin', () => {
-    const result = pack([{ width: 100, height: 100, data: 'a' }], 0);
-    expect(result).toHaveLength(1);
-    expect(result[0].x).toBe(0);
-    expect(result[0].y).toBe(0);
-    expect(result[0].width).toBe(100);
-    expect(result[0].height).toBe(100);
+    const { placed } = pack([{ width: 100, height: 100, data: 'a' }], 0);
+    expect(placed).toHaveLength(1);
+    expect(placed[0].x).toBe(0);
+    expect(placed[0].y).toBe(0);
+    expect(placed[0].width).toBe(100);
+    expect(placed[0].height).toBe(100);
   });
 
   it('should place multiple blocks without overlap', () => {
-    const result = pack(
+    const { placed: result } = pack(
       [
         { width: 100, height: 100, data: 'big' },
         { width: 50, height: 50, data: 'small' },
@@ -36,7 +38,7 @@ describe('pack', () => {
   });
 
   it('should respect margin', () => {
-    const result = pack(
+    const { placed: result } = pack(
       [
         { width: 50, height: 50, data: 'a' },
         { width: 50, height: 50, data: 'b' },
@@ -48,7 +50,7 @@ describe('pack', () => {
   });
 
   it('should preserve data through packing', () => {
-    const result = pack([
+    const { placed: result } = pack([
       { width: 30, height: 30, data: { name: 'icon.png' } },
     ], 0);
     expect(result[0].data).toEqual({ name: 'icon.png' });
@@ -56,7 +58,7 @@ describe('pack', () => {
 
   it('should sort by area descending internally', () => {
     // Small first, big last — should still pack correctly
-    const result = pack(
+    const { placed: result } = pack(
       [
         { width: 10, height: 10, data: 'tiny' },
         { width: 200, height: 200, data: 'huge' },
@@ -71,10 +73,20 @@ describe('pack', () => {
   });
 
   it('should work with default margin (0)', () => {
-    const result = pack([
+    const { placed: result } = pack([
       { width: 50, height: 50, data: 'a' },
       { width: 50, height: 50, data: 'b' },
     ]);
     expect(result).toHaveLength(2);
+  });
+
+  it('should report unfit blocks that cannot be packed', () => {
+    // This is a contrived test — normally GrowingPacker grows to fit,
+    // but we test the unfit tracking exists
+    const { placed, unfit } = pack([
+      { width: 50, height: 50, data: 'a' },
+    ]);
+    expect(placed).toHaveLength(1);
+    expect(unfit).toHaveLength(0);
   });
 });

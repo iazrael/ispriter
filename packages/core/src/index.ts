@@ -11,6 +11,7 @@ export type {
   SpriterResult,
 } from './types.js';
 export { pack } from './packer.js';
+export type { PackOutput } from './packer.js';
 export { extractBackgrounds } from './css/parser.js';
 export { analyseBackground, shouldSkip, cleanImageUrl, isUnsprite } from './css/background.js';
 export { emitCSS } from './css/emitter.js';

@@ -88,7 +88,11 @@ export async function generateRetinaSprites(
     data: a,
   }));
 
-  const packedResults = pack(inputs, config.output.margin * scale);
+  const { placed: packedResults, unfit } = pack(inputs, config.output.margin * scale);
+
+  if (unfit.length > 0) {
+    console.warn(`[ispriter] ${unfit.length} retina image(s) could not be packed`);
+  }
 
   if (packedResults.length === 0) {
     return { packedSprites: [], scaledAssets };

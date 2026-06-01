@@ -9,8 +9,24 @@ interface Block<T> {
   fit?: { x: number; y: number; w: number; h: number };
 }
 
-export function pack<T>(blocks: PackInput<T>[], margin: number = 0): PackResult<T>[] {
-  if (blocks.length === 0) return [];
+/** Internal node structure for GrowingPacker */
+interface PackerNode {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  used?: boolean;
+  down?: PackerNode;
+  right?: PackerNode;
+}
+
+export interface PackOutput<T> {
+  placed: PackResult<T>[];
+  unfit: PackInput<T>[];
+}
+
+export function pack<T>(blocks: PackInput<T>[], margin: number = 0): PackOutput<T> {
+  if (blocks.length === 0) return { placed: [], unfit: [] };
 
   // 按面积降序排序
   const sorted = [...blocks].sort((a, b) => b.width * b.height - a.width * a.height);
@@ -23,25 +39,36 @@ export function pack<T>(blocks: PackInput<T>[], margin: number = 0): PackResult<
     data: b.data,
   }));
 
-  const packer = new GrowingPacker<T>();
+  const packer = new GrowingPacker();
   packer.fit(packerBlocks);
 
-  return packerBlocks
-    .filter((b) => b.fit)
-    .map((b) => ({
-      width: b.w - margin,
-      height: b.h - margin,
-      x: b.fit!.x,
-      y: b.fit!.y,
-      rotated: false,
-      data: b.data,
-    }));
+  const placed: PackResult<T>[] = [];
+  const unfit: PackInput<T>[] = [];
+
+  for (let i = 0; i < packerBlocks.length; i++) {
+    const b = packerBlocks[i];
+    if (b.fit) {
+      placed.push({
+        width: b.w - margin,
+        height: b.h - margin,
+        x: b.fit.x,
+        y: b.fit.y,
+        rotated: false,
+        data: b.data,
+      });
+    } else {
+      unfit.push(sorted[i]);
+      console.warn(`[ispriter] Image could not be packed (too large): skipping`);
+    }
+  }
+
+  return { placed, unfit };
 }
 
-class GrowingPacker<T> {
-  private root!: { x: number; y: number; w: number; h: number; used?: boolean; down?: any; right?: any };
+class GrowingPacker {
+  private root!: PackerNode;
 
-  fit(blocks: Block<T>[]): void {
+  fit(blocks: Block<unknown>[]): void {
     const first = blocks[0];
     this.root = { x: 0, y: 0, w: first.w, h: first.h };
 
@@ -60,9 +87,9 @@ class GrowingPacker<T> {
     }
   }
 
-  private findNode(root: any, w: number, h: number): any {
+  private findNode(root: PackerNode, w: number, h: number): PackerNode | null {
     if (root.used) {
-      return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);
+      return this.findNode(root.right!, w, h) || this.findNode(root.down!, w, h);
     }
     if (w <= root.w && h <= root.h) {
       return root;
@@ -70,13 +97,13 @@ class GrowingPacker<T> {
     return null;
   }
 
-  private splitNode(node: any, w: number, h: number): void {
+  private splitNode(node: PackerNode, w: number, h: number): void {
     node.used = true;
     node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
     node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
   }
 
-  private growNode(w: number, h: number): any {
+  private growNode(w: number, h: number): PackerNode | null {
     const canGrowDown = w <= this.root.w;
     const canGrowRight = h <= this.root.h;
 
@@ -95,7 +122,7 @@ class GrowingPacker<T> {
     return null;
   }
 
-  private growRight(w: number, h: number): any {
+  private growRight(w: number, h: number): PackerNode | null {
     this.root = {
       used: true,
       x: 0,
@@ -105,14 +132,10 @@ class GrowingPacker<T> {
       down: this.root,
       right: { x: this.root.w, y: 0, w: w, h: this.root.h },
     };
-    let node: any;
-    if ((node = this.findNode(this.root, w, h))) {
-      return node;
-    }
-    return null;
+    return this.findNode(this.root, w, h);
   }
 
-  private growDown(w: number, h: number): any {
+  private growDown(w: number, h: number): PackerNode | null {
     this.root = {
       used: true,
       x: 0,
@@ -122,10 +145,6 @@ class GrowingPacker<T> {
       down: { x: 0, y: this.root.h, w: this.root.w, h: h },
       right: this.root,
     };
-    let node: any;
-    if ((node = this.findNode(this.root, w, h))) {
-      return node;
-    }
-    return null;
+    return this.findNode(this.root, w, h);
   }
 }

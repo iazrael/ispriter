@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { glob } from 'node:fs/promises';
 import path from 'node:path';
-import { Spriter, type SpriterConfig, parseConfig } from './index.js';
+import { Spriter, type SpriterConfig, parseConfig, extractBackgrounds } from './index.js';
 
 export interface PluginRunOptions {
   config: SpriterConfig;
@@ -37,18 +37,23 @@ export async function runSpriteGeneration(options: PluginRunOptions): Promise<vo
 
   if (cssFiles.size === 0) return;
 
-  // 2. Collect referenced images
+  // 2. Collect referenced images using parser (instead of fragile regex)
+  const rules = await extractBackgrounds(cssFiles);
+  const imageUrls = new Set<string>();
+  for (const rule of rules) {
+    imageUrls.add(rule.imageUrl);
+  }
+
   const images = new Map<string, Buffer>();
-  for (const [cssFile, css] of cssFiles) {
-    const cssDir = path.dirname(cssFile);
-    for (const m of css.matchAll(/url\(['"]?([^'")]+?)['"]?\)/g)) {
-      const rawUrl = m[1];
-      if (rawUrl.startsWith('data:') || rawUrl.startsWith('http')) continue;
-      if (rawUrl.includes('#unsprite')) continue;
-      const clean = rawUrl.replace(/\?[^#]*/g, '').replace(/#.*/g, '');
-      if (images.has(clean)) continue;
+  for (const url of imageUrls) {
+    if (url.startsWith('data:') || url.startsWith('http')) continue;
+    // Try resolving relative to each CSS file's directory
+    for (const [cssFile] of cssFiles) {
+      const absPath = path.resolve(path.dirname(cssFile), url);
       try {
-        images.set(clean, await readFile(path.resolve(cssDir, clean)));
+        if (!images.has(url)) {
+          images.set(url, await readFile(absPath));
+        }
       } catch {
         // skip missing images
       }
