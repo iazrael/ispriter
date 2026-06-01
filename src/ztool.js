@@ -17,7 +17,11 @@ exports.endsWith = function(str, end){
 }
 
 exports.jsonParse = function(jsonStr){
-    return Function('return ' + jsonStr)();
+    try {
+        return JSON.parse(jsonStr);
+    } catch(e) {
+        return null;
+    }
 }
 
 exports.forEach = function(array, onEach, onDone){
