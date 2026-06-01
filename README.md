@@ -50,33 +50,29 @@ npx ispriter -c config.json
 
 ## CLI 用法
 
+```bash
+# 指定配置文件
+ispriter -c config.json
+
+# 直接指定 CSS 文件和输出目录
+ispriter -f style.css,style2.css -o ./dist/css/
+
+# 预览模式（不写文件，只输出分析报告）
+ispriter -c config.json --dry-run
+
+# 监听模式
+ispriter -c config.json --watch
 ```
-Usage: ispriter [options] [command]
 
-CSS sprite generator
-
-Options:
-  -V, --version           output the version number
-  -h, --help              display help for command
-
-Commands:
-  run [options]           Generate sprites from CSS files
-  help [command]          display help for command
-```
-
-```
-Usage: ispriter run [options]
-
-Generate sprites from CSS files
-
-Options:
-  -c, --config <path>     config file path (JSON)
-  -f, --files <paths>     CSS files (comma separated)
-  -o, --output <path>     CSS output directory
-  --watch                 watch for file changes and regenerate
-  --dry-run               preview what would be sprited without writing files
-  -h, --help              display help for command
-```
+| 参数 | 说明 |
+|------|------|
+| `-c, --config <path>` | 配置文件路径（JSON） |
+| `-f, --files <paths>` | CSS 文件，逗号分隔 |
+| `-o, --output <path>` | CSS 输出目录 |
+| `--watch` | 监听文件变化，自动重新生成 |
+| `--dry-run` | 预览模式，只输出分析报告不写文件 |
+| `-V, --version` | 显示版本号 |
+| `-h, --help` | 显示帮助 |
 
 ---
 
