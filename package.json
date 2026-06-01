@@ -1,17 +1,19 @@
 {
   "name": "ispriter",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "pnpm -r run build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint 'packages/*/src/**/*.ts'",
-    "format": "prettier --write 'packages/*/src/**/*.ts'"
+    "test:e2e": "vitest run tests/e2e/",
+    "lint": "prettier --check 'packages/*/src/**/*.ts'",
+    "format": "prettier --write 'packages/*/src/**/*.ts'",
+    "clean": "pnpm -r exec rm -rf dist"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
-    "eslint": "^9.16.0",
     "prettier": "^3.4.0",
     "sharp": "^0.33.5",
     "tsup": "^8.4.0",
