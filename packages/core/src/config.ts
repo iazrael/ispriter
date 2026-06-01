@@ -23,10 +23,12 @@ export const SpriterConfigSchema = z.object({
     remBase: z.number().positive().default(16),
   }),
   groups: z
-    .array(z.object({
-      name: z.string(),
-      images: z.union([z.string(), z.array(z.string())]),
-    }))
+    .array(
+      z.object({
+        name: z.string(),
+        images: z.union([z.string(), z.array(z.string())]),
+      }),
+    )
     .optional(),
 });
 
@@ -67,10 +69,8 @@ function validateNoTraversal(pathStr: string, _fieldName: string): void {
   // Real traversal detection should happen at runtime when we know the CWD.
   // For config-time validation, we just ensure no null bytes.
   if (pathStr.includes('\0')) {
-    throw new IspriterError(
-      `Invalid path in ${_fieldName}: null byte detected`,
-      'CONFIG_INVALID',
-      { field: _fieldName },
-    );
+    throw new IspriterError(`Invalid path in ${_fieldName}: null byte detected`, 'CONFIG_INVALID', {
+      field: _fieldName,
+    });
   }
 }

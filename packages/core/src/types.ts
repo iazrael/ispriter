@@ -64,7 +64,10 @@ export interface PackedSprite {
 export interface SpriterResult {
   cssFiles: Map<string, string>;
   spriteImages: Map<string, Buffer>;
-  manifest: Map<string, { spriteFile: string; x: number; y: number; width: number; height: number }>;
+  manifest: Map<
+    string,
+    { spriteFile: string; x: number; y: number; width: number; height: number }
+  >;
   skippedImages: string[];
   /** Only present when dryRun=true */
   dryRunReport?: string;

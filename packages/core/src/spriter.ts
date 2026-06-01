@@ -1,4 +1,10 @@
-import type { SpriterRunInput, SpriterResult, PackedSprite, ImageAsset, BackgroundRule } from './types.js';
+import type {
+  SpriterRunInput,
+  SpriterResult,
+  PackedSprite,
+  ImageAsset,
+  BackgroundRule,
+} from './types.js';
 import type { ResolvedConfig } from './config.js';
 import { parseConfig, type SpriterConfig } from './config.js';
 import { extractBackgrounds } from './css/parser.js';

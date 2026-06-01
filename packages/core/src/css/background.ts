@@ -42,7 +42,9 @@ export function analyseBackground(value: string): ParsedBackground {
     const afterUrl = value.replace(/url\([^)]*\)/, '').trim();
     const posTokens = afterUrl
       .split(/\s+/)
-      .filter((t) => t && !['no-repeat', 'repeat', 'repeat-x', 'repeat-y', 'repeat-space'].includes(t))
+      .filter(
+        (t) => t && !['no-repeat', 'repeat', 'repeat-x', 'repeat-y', 'repeat-space'].includes(t),
+      )
       .filter((t) => !t.startsWith('/') && !t.startsWith('#'));
 
     if (posTokens.length >= 1) {
@@ -78,8 +80,18 @@ export function shouldSkip(parsed: ParsedBackground): boolean {
   if (parsed.positionX === '100%' || parsed.positionY === '100%') return true;
   if (parsed.positionX === 'center' || parsed.positionY === 'center') return true;
   // 跳过百分比 position（暂时不支持精确计算）
-  if (typeof parsed.positionX === 'string' && parsed.positionX.endsWith('%') && parsed.positionX !== '100%') return true;
-  if (typeof parsed.positionY === 'string' && parsed.positionY.endsWith('%') && parsed.positionY !== '100%') return true;
+  if (
+    typeof parsed.positionX === 'string' &&
+    parsed.positionX.endsWith('%') &&
+    parsed.positionX !== '100%'
+  )
+    return true;
+  if (
+    typeof parsed.positionY === 'string' &&
+    parsed.positionY.endsWith('%') &&
+    parsed.positionY !== '100%'
+  )
+    return true;
   return false;
 }
 

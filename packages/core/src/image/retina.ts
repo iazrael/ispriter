@@ -38,7 +38,10 @@ export async function generateRetinaSprites(
   assets: ImageAsset[],
   config: ResolvedConfig,
   scale: 2 | 3,
-): Promise<{ packedSprites: PackedSprite[]; scaledAssets: Map<string, { width: number; height: number }> }> {
+): Promise<{
+  packedSprites: PackedSprite[];
+  scaledAssets: Map<string, { width: number; height: number }>;
+}> {
   const scaledAssets = new Map<string, { width: number; height: number }>();
   const retinaMatch = matchRetinaImages(assets, scale);
 

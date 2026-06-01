@@ -27,10 +27,7 @@ interface CollectedInputs {
 
 const program = new Command();
 
-program
-  .name('ispriter')
-  .description('CSS sprite generator')
-  .version(pkg.version);
+program.name('ispriter').description('CSS sprite generator').version(pkg.version);
 
 function createRunAction() {
   return async (opts: CliOptions) => {
@@ -159,12 +156,16 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
 
   const cssDist = path.resolve(workspace, resolved.output.cssDist);
   if (!cssDist.startsWith(workspace)) {
-    console.error(`❌ output.cssDist must be inside workspace: "${resolved.output.cssDist}" resolves outside`);
+    console.error(
+      `❌ output.cssDist must be inside workspace: "${resolved.output.cssDist}" resolves outside`,
+    );
     process.exit(1);
   }
   const imgDist = path.resolve(cssDist, resolved.output.imageDist);
   if (!imgDist.startsWith(workspace)) {
-    console.error(`❌ output.imageDist must be inside workspace: "${resolved.output.imageDist}" resolves outside`);
+    console.error(
+      `❌ output.imageDist must be inside workspace: "${resolved.output.imageDist}" resolves outside`,
+    );
     process.exit(1);
   }
 
@@ -179,10 +180,14 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
     await writeFile(path.join(cssDist, outName), content);
   }
 
-  console.log(`✅ Generated ${result.spriteImages.size} sprite(s), updated ${result.cssFiles.size} CSS file(s)`);
-  
+  console.log(
+    `✅ Generated ${result.spriteImages.size} sprite(s), updated ${result.cssFiles.size} CSS file(s)`,
+  );
+
   if (result.skippedImages.length > 0) {
-    console.warn(`⚠️ Skipped ${result.skippedImages.length} image(s): ${result.skippedImages.join(', ')}`);
+    console.warn(
+      `⚠️ Skipped ${result.skippedImages.length} image(s): ${result.skippedImages.join(', ')}`,
+    );
   }
 }
 
@@ -212,9 +217,12 @@ async function startWatch(config: SpriterConfig): Promise<void> {
     ? resolved.input.cssSource
     : [resolved.input.cssSource];
 
-  const watcher = watch(cssPatterns.map((p) => path.resolve(workspace, p)), {
-    ignoreInitial: true,
-  });
+  const watcher = watch(
+    cssPatterns.map((p) => path.resolve(workspace, p)),
+    {
+      ignoreInitial: true,
+    },
+  );
 
   watcher.on('change', async (file) => {
     console.log(`📝 ${file} changed, regenerating...`);

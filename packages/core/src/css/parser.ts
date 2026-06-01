@@ -29,7 +29,12 @@ export async function extractBackgrounds(
       // 也处理 @keyframes 中的规则
       root.walkAtRules(/keyframes/i, (atRule) => {
         if (atRule.nodes) {
-          const kfRoot = postcss.parse(atRule.toString().replace(/@[^{]+\{/, '').replace(/\}$/, ''));
+          const kfRoot = postcss.parse(
+            atRule
+              .toString()
+              .replace(/@[^{]+\{/, '')
+              .replace(/\}$/, ''),
+          );
           processRules(kfRoot as Root, filename, true, rules);
         }
       });

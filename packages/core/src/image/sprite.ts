@@ -27,15 +27,17 @@ export async function generateSprites(
       });
 
       // 用 composite 叠加所有图片（P1: parallel）
-      const composites = await Promise.all(items.map(async (item) => {
-        let inputBuf = item.asset.buffer;
-        if (item.width !== item.asset.naturalWidth || item.height !== item.asset.naturalHeight) {
-          inputBuf = await sharp(item.asset.buffer)
-            .resize(item.width, item.height, { fit: 'fill' })
-            .toBuffer();
-        }
-        return { input: inputBuf, left: item.x, top: item.y };
-      }));
+      const composites = await Promise.all(
+        items.map(async (item) => {
+          let inputBuf = item.asset.buffer;
+          if (item.width !== item.asset.naturalWidth || item.height !== item.asset.naturalHeight) {
+            inputBuf = await sharp(item.asset.buffer)
+              .resize(item.width, item.height, { fit: 'fill' })
+              .toBuffer();
+          }
+          return { input: inputBuf, left: item.x, top: item.y };
+        }),
+      );
 
       let output = canvas.composite(composites);
 
@@ -49,10 +51,14 @@ export async function generateSprites(
       results.set(sprite.spriteFile, buffer);
     } catch (e) {
       if (e instanceof IspriterError) throw e;
-      throw new IspriterError(`Failed to generate sprite: ${sprite.spriteFile}: ${(e as Error).message}`, 'OUTPUT_ERROR', {
-        spriteFile: sprite.spriteFile,
-        cause: e,
-      });
+      throw new IspriterError(
+        `Failed to generate sprite: ${sprite.spriteFile}: ${(e as Error).message}`,
+        'OUTPUT_ERROR',
+        {
+          spriteFile: sprite.spriteFile,
+          cause: e,
+        },
+      );
     }
   }
 
