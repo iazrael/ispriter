@@ -5,8 +5,8 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const TEST_CSS_DIR = path.join(ROOT, 'test/css');
-const TEST_IMAGES_DIR = path.join(ROOT, 'test/images');
+const TEST_CSS_DIR = path.join(ROOT, 'tests/fixtures/css');
+const TEST_IMAGES_DIR = path.join(ROOT, 'tests/fixtures/images');
 
 /** Read all images from test/images into a Map<relativeUrl, Buffer> */
 async function loadTestImages(): Promise<Map<string, Buffer>> {
