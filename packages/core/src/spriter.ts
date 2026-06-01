@@ -40,6 +40,18 @@ export class Spriter {
     // 6. maxSingleSize 拆分（Fix #13）
     const finalSprites = this.splitByMaxSize(allPackedSprites);
 
+    // Dry-run: 只做分析，不生成图片和 CSS
+    if (input.dryRun) {
+      const manifest = this.buildManifest(finalSprites);
+      return {
+        cssFiles: new Map(),
+        spriteImages: new Map(),
+        manifest,
+        skippedImages: skipped,
+        dryRunReport: this.buildDryRunReport(finalSprites, skipped, assets.length),
+      } as SpriterResult;
+    }
+
     // 7. 生成精灵图
     const spriteImages = await generateSprites(finalSprites, this.config);
 
@@ -267,5 +279,40 @@ export class Spriter {
       }
     }
     return manifest;
+  }
+
+  private buildDryRunReport(
+    packedSprites: PackedSprite[],
+    skipped: string[],
+    totalAssets: number,
+  ): string {
+    const lines: string[] = [];
+    lines.push('');
+    lines.push('📋 Dry-run report');
+    lines.push('─'.repeat(50));
+    lines.push(`Images found:    ${totalAssets}`);
+    lines.push(`Images sprited:  ${totalAssets - skipped.length}`);
+    lines.push(`Images skipped:  ${skipped.length}`);
+    lines.push(`Sprite sheets:   ${packedSprites.length}`);
+    lines.push('');
+
+    for (const sprite of packedSprites) {
+      lines.push(`📄 ${sprite.spriteFile} (${sprite.canvasWidth}×${sprite.canvasHeight}px)`);
+      lines.push(`   Contains ${sprite.items.length} image(s):`);
+      for (const item of sprite.items) {
+        lines.push(`   • ${item.asset.url} → (${item.x}, ${item.y}) ${item.width}×${item.height}`);
+      }
+      lines.push('');
+    }
+
+    if (skipped.length > 0) {
+      lines.push(`⚠️  Skipped (${skipped.length}):`);
+      for (const url of skipped) {
+        lines.push(`   • ${url}`);
+      }
+      lines.push('');
+    }
+
+    return lines.join('\n');
   }
 }

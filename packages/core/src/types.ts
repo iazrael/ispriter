@@ -43,6 +43,7 @@ export interface SpriterRunInput {
   css: Map<string, string>;
   images: Map<string, Buffer>;
   cssBaseDir: string;
+  dryRun?: boolean;
 }
 
 /** 打包后的精灵图条目 */
@@ -65,4 +66,6 @@ export interface SpriterResult {
   spriteImages: Map<string, Buffer>;
   manifest: Map<string, { spriteFile: string; x: number; y: number; width: number; height: number }>;
   skippedImages: string[];
+  /** Only present when dryRun=true */
+  dryRunReport?: string;
 }

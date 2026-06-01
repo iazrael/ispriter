@@ -1,0 +1,168 @@
+{
+  "$ref": "#/definitions/iSpriter Config",
+  "definitions": {
+    "iSpriter Config": {
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "default": "./"
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "cssSource": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "ignoreImages": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "cssSource"
+          ],
+          "additionalProperties": false
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "cssDist": {
+              "type": "string"
+            },
+            "imageDist": {
+              "type": "string",
+              "default": "./img/"
+            },
+            "format": {
+              "type": "string",
+              "enum": [
+                "png",
+                "webp"
+              ],
+              "default": "png"
+            },
+            "quality": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 80
+            },
+            "retina": {
+              "type": "number",
+              "enum": [
+                2,
+                3
+              ]
+            },
+            "maxSingleSize": {
+              "type": "number",
+              "exclusiveMinimum": true,
+              "minimum": 0
+            },
+            "margin": {
+              "type": "number",
+              "minimum": 0,
+              "default": 2
+            },
+            "prefix": {
+              "type": "string",
+              "default": "sprite_"
+            },
+            "compress": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              ],
+              "default": false
+            },
+            "combine": {
+              "type": "boolean",
+              "default": false
+            },
+            "combineCSSRule": {
+              "type": "boolean",
+              "default": true
+            },
+            "unit": {
+              "type": "string",
+              "enum": [
+                "px",
+                "rem"
+              ],
+              "default": "px"
+            },
+            "remBase": {
+              "type": "number",
+              "exclusiveMinimum": true,
+              "minimum": 0,
+              "default": 16
+            }
+          },
+          "required": [
+            "cssDist"
+          ],
+          "additionalProperties": false
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "images": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "images"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "input",
+        "output"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
