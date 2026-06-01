@@ -1,0 +1,34 @@
+{
+  "name": "ispriter",
+  "version": "2.0.0",
+  "description": "Smart CSS sprite generator",
+  "type": "module",
+  "bin": {
+    "ispriter": "./bin/ispriter.mjs"
+  },
+  "dependencies": {
+    "@ispriter/cli": "^2.0.0",
+    "@ispriter/core": "^2.0.0"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "sprite",
+    "css-sprite",
+    "css",
+    "image",
+    "sprite-sheet",
+    "auto-sprite",
+    "ispriter"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iazrael/ispriter.git"
+  },
+  "homepage": "https://github.com/iazrael/ispriter#readme"
+}
