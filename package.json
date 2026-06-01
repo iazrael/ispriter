@@ -1,26 +1,34 @@
 {
-  "author": "azrael <azrael@imatlas.com> (http://imatlas.com/about)",
   "name": "ispriter",
-  "description": "an intelligent merge sprite tool",
-  "version": "0.3.9",
-  "homepage": "http://imatlas.com/posts/ispriter-update/",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/iazrael/ispriter.git"
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "vitest run tests/e2e/",
+    "lint": "prettier --check 'packages/*/src/**/*.ts'",
+    "format": "prettier --write 'packages/*/src/**/*.ts'",
+    "clean": "pnpm -r exec rm -rf dist"
   },
-  "main": "./src/ispriter.js",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "prettier": "^3.4.0",
+    "sharp": "^0.33.5",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.1.0"
+  },
   "engines": {
-    "node": "*"
+    "node": ">=20.0.0"
   },
-  "bin":{
-    "ispriter": "./bin/ispriter"
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   },
-  "bundledDependencies": [
-    "cssom",
-    "pngjs",
-	"eventproxy",
-    "underscore",
-    "commander",
-    "clean-css"
-  ]
+  "dependencies": {
+    "clean-css": "^5.3.3"
+  }
 }
