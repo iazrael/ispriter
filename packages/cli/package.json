@@ -1,0 +1,23 @@
+{
+  "name": "@ispriter/cli",
+  "version": "2.0.0-alpha.1",
+  "type": "module",
+  "bin": {
+    "ispriter": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@ispriter/core": "workspace:*",
+    "@ispriter/shared": "workspace:*",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "@types/node": "^22.10.0"
+  }
+}
