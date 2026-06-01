@@ -3,6 +3,8 @@
  * 从 zTool 中扣出来的方法们
  */
 
+'use strict';
+
 var us = require('underscore');
 
 
@@ -17,7 +19,11 @@ exports.endsWith = function(str, end){
 }
 
 exports.jsonParse = function(jsonStr){
-    return Function('return ' + jsonStr)();
+    try {
+        return JSON.parse(jsonStr);
+    } catch (e) {
+        throw new Error('Failed to parse JSON: ' + e.message);
+    }
 }
 
 exports.forEach = function(array, onEach, onDone){
