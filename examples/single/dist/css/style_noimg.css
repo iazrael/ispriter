@@ -1,0 +1,20 @@
+.body1{
+    background: #ddd;
+}
+.div1{
+    min-height: 10px;
+    border: 1px solid #8A7676;
+    margin: 20px;
+    min-width: 10px;
+    float: left;
+}
+div:nth-of-type(1){
+    width: 12px;
+    height: 12px;
+}
+
+div:nth-of-type(8), div:nth-of-type(9), div:nth-of-type(10), div:nth-of-type(11),
+        div:nth-of-type(12), div:nth-of-type(13){
+    width: 16px;
+    height: 16px;
+}
