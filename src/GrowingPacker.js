@@ -57,7 +57,7 @@ Example:
 
 ******************************************************************************/
 
-GrowingPacker = function() { };
+var GrowingPacker = function() { };
 
 GrowingPacker.prototype = {
 
@@ -111,6 +111,7 @@ GrowingPacker.prototype = {
   },
 
   growRight: function(w, h) {
+    var node;
     this.root = {
       used: true,
       x: 0,
@@ -127,6 +128,7 @@ GrowingPacker.prototype = {
   },
 
   growDown: function(w, h) {
+    var node;
     this.root = {
       used: true,
       x: 0,
