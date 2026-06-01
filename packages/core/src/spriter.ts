@@ -36,6 +36,22 @@ export class Spriter {
     // 6. 更新 CSS
     const cssFiles = await emitCSS(css, packedSprites, this.config);
 
+    // 6.5 Retina 支持
+    if (this.config.output.retina) {
+      const { generateRetinaSprites } = await import('./image/retina.js');
+      const { packedSprites: retinaPacked } = await generateRetinaSprites(
+        assets,
+        this.config,
+        this.config.output.retina,
+      );
+
+      // 生成 retina 精灵图
+      const retinaImages = await generateSprites(retinaPacked, this.config);
+      for (const [name, buf] of retinaImages) {
+        spriteImages.set(name, buf);
+      }
+    }
+
     // 7. 构建 manifest
     const manifest = this.buildManifest(packedSprites);
 

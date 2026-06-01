@@ -25,6 +25,9 @@ program
     try {
       const config = await resolveConfig(opts);
       await runSpriter(config);
+      if (opts.watch) {
+        await startWatch(config);
+      }
     } catch (e: any) {
       if (e.name === 'IspriterError') {
         console.error(`❌ ${e.code}: ${e.message}`);
@@ -39,10 +42,14 @@ program
   .option('-c, --config <path>', 'config file path (JSON)')
   .option('-f, --files <paths>', 'CSS files (comma separated)')
   .option('-o, --output <path>', 'CSS output directory')
+  .option('--watch', 'watch for file changes and regenerate')
   .action(async (opts) => {
     try {
       const config = await resolveConfig(opts);
       await runSpriter(config);
+      if (opts.watch) {
+        await startWatch(config);
+      }
     } catch (e: any) {
       if (e.name === 'IspriterError') {
         console.error(`❌ ${e.code}: ${e.message}`);
@@ -152,6 +159,40 @@ async function runSpriter(config: SpriterConfig): Promise<void> {
   if (result.skippedImages.length > 0) {
     console.warn(`⚠️ Skipped ${result.skippedImages.length} image(s): ${result.skippedImages.join(', ')}`);
   }
+}
+
+async function startWatch(config: SpriterConfig): Promise<void> {
+  const { watch } = await import('chokidar');
+  const resolved = parseConfig(config);
+  const workspace = path.resolve(resolved.workspace);
+
+  console.log('👀 Watching for changes...');
+
+  const cssPatterns = Array.isArray(resolved.input.cssSource)
+    ? resolved.input.cssSource
+    : [resolved.input.cssSource];
+
+  const watcher = watch(cssPatterns.map((p) => path.resolve(workspace, p)), {
+    ignoreInitial: true,
+  });
+
+  watcher.on('change', async (file) => {
+    console.log(`📝 ${file} changed, regenerating...`);
+    try {
+      await runSpriter(config);
+    } catch (e: any) {
+      console.error(`❌ Error: ${e.message}`);
+    }
+  });
+
+  watcher.on('add', async (file) => {
+    console.log(`➕ ${file} added, regenerating...`);
+    try {
+      await runSpriter(config);
+    } catch (e: any) {
+      console.error(`❌ Error: ${e.message}`);
+    }
+  });
 }
 
 program.parse();

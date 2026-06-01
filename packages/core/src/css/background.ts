@@ -77,6 +77,9 @@ export function shouldSkip(parsed: ParsedBackground): boolean {
   // 跳过 right/center/bottom position
   if (parsed.positionX === '100%' || parsed.positionY === '100%') return true;
   if (parsed.positionX === 'center' && parsed.positionY === 'center') return true;
+  // 跳过百分比 position（暂时不支持精确计算）
+  if (typeof parsed.positionX === 'string' && parsed.positionX.endsWith('%') && parsed.positionX !== '100%') return true;
+  if (typeof parsed.positionY === 'string' && parsed.positionY.endsWith('%') && parsed.positionY !== '100%') return true;
   return false;
 }
 
