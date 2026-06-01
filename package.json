@@ -10,17 +10,17 @@
   },
   "main": "./src/ispriter.js",
   "engines": {
-    "node": "*"
+    "node": ">=0.10.0"
   },
   "bin":{
     "ispriter": "./bin/ispriter"
   },
-  "bundledDependencies": [
-    "cssom",
-    "pngjs",
-	"eventproxy",
-    "underscore",
-    "commander",
-    "clean-css"
-  ]
+  "dependencies": {
+    "cssom": "0.2.x",
+    "pngjs": "0.4.x",
+    "eventproxy": "0.2.x",
+    "underscore": "1.4.x",
+    "commander": "1.1.x",
+    "clean-css": "0.4.x"
+  }
 }
