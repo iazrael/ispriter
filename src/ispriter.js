@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require('fs'),
     path = require('path'),
     EventProxy = require('eventproxy'),
@@ -216,7 +218,7 @@ function info(msg) {
 function readConfig(config) {
     if (us.isString(config)) {
         if (!fs.existsSync(config)) {
-            throw 'place give in a sprite config or config file!';
+            throw new Error('place give in a sprite config or config file!');
         }
         var content = fs.readFileSync(config).toString();
         config = zTool.jsonParse(content);
@@ -249,7 +251,7 @@ function readConfig(config) {
 
     var cssSource = config.input.cssSource;
     if (!cssSource) {
-        throw 'there is no cssSource specific!';
+        throw new Error('there is no cssSource specific!');
     } else if (us.isString(cssSource)) {
         cssSource = [cssSource];
     }
@@ -271,7 +273,7 @@ function readConfig(config) {
         cssFiles = cssFiles.concat(queryResult);
     }
     if (!cssFiles.length) {
-        throw 'there is no any css file contain!';
+        throw new Error('there is no any css file contain!');
     }
 
     // 去重
@@ -1076,17 +1078,7 @@ function createPng(width, height) {
     /*
      * 必须把图片的所有像素都设置为 0, 否则会出现一些随机的噪点
      */
-    for (var y = 0; y < png.height; y++) {
-        for (var x = 0; x < png.width; x++) {
-            var idx = (png.width * y + x) << 2;
-
-            png.data[idx] = 0;
-            png.data[idx + 1] = 0;
-            png.data[idx + 2] = 0;
-
-            png.data[idx + 3] = 0;
-        }
-    }
+    png.data.fill(0);
     return png;
 }
 
@@ -1162,7 +1154,7 @@ function setPxValue(style, attr, newValue) {
         value = parseInt(style[attr]);
     } else {
         value = 0;
-        style[style.length++] = attr;
+        style.setProperty(attr, '');
     }
     value = value - newValue;
     value = value ? value + 'px' : '0';

@@ -1,5 +1,6 @@
-/**
- * @author azrael
+'use strict';
+
+
  * @date 2012-6-16
  * @description 解析 css background 属性
  */
